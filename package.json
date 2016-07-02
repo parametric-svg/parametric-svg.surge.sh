@@ -4,6 +4,7 @@
   "author": "Tomek Wiszniewski <t.wiszniewski@gmail.com",
   "devDependencies": {
     "@polymer/paper-toolbar": "0.0.3",
+    "browserify": "^13.0.1",
     "concurrently": "^2.1.0",
     "elm": "^0.17.1",
     "elm-css": "^0.5.1",
@@ -15,6 +16,7 @@
     "watch-spawn": "^2.0.0"
   },
   "dependencies": {
-    "@polymer/paper-header-panel": "0.0.3"
+    "@polymer/paper-header-panel": "0.0.3",
+    "codemirror": "^5.16.0"
   }
 }

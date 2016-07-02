@@ -263,7 +263,7 @@
     },
     "browserify": {
       "version": "13.0.1",
-      "from": "browserify@>=13.0.1 <14.0.0",
+      "from": "browserify@latest",
       "resolved": "https://registry.npmjs.org/browserify/-/browserify-13.0.1.tgz",
       "dependencies": {
         "glob": {
@@ -399,6 +399,11 @@
       "version": "1.0.0",
       "from": "code-point-at@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/code-point-at/-/code-point-at-1.0.0.tgz"
+    },
+    "codemirror": {
+      "version": "5.16.0",
+      "from": "codemirror@latest",
+      "resolved": "https://registry.npmjs.org/codemirror/-/codemirror-5.16.0.tgz"
     },
     "combine-source-map": {
       "version": "0.7.2",

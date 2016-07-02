@@ -13,4 +13,5 @@ set -x
 "$local"/elm-make \
   $(cat "$private"/elm-make-args.txt)
 
+"$scripts"/custom-elements
 "$scripts"/styles

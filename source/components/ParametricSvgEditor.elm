@@ -51,6 +51,7 @@ view _ =
         [ text "parametric-svg"
         ]
       ]
+    , node "codemirror-editor" [] []
     , div []
       [ text "(content goes here)"
       ]

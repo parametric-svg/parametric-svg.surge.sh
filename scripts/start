@@ -12,6 +12,8 @@ Usage:
 "; exit; fi
 set -x
 
+"$scripts"/custom-elements
+
 "$local"/concurrently \
   "$scripts/start.server $@" \
   "$scripts/start.styles"

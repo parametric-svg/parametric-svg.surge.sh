@@ -1,0 +1,9 @@
+#! /bin/sh -e
+source "$(dirname "$0")"/_/env.source.sh
+
+mkdir -p public/vendor
+
+"$local"/browserify \
+  --transform=brfs \
+  --outfile=public/custom-elements.js \
+  custom-elements/codemirror-editor/index.js

@@ -3,7 +3,7 @@ source "$(dirname "$0")"/_/env.source.sh
 
 if test "$1" = '--help'; then echo "\
 Usage:
-  We’ll run a preconfifured webpack-dev-server at http://localhost:9111.
+  We’ll run a preconfifured webpack-dev-server at http://localhost:9229.
 
   $0 [...<webpack-dev-server args>]
   $0 --help
@@ -11,7 +11,7 @@ Usage:
 set -x
 
 "$local"/webpack-dev-server \
-  --port=9111 \
+  --port=9229 \
   --host=0.0.0.0 \
   --history-api-fallback \
   --content-base=public/ \

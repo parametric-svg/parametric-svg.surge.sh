@@ -5,6 +5,7 @@
   "devDependencies": {
     "elm": "^0.17.1",
     "elm-webpack-loader": "^3.0.3",
+    "npm": "^3.10.3",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
   }

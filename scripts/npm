@@ -1,0 +1,27 @@
+#! /bin/sh -e
+source "$(dirname "$0")"/_/env.source.sh
+
+if test "$1" = '--help'; then echo "\
+Usage:
+  $0 [...<npm args>]
+  $0 --help
+
+  This is a proxy to npm. We’ll call \`npm shrinkwrap\` afterwards.
+"; exit; fi
+set -x
+
+"$local"/npm $@
+"$local"/npm shrinkwrap --dev
+
+set +x
+read \
+  -p 'Would you like us to commit any updated dependencies? [y/n] ' \
+  -n 1 \
+  reply
+echo
+if test "$reply" = 'y'; then
+  git commit -m '[scripts/npm] Update dependencies' \
+    package.json \
+    npm-shrinkwrap.json
+fi
+set -x

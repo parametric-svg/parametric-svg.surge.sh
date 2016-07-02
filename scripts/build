@@ -1,0 +1,12 @@
+#! /bin/bash -e
+source _/env.source.sh
+
+if test "$1" = '--help'; then echo "\
+Usage:
+  $0 [...<webpack args>]
+  $0 --help
+
+  We’ll run webpack to build the lot. We’ll pass on any args to webpack.
+"; exit; fi
+
+"$local"/webpack $@

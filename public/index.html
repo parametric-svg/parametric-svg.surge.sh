@@ -1,5 +1,10 @@
 <!doctype html>
 
-<body>
-  <script src="scripts.js"></script>
-</body>
+<div id="main"></div>
+
+<script src="elm.js"></script>
+<script>
+  Elm.Main.embed(
+    document.querySelector('#main')
+  );
+</script>

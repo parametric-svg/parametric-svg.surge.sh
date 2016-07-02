@@ -1,10 +1,40 @@
 <!doctype html>
 
-<div id="main"></div>
+<head>
+  <script>
+    window.Polymer = {
+      dom: 'shadow',
+      lazyRegister: true
+    };
+  </script>
+  <link rel="import" href="polymer/paper-header-panel/paper-header-panel.html" />
+  <link rel="import" href="polymer/paper-toolbar/paper-toolbar.html" />
 
-<script src="elm.js"></script>
-<script>
-  Elm.Main.embed(
-    document.querySelector('#main')
-  );
-</script>
+  <style>
+    @font-face {
+      font-family: 'source sans pro';
+      src: url('fonts/source-sans-pro.regular.woff') format('woff');
+    } @font-face {
+      font-family: 'source code pro';
+      font-style: italic;
+      src: url('/fonts/source-code-pro.regular.woff') format('woff');
+    }
+
+    html, body {
+      padding: 0;
+      margin: 0;
+      font-family: 'source sans pro';
+    }
+  </style>
+</head>
+
+<body class="fullbleed layout vertical">
+  <div id="main"></div>
+
+  <script src="elm.js"></script>
+  <script>
+    Elm.Main.embed(
+      document.querySelector('#main')
+    );
+  </script>
+</body>

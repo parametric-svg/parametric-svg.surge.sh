@@ -1,0 +1,11 @@
+{
+  "name": "parametric-svg.github.io",
+  "version": "0.0.0",
+  "author": "Tomek Wiszniewski <t.wiszniewski@gmail.com",
+  "devDependencies": {
+    "elm": "^0.17.1",
+    "elm-webpack-loader": "^3.0.3",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1"
+  }
+}

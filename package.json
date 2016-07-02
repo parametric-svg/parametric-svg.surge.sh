@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@polymer/paper-header-panel": "0.0.3",
-    "codemirror": "^5.16.0"
+    "brfs": "^1.4.3",
+    "codemirror": "^5.16.0",
+    "private-parts": "^0.4.1"
   }
 }

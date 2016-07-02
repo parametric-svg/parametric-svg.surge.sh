@@ -624,9 +624,9 @@
       "resolved": "https://registry.npmjs.org/elm/-/elm-0.17.1.tgz"
     },
     "elm-live": {
-      "version": "2.4.0",
+      "version": "2.4.1",
       "from": "elm-live@latest",
-      "resolved": "https://registry.npmjs.org/elm-live/-/elm-live-2.4.0.tgz"
+      "resolved": "https://registry.npmjs.org/elm-live/-/elm-live-2.4.1.tgz"
     },
     "encodeurl": {
       "version": "1.0.1",

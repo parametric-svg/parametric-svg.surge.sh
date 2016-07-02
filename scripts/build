@@ -1,5 +1,5 @@
-#! /bin/bash -e
-source _/env.source.sh
+#! /bin/sh -e
+source "$(dirname "$0")"/_/env.source.sh
 
 if test "$1" = '--help'; then echo "\
 Usage:
@@ -8,5 +8,6 @@ Usage:
 
   We’ll run webpack to build the lot. We’ll pass on any args to webpack.
 "; exit; fi
+set -x
 
 "$local"/webpack $@

@@ -1,5 +1,7 @@
 /node_modules/
 npm-debug.log
 /elm-stuff/
-/public/
 *~
+
+/public/*
+!/public/index.html

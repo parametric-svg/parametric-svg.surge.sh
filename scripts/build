@@ -1,13 +1,15 @@
 #! /bin/sh -e
-source "$(dirname "$0")"/_/env.source.sh
+private="$(dirname "$0")"/_
+source "$private"/env.source.sh
 
 if test "$1" = '--help'; then echo "\
 Usage:
-  $0 [...<webpack args>]
+  $0
   $0 --help
 
-  We’ll run webpack to build the lot. We’ll pass on any args to webpack.
+  We’ll build the lot with elm-make.
 "; exit; fi
 set -x
 
-"$local"/webpack $@
+"$local"/elm-make \
+  $(cat "$private"/elm-make-args.txt)

@@ -1,0 +1,2 @@
+source/Main.elm
+--output=public/elm.js

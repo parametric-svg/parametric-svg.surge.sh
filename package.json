@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "author": "Tomek Wiszniewski <t.wiszniewski@gmail.com",
   "devDependencies": {
+    "@polymer/paper-toolbar": "0.0.3",
     "elm": "^0.17.1",
     "elm-live": "^2.4.1",
     "eslint": "^2.13.1",

@@ -2,6 +2,11 @@
   "name": "parametric-svg.github.io",
   "version": "0.0.0",
   "dependencies": {
+    "@polymer/font-roboto": {
+      "version": "0.0.3",
+      "from": "@polymer/font-roboto@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/font-roboto/-/font-roboto-0.0.3.tgz"
+    },
     "@polymer/iron-flex-layout": {
       "version": "0.0.3",
       "from": "@polymer/iron-flex-layout@>=0.0.3 <0.0.4",
@@ -11,6 +16,16 @@
       "version": "0.0.3",
       "from": "@polymer/paper-header-panel@latest",
       "resolved": "https://registry.npmjs.org/@polymer/paper-header-panel/-/paper-header-panel-0.0.3.tgz"
+    },
+    "@polymer/paper-styles": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-styles@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-styles/-/paper-styles-0.0.3.tgz"
+    },
+    "@polymer/paper-toolbar": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-toolbar@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-toolbar/-/paper-toolbar-0.0.3.tgz"
     },
     "@polymer/polymer": {
       "version": "1.2.5-npm-test.2",

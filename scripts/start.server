@@ -1,0 +1,10 @@
+#! /bin/sh -ex
+source "$(dirname "$0")"/_/env.source.sh
+
+$local/elm-live \
+  $(cat "$private"/elm-make-args.txt | tr '\n' ' ') \
+  --path-to-elm-make=node_modules/.bin/elm-make \
+  --port=9229 \
+  --host=0.0.0.0 \
+  --dir=public/ \
+  $@

@@ -1,6 +1,5 @@
 #! /bin/sh -e
-private="$(dirname "$0")"/_
-source "$private"/env.source.sh
+source "$(dirname "$0")"/_/env.source.sh
 
 if test "$1" = '--help'; then echo "\
 Usage:
@@ -8,13 +7,11 @@ Usage:
   $0 --help
 
   We’ll run a preconfifured elm-live server at http://localhost:9229.
+  We’ll also be watching your components for style updates and rebuild
+  the styles with elm-css on every change.
 "; exit; fi
 set -x
 
-"$local"/elm-live \
-  $(cat "$private"/elm-make-args.txt) \
-  --path-to-elm-make=node_modules/.bin/elm-make \
-  --port=9229 \
-  --host=0.0.0.0 \
-  --dir=public/ \
-  $@
+"$local"/concurrently \
+  "$scripts/start.server $@" \
+  "$scripts/start.styles"

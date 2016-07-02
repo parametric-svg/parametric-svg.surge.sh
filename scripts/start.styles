@@ -1,0 +1,7 @@
+#! /bin/sh -ex
+source "$(dirname "$0")"/_/env.source.sh
+
+$local/watch-spawn \
+  --initial \
+  --pattern='source/{components/**/*.elm,Stylesheet.elm}' \
+  "$scripts/styles"

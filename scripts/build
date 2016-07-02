@@ -1,15 +1,16 @@
 #! /bin/sh -e
-private="$(dirname "$0")"/_
-source "$private"/env.source.sh
+source "$(dirname "$0")"/_/env.source.sh
 
 if test "$1" = '--help'; then echo "\
 Usage:
   $0
   $0 --help
 
-  We’ll build the lot with elm-make.
+  We’ll build the lot with elm-make and elm-css.
 "; exit; fi
 set -x
 
 "$local"/elm-make \
   $(cat "$private"/elm-make-args.txt)
+
+"$scripts"/styles

@@ -1,6 +1,6 @@
 module ParametricSvgEditor exposing
   ( Model, Message
-  , init, update, view
+  , init, update, view, css
   )
 
 import Html exposing (node, div, text, Html)
@@ -70,4 +70,4 @@ css = (stylesheet << namespace componentNamespace)
   ]
 
 componentNamespace : String
-componentNamespace = "3de78af-"
+componentNamespace = "a3e78af-"

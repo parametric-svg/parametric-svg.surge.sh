@@ -3,7 +3,7 @@ module ParametricSvgEditor exposing
   , init, update, view, css
   )
 
-import Html exposing (node, div, text, Html)
+import Html exposing (node, div, text, textarea, Html)
 import Html.Attributes exposing (attribute)
 import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
@@ -51,7 +51,9 @@ view _ =
         [ text "parametric-svg"
         ]
       ]
-    , node "codemirror-editor" [] []
+    , node "codemirror-editor" []
+      [ textarea [] []
+      ]
     , div []
       [ text "(content goes here)"
       ]

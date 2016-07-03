@@ -17,6 +17,7 @@ const styleOverrides = jssLite({
   },
 });
 
+
 const prototype = Object.assign(Object.create(HTMLElement.prototype), {
   createdCallback() {
     const shadow = this.createShadowRoot();
@@ -37,6 +38,31 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
         cm.replaceSelection('  ', 'end');
       },
     });
+
+    const content = document.createElement('content');
+    shadow.appendChild(content);
+
+    let textarea;
+    const updateTextareaValue = () => {
+      if (!textarea) return;
+      textarea.value = editor.getValue();
+    };
+    editor.on('change', updateTextareaValue);
+
+    const rewireTextarea = () => {
+      const nextTextarea = Array.from(this.children)
+        .find(child => child.tagName === 'TEXTAREA');
+
+      if (nextTextarea !== textarea) {
+        textarea = nextTextarea;
+        if (textarea === undefined) return;
+        nextTextarea.style.display = 'none';
+        updateTextareaValue();
+      }
+    };
+    rewireTextarea();
+    const observer = new MutationObserver(rewireTextarea);
+    observer.observe(this, { childList: true });
   },
 });
 

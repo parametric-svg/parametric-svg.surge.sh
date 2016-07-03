@@ -4068,11 +4068,6 @@
       "from": "pretty-ms@>=2.1.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/pretty-ms/-/pretty-ms-2.1.0.tgz"
     },
-    "private-parts": {
-      "version": "0.4.1",
-      "from": "private-parts@latest",
-      "resolved": "https://registry.npmjs.org/private-parts/-/private-parts-0.4.1.tgz"
-    },
     "process": {
       "version": "0.11.5",
       "from": "process@>=0.11.0 <0.12.0",

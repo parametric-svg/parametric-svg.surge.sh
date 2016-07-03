@@ -19,7 +19,6 @@
     "@polymer/paper-header-panel": "0.0.3",
     "brfs": "^1.4.3",
     "codemirror": "^5.16.0",
-    "jss-lite": "^1.2.0",
-    "private-parts": "^0.4.1"
+    "jss-lite": "^1.2.0"
   }
 }

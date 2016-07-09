@@ -1,5 +1,6 @@
-/* eslint-disable prefer-template */
+/* eslint-disable prefer-template, quote-props */
   // brfs doesn’t play way with template strings ATM
+  // jss-lite looks more elegant when all properties are quoted
 const codemirror = require('codemirror');
 const fs = require('fs');
 const jssLite = require('jss-lite');
@@ -16,6 +17,7 @@ const themeCss = fs.readFileSync(
 const styleOverrides = jssLite({
   '.CodeMirror': {
     'font-family': '"source code pro", monospace',
+    'height': 'auto',
   },
 });
 
@@ -36,6 +38,8 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
       inputStyle: 'contenteditable',
       autofocus: true,
       smartIndent: false,
+      scrollbarStyle: null,
+      lineWrapping: true,
     });
     editor.setOption('extraKeys', {
       Tab: (cm) => {

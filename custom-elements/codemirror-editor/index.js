@@ -46,6 +46,11 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     const updateTextareaValue = () => {
       if (!textarea) return;
       textarea.value = editor.getValue();
+
+      // Dispatch “input” event
+      const event = document.createEvent('Events');
+      event.initEvent('input', true, true);
+      textarea.dispatchEvent(event);
     };
     editor.on('change', updateTextareaValue);
 

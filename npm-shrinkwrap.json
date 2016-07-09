@@ -4638,7 +4638,7 @@
     },
     "private-parts": {
       "version": "0.4.1",
-      "from": "private-parts@>=0.4.1 <0.5.0",
+      "from": "private-parts@latest",
       "resolved": "https://registry.npmjs.org/private-parts/-/private-parts-0.4.1.tgz"
     },
     "process": {

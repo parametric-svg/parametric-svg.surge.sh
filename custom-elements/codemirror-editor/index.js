@@ -4,6 +4,7 @@ const fs = require('fs');
 const jssLite = require('jss-lite');
 
 require('codemirror/mode/xml/xml');
+require('codemirror/keymap/sublime');
 
 const baseCss = fs.readFileSync(
   __dirname + '/../../node_modules/codemirror/lib/codemirror.css', 'utf8'
@@ -29,9 +30,11 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     const editor = codemirror(shadow, {
       mode: 'xml',
       theme: 'material',
+      keyMap: 'sublime',
       tabSize: 2,
       inputStyle: 'contenteditable',
       autofocus: true,
+      smartIndent: false,
     });
     editor.setOption('extraKeys', {
       Tab: (cm) => {

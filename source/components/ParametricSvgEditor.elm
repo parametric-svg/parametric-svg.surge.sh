@@ -11,9 +11,10 @@ import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
-  , stylesheet, (.), selector, children
-  , height, width, display
-  , pct, block
+  , stylesheet, (.), selector, children, after
+  , height, width, display, position, backgroundColor, top
+  , pct, block, hex, relative, absolute, zero, px
+  , src
   )
 import Json.Encode exposing (string)
 
@@ -79,7 +80,8 @@ view model =
           ]
         ]
       , node "codemirror-editor"
-        []
+        [ class [Editor]
+        ]
         [ textarea [onInput UpdateSource] []
         ]
       ]
@@ -87,19 +89,38 @@ view model =
 
 -- STYLES
 
-type Classes = Root | Display
+type Classes = Root | Display | Editor
 
 css : Stylesheet
 css = (stylesheet << namespace componentNamespace)
-  [ (.) Root
-    [ height <| pct 100
-    ]
+  <| let
+    paperToolbarBackgroundColor =
+      hex "3f51b5"
+    codemirrorMaterialBackgroundColor =
+      hex "263238"
+  in
+    [ (.) Root
+      [ height <| pct 100
+      ]
 
-  , (.) Display [children [selector "svg"
-    [ display block
-    , width <| pct 100
-    ]]]
-  ]
+    , (.) Display [children [selector "svg"
+      [ display block
+      , width <| pct 100
+      ]]]
+
+    , (.) Editor
+      [ position relative
+      , display block
+      ]
+    , (.) Editor [after
+      [ Css.property "content" "''"
+      , position absolute
+      , Css.property "z-index" "-1"
+      , display block
+      , height (px 99999)
+      , backgroundColor codemirrorMaterialBackgroundColor
+      ]]
+    ]
 
 componentNamespace : String
 componentNamespace = "a3e78af-"

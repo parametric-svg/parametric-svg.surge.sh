@@ -19,6 +19,7 @@ const styleOverrides = jssLite({
     'font-family': '"source code pro", monospace',
     'height': 'auto',
     'padding': '0.5em',
+    'cursor': 'text',
   },
 });
 

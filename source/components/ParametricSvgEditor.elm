@@ -11,7 +11,7 @@ import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
-  , stylesheet, (.), selector, children, after
+  , stylesheet, (.), selector, children, everything
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
   , pct, block, hex, relative, px, int
   , src
@@ -92,19 +92,27 @@ view model =
 type Classes = Root | Display | Editor
 
 css : Stylesheet
-css = (stylesheet << namespace componentNamespace)
-  <| let
+css = (stylesheet << namespace componentNamespace) <|
+  let
     paperToolbarBackgroundColor =
       hex "3f51b5"
     codemirrorMaterialBackgroundColor =
       hex "263238"
     white =
       hex "ffffff"
+    cursor value =
+      Css.property "cursor" value
+    text =
+      "text"
+    default =
+      "default"
   in
     [ (.) Root
       [ height <| pct 100
       , displayFlex
       , backgroundColor codemirrorMaterialBackgroundColor
+      , cursor text
+      , children [everything [cursor default]]
       ]
 
     , (.) Display

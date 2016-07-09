@@ -71,10 +71,12 @@ view model =
       [ node "paper-toolbar" []
         [ div [] [text "parametric-svg"]
         ]
-      , div
-        [ class [Display]
-        ]
-        [ svg [innerHtml model.source] []
+      , div []
+        [ node "parametric-svg"
+          [ class [Display]
+          ]
+          [ svg [innerHtml model.source] []
+          ]
         ]
       , node "codemirror-editor"
         []

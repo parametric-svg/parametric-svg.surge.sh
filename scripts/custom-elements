@@ -6,4 +6,4 @@ mkdir -p public/vendor
 "$local"/browserify \
   --transform=brfs \
   --outfile=public/custom-elements.js \
-  custom-elements/codemirror-editor/index.js
+  custom-elements/index.js

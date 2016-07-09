@@ -1,4 +1,5 @@
 /* eslint-disable prefer-template */
+  // brfs doesn’t play way with template strings ATM
 const codemirror = require('codemirror');
 const fs = require('fs');
 const jssLite = require('jss-lite');

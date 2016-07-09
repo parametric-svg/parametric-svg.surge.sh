@@ -4,9 +4,12 @@
 const codemirror = require('codemirror');
 const fs = require('fs');
 const jssLite = require('jss-lite');
+const privateParts = require('private-parts');
 
 require('codemirror/mode/xml/xml');
 require('codemirror/keymap/sublime');
+
+const _ = privateParts.createKey();
 
 const baseCss = fs.readFileSync(
   __dirname + '/../../node_modules/codemirror/lib/codemirror.css', 'utf8'
@@ -32,7 +35,7 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     style.textContent = baseCss + themeCss + styleOverrides;
     shadow.appendChild(style);
 
-    const editor = codemirror(shadow, {
+    const editor = _(this).editor = codemirror(shadow, {
       mode: 'xml',
       theme: 'material',
       keyMap: 'sublime',
@@ -78,6 +81,10 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     rewireTextarea();
     const observer = new MutationObserver(rewireTextarea);
     observer.observe(this, { childList: true });
+  },
+
+  attachedCallback() {
+    _(this).editor.focus();
   },
 });
 

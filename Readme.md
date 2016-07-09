@@ -15,6 +15,7 @@
 * [ ] Customizable controls
 * [ ] Gist integration
 * [ ] Offline support
+* [ ] Tweak editor focus UX
 
 
 ## License

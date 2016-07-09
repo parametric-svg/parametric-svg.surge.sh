@@ -11,7 +11,7 @@ import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
-  , stylesheet, (.), selector, children, everything
+  , stylesheet, (.), selector, children
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
   , pct, block, hex, relative, px, int
   , src
@@ -100,19 +100,11 @@ css = (stylesheet << namespace componentNamespace) <|
       hex "263238"
     white =
       hex "ffffff"
-    cursor value =
-      Css.property "cursor" value
-    text =
-      "text"
-    default =
-      "default"
   in
     [ (.) Root
       [ height <| pct 100
       , displayFlex
       , backgroundColor codemirrorMaterialBackgroundColor
-      , cursor text
-      , children [everything [cursor default]]
       ]
 
     , (.) Display

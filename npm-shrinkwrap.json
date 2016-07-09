@@ -7,15 +7,80 @@
       "from": "@polymer/font-roboto@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/font-roboto/-/font-roboto-0.0.3.tgz"
     },
+    "@polymer/iron-a11y-keys-behavior": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-a11y-keys-behavior@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-a11y-keys-behavior/-/iron-a11y-keys-behavior-0.0.3.tgz"
+    },
+    "@polymer/iron-behaviors": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-behaviors@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-behaviors/-/iron-behaviors-0.0.3.tgz"
+    },
+    "@polymer/iron-checked-element-behavior": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-checked-element-behavior@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-checked-element-behavior/-/iron-checked-element-behavior-0.0.3.tgz"
+    },
     "@polymer/iron-flex-layout": {
       "version": "0.0.3",
       "from": "@polymer/iron-flex-layout@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/iron-flex-layout/-/iron-flex-layout-0.0.3.tgz"
     },
+    "@polymer/iron-form-element-behavior": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-form-element-behavior@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-form-element-behavior/-/iron-form-element-behavior-0.0.3.tgz"
+    },
+    "@polymer/iron-icon": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-icon@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-icon/-/iron-icon-0.0.3.tgz"
+    },
+    "@polymer/iron-icons": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-icons@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-icons/-/iron-icons-0.0.3.tgz"
+    },
+    "@polymer/iron-iconset-svg": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-iconset-svg@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-iconset-svg/-/iron-iconset-svg-0.0.3.tgz"
+    },
+    "@polymer/iron-meta": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-meta@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-meta/-/iron-meta-0.0.3.tgz"
+    },
+    "@polymer/iron-validatable-behavior": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-validatable-behavior@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-validatable-behavior/-/iron-validatable-behavior-0.0.3.tgz"
+    },
+    "@polymer/paper-behaviors": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-behaviors@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-behaviors/-/paper-behaviors-0.0.3.tgz"
+    },
+    "@polymer/paper-fab": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-fab@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-fab/-/paper-fab-0.0.3.tgz"
+    },
     "@polymer/paper-header-panel": {
       "version": "0.0.3",
       "from": "@polymer/paper-header-panel@latest",
       "resolved": "https://registry.npmjs.org/@polymer/paper-header-panel/-/paper-header-panel-0.0.3.tgz"
+    },
+    "@polymer/paper-material": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-material@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-material/-/paper-material-0.0.3.tgz"
+    },
+    "@polymer/paper-ripple": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-ripple@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-ripple/-/paper-ripple-0.0.3.tgz"
     },
     "@polymer/paper-styles": {
       "version": "0.0.3",

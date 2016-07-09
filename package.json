@@ -16,6 +16,8 @@
     "watch-spawn": "^2.0.0"
   },
   "dependencies": {
+    "@polymer/iron-icons": "0.0.3",
+    "@polymer/paper-fab": "0.0.3",
     "@polymer/paper-header-panel": "0.0.3",
     "brfs": "^1.4.3",
     "codemirror": "^5.16.0",

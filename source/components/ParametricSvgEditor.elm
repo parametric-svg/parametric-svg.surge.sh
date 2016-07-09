@@ -12,8 +12,8 @@ import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
   , stylesheet, (.), selector, children, after
-  , height, width, display, position, backgroundColor, top
-  , pct, block, hex, relative, absolute, zero, px
+  , height, width, display, displayFlex, position, backgroundColor, flexGrow
+  , pct, block, hex, relative, px, int
   , src
   )
 import Json.Encode exposing (string)
@@ -72,10 +72,10 @@ view model =
       [ node "paper-toolbar" []
         [ div [] [text "parametric-svg"]
         ]
-      , div []
-        [ node "parametric-svg"
-          [ class [Display]
-          ]
+      , div
+        [ class [Display]
+        ]
+        [ node "parametric-svg" []
           [ svg [innerHtml model.source] []
           ]
         ]
@@ -98,12 +98,19 @@ css = (stylesheet << namespace componentNamespace)
       hex "3f51b5"
     codemirrorMaterialBackgroundColor =
       hex "263238"
+    white =
+      hex "ffffff"
   in
     [ (.) Root
       [ height <| pct 100
+      , displayFlex
+      , backgroundColor codemirrorMaterialBackgroundColor
       ]
 
-    , (.) Display [children [selector "svg"
+    , (.) Display
+      [ backgroundColor white
+      ]
+    , (.) Display [children [selector "parametric-svg > svg"
       [ display block
       , width <| pct 100
       ]]]
@@ -112,14 +119,6 @@ css = (stylesheet << namespace componentNamespace)
       [ position relative
       , display block
       ]
-    , (.) Editor [after
-      [ Css.property "content" "''"
-      , position absolute
-      , Css.property "z-index" "-1"
-      , display block
-      , height (px 99999)
-      , backgroundColor codemirrorMaterialBackgroundColor
-      ]]
     ]
 
 componentNamespace : String

@@ -3,16 +3,19 @@ module ParametricSvgEditor exposing
   , init, update, view, css
   )
 
+import Svg exposing (svg)
 import Html exposing (node, div, text, textarea, Html)
-import Html.Attributes exposing (attribute)
+import Html.Attributes exposing (attribute, property)
+import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
-  , stylesheet, (.)
-  , height
-  , pct
+  , stylesheet, (.), selector, children
+  , height, width, display
+  , pct, block
   )
+import Json.Encode exposing (string)
 
 {class} =
   withNamespace componentNamespace
@@ -21,55 +24,79 @@ import Css exposing
 -- MODEL
 
 type alias Model =
-  ()
+  { source : String
+  , liveSource : String
+  }
 
 init : Model
 init =
-  ()
+  { source = ""
+  , liveSource = ""
+  }
 
 
 -- UPDATE
 
-type alias Message =
-  ()
+type Message
+  = UpdateSource String
+  | InjectSourceIntoDrawing
 
 update : Message -> Model -> Model
-update _ _ =
-  ()
+update message model =
+  case message of
+    UpdateSource source ->
+      { model
+      | source = source
+      }
+
+    InjectSourceIntoDrawing ->
+      { model
+      | liveSource = model.source
+      }
 
 
 -- VIEW
 
 view : Model -> Html Message
-view _ =
-  node "paper-header-panel"
-    [ attribute "mode" "waterfall"
-    , class [Root]
-    ]
-    [ node "paper-toolbar" []
-      [ div []
-        [ text "parametric-svg"
+view model =
+  let
+    innerHtml source =
+      property "innerHTML" <| string source
+
+  in
+    node "paper-header-panel"
+      [ class [Root]
+      , attribute "mode" "waterfall"
+      ]
+      [ node "paper-toolbar" []
+        [ div [] [text "parametric-svg"]
+        ]
+      , div
+        [ class [Display]
+        ]
+        [ svg [innerHtml model.source] []
+        ]
+      , node "codemirror-editor"
+        []
+        [ textarea [onInput UpdateSource] []
         ]
       ]
-    , node "codemirror-editor" []
-      [ textarea [] []
-      ]
-    , div []
-      [ text "(content goes here)"
-      ]
-    ]
 
 
 -- STYLES
 
-type Classes
-  = Root
+type Classes = Root | Display
 
 css : Stylesheet
 css = (stylesheet << namespace componentNamespace)
   [ (.) Root
-    [ height (pct 100)
+    [ height <| pct 100
     ]
+
+  , (.) Display [children [selector "svg"
+    [ display block
+    , width <| pct 100
+    ]]]
   ]
 
 componentNamespace : String

@@ -3,7 +3,6 @@ module ParametricSvgEditor exposing
   , init, update, view, css
   )
 
-import Svg exposing (svg)
 import Html exposing (node, div, text, textarea, Html)
 import Html.Attributes exposing (attribute, property)
 import Html.Events exposing (onInput)
@@ -20,6 +19,7 @@ import Css exposing
   , src
   )
 import Json.Encode exposing (string)
+import Regex exposing (regex, contains)
 
 {class} =
   withNamespace componentNamespace
@@ -67,6 +67,11 @@ view model =
     innerHtml source =
       property "innerHTML" <| string source
 
+    svgSource =
+      if contains (regex "^<svg") model.source
+        then model.source
+        else "<svg>" ++ model.source ++ "</svg>"
+
   in
     node "paper-header-panel"
       [ class [Root]
@@ -78,9 +83,9 @@ view model =
       , div
         [ class [Display]
         ]
-        [ node "parametric-svg" []
-          [ svg [innerHtml model.source] []
-          ]
+        [ node "parametric-svg"
+          [ innerHtml svgSource
+          ] []
         ]
       , node "codemirror-editor"
         [ class [Editor]

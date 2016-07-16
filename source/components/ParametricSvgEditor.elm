@@ -12,8 +12,11 @@ import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
   , stylesheet, (.), selector, children
+
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
-  , pct, block, hex, relative, px, int
+  , minHeight
+
+  , pct, block, hex, relative, px, int, absolute
   , src
   )
 import Json.Encode exposing (string)
@@ -108,16 +111,20 @@ css = (stylesheet << namespace componentNamespace) <|
       ]
 
     , (.) Display
-      [ backgroundColor white
+      [ position relative
+      , flexGrow (int 1)
+      , minHeight (pct 60)
+      , backgroundColor white
       ]
     , (.) Display [children [selector "parametric-svg > svg"
-      [ display block
-      , width <| pct 100
+      [ position absolute
+      , width (pct 100)
+      , height (pct 100)
       ]]]
 
     , (.) Editor
-      [ position relative
-      , display block
+      [ display block
+      , flexGrow (int 1)
       ]
     ]
 

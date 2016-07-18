@@ -21,6 +21,8 @@ import Css exposing
 import Json.Encode exposing (string)
 import Regex exposing (regex, contains)
 
+import VariablesPanel
+
 {class} =
   withNamespace componentNamespace
 
@@ -30,12 +32,14 @@ import Regex exposing (regex, contains)
 type alias Model =
   { source : String
   , liveSource : String
+  , variablesPanel : VariablesPanel.Model
   }
 
 init : Model
 init =
   { source = ""
   , liveSource = ""
+  , variablesPanel = VariablesPanel.init
   }
 
 
@@ -72,6 +76,14 @@ view model =
         then model.source
         else "<svg>" ++ model.source ++ "</svg>"
 
+    parametricAttributes =
+      List.map
+        parametricAttribute
+        model.variablesPanel.variables
+
+    parametricAttribute variable =
+      attribute variable.name variable.rawValue
+
   in
     node "paper-header-panel"
       [ class [Root]
@@ -84,13 +96,18 @@ view model =
         [ class [Display]
         ]
         [ node "parametric-svg"
-          [ innerHtml svgSource
-          ] []
+          ( [ innerHtml svgSource
+            ]
+          ++ parametricAttributes
+          )
+          []
         ]
       , node "codemirror-editor"
         [ class [Editor]
         ]
-        [ textarea [onInput UpdateSource] []
+        [ textarea
+          [ onInput UpdateSource
+          ] []
         ]
       ]
 

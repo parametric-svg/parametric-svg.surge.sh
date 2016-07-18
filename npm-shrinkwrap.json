@@ -44,6 +44,11 @@
       "from": "@polymer/iron-a11y-keys-behavior@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/iron-a11y-keys-behavior/-/iron-a11y-keys-behavior-0.0.3.tgz"
     },
+    "@polymer/iron-autogrow-textarea": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-autogrow-textarea@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-autogrow-textarea/-/iron-autogrow-textarea-0.0.3.tgz"
+    },
     "@polymer/iron-behaviors": {
       "version": "0.0.3",
       "from": "@polymer/iron-behaviors@>=0.0.3 <0.0.4",
@@ -79,6 +84,11 @@
       "from": "@polymer/iron-iconset-svg@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/iron-iconset-svg/-/iron-iconset-svg-0.0.3.tgz"
     },
+    "@polymer/iron-input": {
+      "version": "0.0.3",
+      "from": "@polymer/iron-input@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/iron-input/-/iron-input-0.0.3.tgz"
+    },
     "@polymer/iron-meta": {
       "version": "0.0.3",
       "from": "@polymer/iron-meta@>=0.0.3 <0.0.4",
@@ -103,6 +113,11 @@
       "version": "0.0.3",
       "from": "@polymer/paper-header-panel@latest",
       "resolved": "https://registry.npmjs.org/@polymer/paper-header-panel/-/paper-header-panel-0.0.3.tgz"
+    },
+    "@polymer/paper-input": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-input@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-input/-/paper-input-0.0.3.tgz"
     },
     "@polymer/paper-material": {
       "version": "0.0.3",

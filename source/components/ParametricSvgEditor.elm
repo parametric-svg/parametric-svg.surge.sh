@@ -89,7 +89,9 @@ view model =
       [ class [Root]
       , attribute "mode" "waterfall"
       ]
-      [ node "paper-toolbar" []
+      [ node "paper-toolbar"
+        [ class [Toolbar]
+        ]
         [ div [] [text "parametric-svg"]
         ]
       , div
@@ -114,22 +116,35 @@ view model =
 
 -- STYLES
 
-type Classes = Root | Display | Editor
+type Classes = Root | Display | Editor | Toolbar
 
 css : Stylesheet
 css = (stylesheet << namespace componentNamespace) <|
   let
-    paperToolbarBackgroundColor =
-      hex "3f51b5"
+    toolbarBackgroundColor =
+      hex "8BC34A"
+      -- Light Green 500
+
     codemirrorMaterialBackgroundColor =
       hex "263238"
+      -- Blue Grey 900
+
     white =
-      hex "ffffff"
+      hex "FFFFFF"
+
   in
     [ (.) Root
       [ height <| pct 100
       , displayFlex
       , backgroundColor codemirrorMaterialBackgroundColor
+      ]
+
+    , selector "html"
+      [ backgroundColor codemirrorMaterialBackgroundColor
+      ]
+
+    , (.) Toolbar
+      [ backgroundColor toolbarBackgroundColor
       ]
 
     , (.) Display

@@ -79,7 +79,7 @@ view model =
     parametricAttributes =
       List.map
         parametricAttribute
-        model.variablesPanel.variables
+        <| VariablesPanel.getVariables model.variablesPanel
 
     parametricAttribute variable =
       attribute variable.name variable.rawValue

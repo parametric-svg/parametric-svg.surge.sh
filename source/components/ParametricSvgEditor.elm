@@ -7,6 +7,7 @@ import Html exposing (node, div, text, textarea, Html)
 import Html.Attributes exposing (attribute, property)
 import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
+import Html.App as App
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
@@ -48,6 +49,7 @@ init =
 type Message
   = UpdateSource String
   | InjectSourceIntoDrawing
+  | VariablesPanelMessage VariablesPanel.Message
 
 update : Message -> Model -> Model
 update message model =
@@ -61,6 +63,9 @@ update message model =
       { model
       | liveSource = model.source
       }
+
+    VariablesPanelMessage message ->
+      model
 
 
 -- VIEW
@@ -104,6 +109,7 @@ view model =
           )
           []
         ]
+      , App.map VariablesPanelMessage <| VariablesPanel.view model.variablesPanel
       , node "codemirror-editor"
         [ class [Editor]
         ]
@@ -166,4 +172,4 @@ css = (stylesheet << namespace componentNamespace) <|
     ]
 
 componentNamespace : String
-componentNamespace = "a3e78af-"
+componentNamespace = "a3e78af-ParametricSvgEditor-"

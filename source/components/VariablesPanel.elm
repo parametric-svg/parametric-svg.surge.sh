@@ -1,9 +1,22 @@
 module VariablesPanel exposing
-  ( Model, Variable
-  , init, getVariables
+  ( Model, Variable, Message
+  , init, getVariables, view
   )
 
+import Css.Namespace exposing (namespace)
+import Css exposing
+  ( Stylesheet
+  , stylesheet, (.)
+  , backgroundColor, color
+  , hex
+  )
 import Dict exposing (empty, Dict)
+import Html exposing (div, node, Html)
+import Html.Attributes exposing (attribute)
+import Html.CssHelpers exposing (withNamespace)
+
+{class} =
+  withNamespace componentNamespace
 
 
 -- MODEL
@@ -42,3 +55,71 @@ getVariables { variableFields } =
   in
     Dict.values variableFields
     |> List.filterMap toVariable
+
+
+-- ACTIONS
+
+type Message
+  = UpdateVariableName Id String
+  | UpdateVariableValue Id String
+
+
+-- VIEW
+
+view : Model -> Html Message
+view model =
+  let
+    renderVariableField field =
+      div []
+        [ node "paper-input"
+          [ value field.name
+          , placeholder "parameter"
+          , class [Input]
+          ] []
+        , node "paper-input"
+          [ value field.rawValue
+          , placeholder "value"
+          , class [Input]
+          ] []
+        ]
+
+    value fieldPart =
+      attribute "value" <| Maybe.withDefault "" fieldPart
+
+    placeholder =
+      attribute "placeholder"
+
+    newVariableField =
+      renderVariableField {name = Nothing, rawValue = Nothing}
+
+  in
+    div
+      [ class [Root]
+      ]
+      <| List.map renderVariableField (Dict.values model.variableFields)
+      ++ [newVariableField]
+
+
+-- STYLES
+
+type Classes = Root | Input
+
+css : Stylesheet
+css = (stylesheet << namespace componentNamespace) <|
+  let
+    panelBackgroundColor =
+      hex "607D8B"
+      -- Blue Grey 500
+
+    white =
+      hex "FFFFFF"
+
+  in
+    [ (.) Root
+      [ backgroundColor panelBackgroundColor
+      , color white
+      ]
+    ]
+
+componentNamespace : String
+componentNamespace = "b7sj97j-VariablesPanel-"

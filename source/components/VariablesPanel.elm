@@ -1,6 +1,6 @@
 module VariablesPanel exposing
   ( Model, Variable, Message
-  , init, getVariables, view
+  , init, getVariables, view, css
   )
 
 import Css.Namespace exposing (namespace)

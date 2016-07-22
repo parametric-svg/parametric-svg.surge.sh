@@ -4,6 +4,7 @@ npm-debug.log
 *~
 
 /public/*
-!/public/index.html
 !/public/polymer
 !/public/fonts/
+
+/build/styles.css

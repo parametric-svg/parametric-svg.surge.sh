@@ -3,4 +3,9 @@ source "$(dirname "$0")"/_/env.source.sh
 
 "$local"/elm-css \
   source/Stylesheets.elm \
-  --output=public/
+  --output=build/
+
+cat build/styles.css \
+  | sed 's/^/    /g' \
+  | cat build/index.1.html - build/index.2.html \
+  > public/index.html

@@ -11,7 +11,7 @@
   <link rel="import" href="polymer/paper-toolbar/paper-toolbar.html" />
   <link rel="import" href="polymer/paper-input/paper-input.html" />
 
-  <style>
+  <style is="custom-style" id="style">
     @font-face {
       font-family: 'source sans pro';
       src: url('fonts/source-sans-pro.regular.woff') format('woff');
@@ -27,19 +27,3 @@
       font-family: 'source sans pro';
       height: 100%;
     }
-  </style>
-
-  <link rel="stylesheet" type="text/css" href="styles.css" />
-</head>
-
-<body>
-  <div id="main"></div>
-
-  <script src="custom-elements.js"></script>
-  <script src="elm.js"></script>
-  <script>
-    Elm.Main.embed(
-      document.querySelector('#main')
-    );
-  </script>
-</body>

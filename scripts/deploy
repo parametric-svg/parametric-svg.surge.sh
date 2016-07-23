@@ -3,6 +3,13 @@ source "$(dirname "$0")"/_/env.source.sh
 
 scripts/build
 
+rm -rf build/public
+cp -r public build/public
+rm build/public/polymer
+
+"$local"/vulcanize public/polymer.html \
+  > build/public/polymer.html
+
 "$local"/surge \
-  --project=public/ \
+  --project=build/public/ \
   --domain=https://parametric-svg.surge.sh

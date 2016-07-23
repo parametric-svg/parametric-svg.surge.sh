@@ -6,12 +6,13 @@ module VariablesPanel exposing
 import Css.Namespace exposing (namespace)
 import Css exposing
   ( Stylesheet
-  , stylesheet, (.), after
+  , stylesheet, (.), after, mediaQuery
 
   , backgroundColor, color, property, padding3, displayFlex, flexDirection
-  , width, flexGrow, position, content, bottom
+  , width, flexGrow, position, content, bottom, borderRight3, flexWrap
+  , paddingLeft
 
-  , hex, em, row, int, right, relative, absolute, zero
+  , hex, em, row, int, right, relative, absolute, zero, solid, wrap, pct
   )
 import Dict exposing (empty, Dict)
 import Html exposing (div, node, Html)
@@ -177,19 +178,48 @@ css = (stylesheet << namespace componentNamespace) <|
       "263238"
       -- Blue Grey 900
 
+    minFieldWidthEm =
+      20
+
+    largestSupportedScreenWidthEm =
+      4 * 1024 / 16
+
+    widthDenominators =
+      let
+        largestDenominator =
+          ceiling (largestSupportedScreenWidthEm / minFieldWidthEm)
+      in
+        [1..largestDenominator]
+
+    fieldSpacing =
+      em 1.5
+
   in
     [ (.) Root
-      [ padding3 zero (em 1) (em 1.5)
+      [ padding3 zero zero (em 1.5)
       , backgroundColor (hex panelBackgroundColor)
       , color (hex inputColor)
+      , borderRight3 fieldSpacing solid (hex panelBackgroundColor)
+      , displayFlex
+      , flexWrap wrap
       ]
 
     , (.) Input
       [ displayFlex
-      , flexDirection row
+      , width (pct 100)
+      , paddingLeft fieldSpacing
       ]
+    ] ++
+    List.map (\denominator -> mediaQuery (
+      "all and (min-width: "
+      ++ toString (denominator * minFieldWidthEm)
+      ++ "em)"
+    ) [(.) Input
+      [ width <| pct <| 100 / toFloat denominator
+      ]]
+    ) widthDenominators ++
 
-    , (.) InputField
+    [ (.) InputField
       [ property "--paper-input-container-color" ("#" ++ secondaryColor)
       , property "--paper-input-container-focus-color" ("#" ++ highlightColor)
       , property "--paper-input-container-input-color" ("#" ++ inputColor)

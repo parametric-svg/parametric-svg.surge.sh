@@ -46,7 +46,7 @@ type alias Id =
 init : Model
 init =
   Model
-    (Dict.fromList [(0, VariableField Nothing Nothing)])
+    (Dict.fromList [emptyVariableField 0])
     1
 
 getVariables : Model -> List Variable
@@ -62,6 +62,10 @@ getVariables { variableFields } =
     Dict.values variableFields
     |> List.filterMap toVariable
 
+emptyVariableField : Id -> (Id, VariableField)
+emptyVariableField id =
+  (id, VariableField Nothing Nothing)
+
 
 -- ACTIONS
 
@@ -72,20 +76,42 @@ type Message
 update : Message -> Model -> Model
 update message model =
   let
-    modelWithVariableFields variableFields =
-      { model
-      | variableFields = variableFields
+    updateName name variable =
+      {variable | name =
+        if name == ""
+          then Nothing
+          else Just name
       }
 
-    updateName name variable =
-      {variable | name = Just name}
-
     updateValue value variable =
-      {variable | rawValue = Just value}
+      {variable | rawValue =
+        if value == ""
+          then Nothing
+          else Just value
+      }
+
+    normalizeVariableFields fields =
+      Dict.fromList
+      <| (
+        List.filter notEmpty (Dict.toList fields)
+        ++ [emptyVariableField model.nextId]
+      )
+
+    notEmpty (_, {name, rawValue}) =
+      if name == Nothing
+        then False
+      else if rawValue == Nothing
+        then False
+      else True
 
     updateVariableFields id updater =
-      modelWithVariableFields <|
-        Dict.update id (Maybe.map updater) model.variableFields
+      { model
+      | variableFields =
+        normalizeVariableFields
+        <| Dict.update id (Maybe.map updater) model.variableFields
+      , nextId =
+        model.nextId + 1
+      }
 
   in
     case message of

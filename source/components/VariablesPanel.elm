@@ -92,17 +92,13 @@ update message model =
 
     normalizeVariableFields fields =
       Dict.fromList
-      <| (
-        List.filter notEmpty (Dict.toList fields)
-        ++ [emptyVariableField model.nextId]
-      )
+      <| List.filter notEmpty (Dict.toList fields)
+      ++ [emptyVariableField model.nextId]
 
-    notEmpty (_, {name, rawValue}) =
-      if name == Nothing
+    notEmpty (_, fieldData) =
+      if fieldData == {name = Nothing, rawValue = Nothing}
         then False
-      else if rawValue == Nothing
-        then False
-      else True
+        else True
 
     updateVariableFields id updater =
       { model

@@ -162,25 +162,26 @@ css : Stylesheet
 css = (stylesheet << namespace componentNamespace) <|
   let
     panelBackgroundColor =
-      "607D8B"
-      -- Blue Grey 500
+      "C5E1A5"
+      -- Light Green 200
 
     secondaryColor =
-      "B0BEC5"
-      -- Blue Grey 200
+      "90A4AE"
+      -- Blue Grey 300
 
     highlightColor =
-      "8BC34A"
-      -- Light Green 500
+      "558B2F"
+      -- Light Green 800
 
-    white =
-      "FFFFFF"
+    inputColor =
+      "263238"
+      -- Blue Grey 900
 
   in
     [ (.) Root
-      [ padding3 zero (em 1) (em 1)
+      [ padding3 zero (em 1) (em 1.5)
       , backgroundColor (hex panelBackgroundColor)
-      , color (hex white)
+      , color (hex inputColor)
       ]
 
     , (.) Input
@@ -191,14 +192,14 @@ css = (stylesheet << namespace componentNamespace) <|
     , (.) InputField
       [ property "--paper-input-container-color" ("#" ++ secondaryColor)
       , property "--paper-input-container-focus-color" ("#" ++ highlightColor)
-      , property "--paper-input-container-input-color" ("#" ++ white)
+      , property "--paper-input-container-input-color" ("#" ++ inputColor)
       ]
     , (.) Parameter
       [ width (em 7)
       , position relative
       , after
         [ position absolute
-        , color (hex white)
+        , color (hex inputColor)
         , property "content" "'='"
         , right (em 0.95)
         , bottom (em 0.65)

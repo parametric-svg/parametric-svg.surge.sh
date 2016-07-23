@@ -101,6 +101,7 @@ view model =
         ]
         [ div [] [text "parametric-svg"]
         ]
+      , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
       , div
         [ class [Display]
         ]
@@ -111,7 +112,6 @@ view model =
           )
           []
         ]
-      , App.map VariablesPanelMessage <| VariablesPanel.view model.variablesPanel
       , node "codemirror-editor"
         [ class [Editor]
         ]

@@ -81,32 +81,29 @@ view : Model -> Html Message
 view model =
   let
     display =
-      div
-        [ class [Display]
-        , displayStyles
-        ]
-        [ div
-          [ class [DisplaySizer]
-          , displaySizerStyles
-          ] []
-        , parametricSvg
-        ]
-
-    (displayStyles, displaySizerStyles) =
       case getSize model.source of
         Just (drawingWidth, drawingHeight) ->
-          ( styles
-            [ maxHeight (px drawingHeight)
+          div
+            [ class [Display]
+            , styles
+              [ maxHeight (px drawingHeight)
+              ]
             ]
-          , styles
-            [ paddingTop (pct <| drawingHeight / drawingWidth * 100)
+            [ div
+              [ class [DisplaySizer]
+              , styles
+                [ paddingTop (pct <| drawingHeight / drawingWidth * 100)
+                ]
+              ] []
+            , parametricSvg
             ]
-          )
 
         Nothing ->
-          ( styles []
-          , styles []
-          )
+          div
+            [ class [Display, Display_ImplicitSize]
+            ]
+            [ parametricSvg
+            ]
 
     parametricSvg =
       node "parametric-svg"
@@ -195,7 +192,12 @@ getSize source =
 
 -- STYLES
 
-type Classes = Root | Display | DisplaySizer | Editor | Toolbar
+type Classes
+  = Root
+  | Display | Display_ImplicitSize
+  | DisplaySizer
+  | Editor
+  | Toolbar
 
 css : Stylesheet
 css = (stylesheet << namespace componentNamespace) <|
@@ -229,7 +231,6 @@ css = (stylesheet << namespace componentNamespace) <|
     , (.) Display
       [ position relative
       , flexGrow (int 1)
-      , minHeight (pct 60)
       , backgroundColor white
       ]
     , (.) Display [children [selector "parametric-svg > svg"
@@ -238,6 +239,10 @@ css = (stylesheet << namespace componentNamespace) <|
       , width (pct 100)
       , height (pct 100)
       ]]]
+    , (.) Display_ImplicitSize
+      [ minHeight (pct 60)
+      ]
+
 
     , (.) DisplaySizer
       [ width (pct 100)

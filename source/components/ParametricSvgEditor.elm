@@ -14,18 +14,23 @@ import Css exposing
   , stylesheet, (.), selector, children
 
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
-  , minHeight
+  , minHeight, maxHeight, paddingTop, top
 
-  , pct, block, hex, relative, px, int, absolute
-  , src
+  , pct, block, hex, relative, px, int, absolute, zero
   )
 import Json.Encode exposing (string)
 import Regex exposing (regex, contains)
+import String
+import Maybe exposing (andThen)
 
 import VariablesPanel
 
 {class} =
   withNamespace componentNamespace
+
+styles : List Css.Mixin -> Html.Attribute a
+styles =
+  Html.Attributes.style << Css.asPairs
 
 
 -- MODEL
@@ -75,11 +80,47 @@ update message model =
 view : Model -> Html Message
 view model =
   let
+    display =
+      div
+        [ class [Display]
+        , displayStyles
+        ]
+        [ div
+          [ class [DisplaySizer]
+          , displaySizerStyles
+          ] []
+        , parametricSvg
+        ]
+
+    (displayStyles, displaySizerStyles) =
+      case getSize model.source of
+        Just (drawingWidth, drawingHeight) ->
+          ( styles
+            [ maxHeight (px drawingHeight)
+            ]
+          , styles
+            [ paddingTop (pct <| drawingHeight / drawingWidth * 100)
+            ]
+          )
+
+        Nothing ->
+          ( styles []
+          , styles []
+          )
+
+    parametricSvg =
+      node "parametric-svg"
+        ( [ innerHtml svgSource
+          ]
+          ++ parametricAttributes
+        )
+        []
+
     innerHtml source =
       property "innerHTML" <| string source
 
     svgSource =
-      if contains (regex "^<svg") model.source
+      if contains (regex "^\\s*<svg\\b") model.source
         then model.source
         else "<svg>" ++ model.source ++ "</svg>"
 
@@ -102,16 +143,7 @@ view model =
         [ div [] [text "parametric-svg"]
         ]
       , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
-      , div
-        [ class [Display]
-        ]
-        [ node "parametric-svg"
-          ( [ innerHtml svgSource
-            ]
-          ++ parametricAttributes
-          )
-          []
-        ]
+      , display
       , node "codemirror-editor"
         [ class [Editor]
         ]
@@ -121,10 +153,49 @@ view model =
         ]
       ]
 
+type alias Size =
+  Maybe (Float, Float)
+
+getSize : String -> Size
+getSize source =
+  let
+    dimensionRegex dimension =
+      regex
+        <| "^\\s*<svg\\b[^>]*\\b"
+        ++ dimension
+        ++ "=\"(\\d+|\\d*(?:\\.\\d+)?)\""
+
+    dimensionFloat : String -> Maybe Float
+    dimensionFloat dimension =
+      ( List.head <| Regex.find (Regex.AtMost 1)
+          (dimensionRegex dimension)
+          source
+      )
+
+      `andThen`
+      \match -> List.head match.submatches
+
+      `andThen`
+      \submatch ->
+        case submatch of
+          Just value ->
+            Result.toMaybe <| String.toFloat value
+
+          Nothing ->
+            Nothing
+
+  in
+    case (dimensionFloat "width", dimensionFloat "height") of
+      (Just width, Just height) ->
+        Just (width, height)
+
+      _ ->
+        Nothing
+
 
 -- STYLES
 
-type Classes = Root | Display | Editor | Toolbar
+type Classes = Root | Display | DisplaySizer | Editor | Toolbar
 
 css : Stylesheet
 css = (stylesheet << namespace componentNamespace) <|
@@ -163,9 +234,14 @@ css = (stylesheet << namespace componentNamespace) <|
       ]
     , (.) Display [children [selector "parametric-svg > svg"
       [ position absolute
+      , top zero
       , width (pct 100)
       , height (pct 100)
       ]]]
+
+    , (.) DisplaySizer
+      [ width (pct 100)
+      ]
 
     , (.) Editor
       [ display block

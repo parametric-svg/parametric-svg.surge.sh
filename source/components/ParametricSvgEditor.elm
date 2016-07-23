@@ -243,7 +243,6 @@ css = (stylesheet << namespace componentNamespace) <|
       [ minHeight (pct 60)
       ]
 
-
     , (.) DisplaySizer
       [ width (pct 100)
       ]

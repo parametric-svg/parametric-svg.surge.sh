@@ -65,7 +65,9 @@ update message model =
       }
 
     VariablesPanelMessage message ->
-      model
+      { model
+      | variablesPanel = VariablesPanel.update message model.variablesPanel
+      }
 
 
 -- VIEW

@@ -1,6 +1,6 @@
 module VariablesPanel exposing
   ( Model, Variable, Message
-  , init, getVariables, view, css
+  , init, getVariables, update, view, css
   )
 
 import Css.Namespace exposing (namespace)
@@ -16,6 +16,7 @@ import Css exposing
 import Dict exposing (empty, Dict)
 import Html exposing (div, node, Html)
 import Html.Attributes exposing (attribute)
+import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 
 {class} =
@@ -44,7 +45,9 @@ type alias Id =
 
 init : Model
 init =
-  Model empty 0
+  Model
+    (Dict.fromList [(0, VariableField Nothing Nothing)])
+    1
 
 getVariables : Model -> List Variable
 getVariables { variableFields } =
@@ -66,25 +69,53 @@ type Message
   = UpdateVariableName Id String
   | UpdateVariableValue Id String
 
+update : Message -> Model -> Model
+update message model =
+  let
+    modelWithVariableFields variableFields =
+      { model
+      | variableFields = variableFields
+      }
+
+    updateName name variable =
+      {variable | name = Just name}
+
+    updateValue value variable =
+      {variable | rawValue = Just value}
+
+    updateVariableFields id updater =
+      modelWithVariableFields <|
+        Dict.update id (Maybe.map updater) model.variableFields
+
+  in
+    case message of
+      UpdateVariableName id name ->
+        updateVariableFields id (updateName name)
+
+      UpdateVariableValue id value ->
+        updateVariableFields id (updateValue value)
+
 
 -- VIEW
 
 view : Model -> Html Message
 view model =
   let
-    renderVariableField field =
+    renderVariableField (id, field) =
       div
         [ class [Input]
         ]
         [ node "paper-input"
-          [ value field.name
+          [ value <| field.name
           , label "parameter"
           , class [InputField, Parameter]
+          , onInput (UpdateVariableName id)
           ] []
         , node "paper-input"
-          [ value field.rawValue
+          [ value <| field.rawValue
           , label "value"
           , class [InputField, Value]
+          , onInput (UpdateVariableValue id)
           ] []
         ]
 
@@ -94,15 +125,11 @@ view model =
     label =
       attribute "placeholder"
 
-    newVariableField =
-      renderVariableField {name = Nothing, rawValue = Nothing}
-
   in
     div
       [ class [Root]
       ]
-      <| List.map renderVariableField (Dict.values model.variableFields)
-      ++ [newVariableField]
+      <| List.map renderVariableField (Dict.toList model.variableFields)
 
 
 -- STYLES

@@ -200,7 +200,7 @@ css = (stylesheet << namespace componentNamespace) <|
         [ position absolute
         , color (hex white)
         , property "content" "'='"
-        , right (em 1)
+        , right (em 0.95)
         , bottom (em 0.65)
         ]
       ]

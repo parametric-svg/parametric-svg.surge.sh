@@ -11,10 +11,11 @@
 
 ## TODO
 
-* [ ] Basic mobile-first UI
-* [ ] Customizable controls
-* [ ] Gist integration
+* [x] Minimal mobile-first UI
+* [x] Customizable controls
+* [ ] Import / export
 * [ ] Offline support
+* [ ] Gist integration
 * [ ] Tweak editor focus UX
 
 

@@ -76,7 +76,7 @@
     },
     "@polymer/iron-icons": {
       "version": "0.0.3",
-      "from": "@polymer/iron-icons@latest",
+      "from": "@polymer/iron-icons@0.0.3",
       "resolved": "https://registry.npmjs.org/@polymer/iron-icons/-/iron-icons-0.0.3.tgz"
     },
     "@polymer/iron-iconset-svg": {

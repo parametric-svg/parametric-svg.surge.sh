@@ -4,7 +4,7 @@ module ParametricSvgEditor exposing
   )
 
 import Html exposing (node, div, text, textarea, Html)
-import Html.Attributes exposing (attribute, property)
+import Html.Attributes exposing (attribute)
 import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 import Html.App as App
@@ -14,7 +14,7 @@ import Css exposing
   , stylesheet, (.), selector, children
 
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
-  , minHeight, maxHeight, paddingTop, top
+  , minHeight, maxHeight, paddingTop, top, property
 
   , pct, block, hex, relative, px, int, absolute, zero
   )
@@ -114,7 +114,7 @@ view model =
         []
 
     innerHtml source =
-      property "innerHTML" <| string source
+      Html.Attributes.property "innerHTML" <| string source
 
     svgSource =
       if contains (regex "^\\s*<svg\\b") model.source
@@ -137,7 +137,11 @@ view model =
       [ node "paper-toolbar"
         [ class [Toolbar]
         ]
-        [ div [] [text "parametric-svg"]
+        [ div
+          [ Html.Attributes.class "title"
+          ]
+          [ text "parametric-svg"
+          ]
         ]
       , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
       , display
@@ -221,11 +225,15 @@ css = (stylesheet << namespace componentNamespace) <|
       ]
 
     , selector "html"
-      [ backgroundColor codemirrorMaterialBackgroundColor
+      [ backgroundColor toolbarBackgroundColor
       ]
 
     , (.) Toolbar
       [ backgroundColor toolbarBackgroundColor
+      , property "--paper-toolbar-title" <| "{ "
+        ++ "margin-left: 0; "
+        ++ "line-height: 1.5; "
+        ++ "}"
       ]
 
     , (.) Display

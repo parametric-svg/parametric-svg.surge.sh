@@ -3,8 +3,8 @@ module ParametricSvgEditor exposing
   , init, update, view, css
   )
 
-import Html exposing (node, div, text, textarea, Html)
-import Html.Attributes exposing (attribute)
+import Html exposing (node, div, text, textarea, span, Html)
+import Html.Attributes exposing (attribute, id)
 import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 import Html.App as App
@@ -129,6 +129,32 @@ view model =
     parametricAttribute variable =
       attribute variable.name variable.rawValue
 
+    iconButton symbol tooltip =
+      let
+        iconId =
+          componentNamespace ++ symbol ++ "-toolbar-icon-button"
+
+      in
+        [ node "paper-icon-button"
+          [ attribute "icon" symbol
+          , attribute "alt" tooltip
+          , id iconId
+          ] []
+        , node "paper-tooltip"
+          [ attribute "for" iconId
+          ]
+          [ text tooltip
+          ]
+        ]
+
+    title titleLine =
+      [ div
+        [ Html.Attributes.class "title"
+        ]
+        [ text "parametric-svg"
+        ]
+      ]
+
   in
     node "paper-header-panel"
       [ class [Root]
@@ -137,14 +163,14 @@ view model =
       [ node "paper-toolbar"
         [ class [Toolbar]
         ]
-        [ div
-          [ Html.Attributes.class "title"
-          ]
-          [ text "parametric-svg"
-          ]
-        ]
+        <| title "parametric-svg"
+        ++ iconButton "file-upload" "Import SVG file"
+        ++ iconButton "file-download" "Download as SVG file"
+
       , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
+
       , display
+
       , node "codemirror-editor"
         [ class [Editor]
         ]

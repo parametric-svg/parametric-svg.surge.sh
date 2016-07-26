@@ -1,7 +1,11 @@
-/node_modules/
 npm-debug.log
 /elm-stuff/
 *~
+
+/node_modules/*
+!/node_modules/@polymer
+/node_modules/@polymer/*
+!/node_modules/@polymer/web-animations-js
 
 /public/*
 !/public/polymer
@@ -11,3 +15,4 @@ npm-debug.log
 
 /build/styles.css
 /build/public/
+/build/artifacts/

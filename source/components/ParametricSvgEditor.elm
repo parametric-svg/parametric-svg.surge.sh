@@ -164,8 +164,9 @@ view model =
         [ class [Toolbar]
         ]
         <| title "parametric-svg"
-        ++ iconButton "file-upload" "Import SVG file"
-        ++ iconButton "file-download" "Download as SVG file"
+        ++[ node "github-auth" []
+            <| iconButton "cloud-queue" "Enable gist integration"
+          ]
 
       , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
 

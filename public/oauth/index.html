@@ -1,0 +1,34 @@
+<!doctype html>
+
+<head>
+  <title>authentication • parametric-svg.surge.sh</title>
+</head>
+
+<body>
+  <div id="oops" style="font-family: sans-serif"></div>
+
+  <script>
+    const oops = document.querySelector('#oops');
+    const fail = () => {
+      oops.innerHTML = (
+        '<p>' +
+          'Yikes! Something went wrong when authenticating you at github. ' +
+          '<a href="javascript:window.close()">Try again</a> – and if that ' +
+          'doesn’t work, <a href="https://github.com/parametric-svg/' +
+          'parametric-svg.surge.sh/issues">let us know in an issue</a>.' +
+        '</p>'
+      );
+    };
+
+    const codeMatch = /[?&]code=(.+?)(?:$|&)/.exec(location.search);
+    if (!codeMatch) fail();
+    const code = codeMatch[1];
+
+    fetch(`http://parametric-svg-auth.herokuapp.com/authenticate/${code}`).then(
+      r => r.json()
+    ).then((data) => {
+      window.opener.postMessage(data.token, 'http://0.0.0.0:9229');
+      window.close();
+    });
+  </script>
+</body>

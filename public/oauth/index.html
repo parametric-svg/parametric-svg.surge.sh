@@ -5,12 +5,12 @@
 </head>
 
 <body>
-  <div id="oops" style="font-family: sans-serif"></div>
+  <div id="display" style="font-family: sans-serif">Waiting for authentication. Make sure you don’t close this window – we’ll get you back to the app as soon as possible.</div>
 
   <script>
-    const oops = document.querySelector('#oops');
+    const display = document.querySelector('#display');
     const fail = () => {
-      oops.innerHTML = (
+      display.innerHTML = (
         '<p>' +
           'Yikes! Something went wrong when authenticating you at github. ' +
           '<a href="javascript:window.close()">Try again</a> – and if that ' +

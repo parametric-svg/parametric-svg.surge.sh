@@ -12,12 +12,11 @@ const click = (event) => {
   const me = event.currentTarget;
   window.addEventListener('message', (message) => {
     const token = message.data;
-    const tokenEvent = new Event('token', {
+    const tokenEvent = new CustomEvent('token', {
       detail: { token },
       bubbles: false,
     });
     me.dispatchEvent(tokenEvent);
-    me.setAttribute('token', token);
   });
 };
 

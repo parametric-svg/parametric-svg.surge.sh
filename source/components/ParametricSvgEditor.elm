@@ -24,6 +24,7 @@ import String
 import Maybe exposing (andThen)
 
 import VariablesPanel
+import Auth
 
 {class} =
   withNamespace componentNamespace
@@ -39,6 +40,7 @@ type alias Model =
   { source : String
   , liveSource : String
   , variablesPanel : VariablesPanel.Model
+  , auth : Auth.Model
   }
 
 init : Model
@@ -46,6 +48,7 @@ init =
   { source = ""
   , liveSource = ""
   , variablesPanel = VariablesPanel.init
+  , auth = Auth.init
   }
 
 
@@ -55,6 +58,7 @@ type Message
   = UpdateSource String
   | InjectSourceIntoDrawing
   | VariablesPanelMessage VariablesPanel.Message
+  | AuthMessage Auth.Message
 
 update : Message -> Model -> Model
 update message model =
@@ -72,6 +76,11 @@ update message model =
     VariablesPanelMessage message ->
       { model
       | variablesPanel = VariablesPanel.update message model.variablesPanel
+      }
+
+    AuthMessage message ->
+      { model
+      | auth = Auth.update message model.auth
       }
 
 
@@ -129,17 +138,27 @@ view model =
     parametricAttribute variable =
       attribute variable.name variable.rawValue
 
-    iconButton symbol tooltip =
+    iconButton symbol state tooltip =
       let
         iconId =
           componentNamespace ++ symbol ++ "-toolbar-icon-button"
 
+        disabled =
+          case state of
+            Disabled ->
+              [attribute "disabled" ""]
+
+            Active ->
+              []
+
       in
         [ node "paper-icon-button"
-          [ attribute "icon" symbol
-          , attribute "alt" tooltip
-          , id iconId
-          ] []
+          ( [ attribute "icon" symbol
+            , attribute "alt" tooltip
+            , id iconId
+            ]
+            ++ disabled
+          ) []
         , node "paper-tooltip"
           [ attribute "for" iconId
           ]
@@ -155,6 +174,17 @@ view model =
         ]
       ]
 
+    toolbarButtons =
+      case Auth.token model.auth of
+        Just _ ->
+          ( iconButton "cloud-download" Disabled "Open gist"
+          ++ iconButton "cloud-upload" Disabled "Save as gist"
+          )
+
+        Nothing ->
+          List.map (App.map AuthMessage) <| Auth.view model.auth <|
+            iconButton "cloud-queue" Active "Enable gist integration"
+
   in
     node "paper-header-panel"
       [ class [Root]
@@ -164,9 +194,7 @@ view model =
         [ class [Toolbar]
         ]
         <| title "parametric-svg"
-        ++[ node "github-auth" []
-            <| iconButton "cloud-queue" "Enable gist integration"
-          ]
+        ++ toolbarButtons
 
       , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
 
@@ -180,6 +208,10 @@ view model =
           ] []
         ]
       ]
+
+type IconButtonState
+  = Active
+  | Disabled
 
 type alias Size =
   Maybe (Float, Float)

@@ -1,5 +1,5 @@
 /* eslint-disable prefer-template, quote-props */
-  // brfs doesn’t play way with template strings ATM
+  // brfs doesn’t play well with template strings ATM
   // jss-lite looks more elegant when all properties are quoted
 const codemirror = require('codemirror');
 const fs = require('fs');

@@ -8,8 +8,8 @@ import Html exposing (div)
 import Html.App as Html
 import String
 
-import ParametricSvgEditor
-import VariablesPanel
+import Components.ParametricSvgEditor as ParametricSvgEditor
+import Components.VariablesPanel as VariablesPanel
 
 
 port files : CssFileStructure -> Cmd msg

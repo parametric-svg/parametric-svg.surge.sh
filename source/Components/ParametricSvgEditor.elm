@@ -1,4 +1,4 @@
-module ParametricSvgEditor exposing
+module Components.ParametricSvgEditor exposing
   ( Model, Message
   , init, update, view, css
   )
@@ -23,8 +23,8 @@ import Regex exposing (regex, contains)
 import String
 import Maybe exposing (andThen)
 
-import VariablesPanel
-import Auth
+import Components.VariablesPanel as VariablesPanel
+import Components.Auth as Auth
 
 {class} =
   withNamespace componentNamespace

@@ -1,4 +1,4 @@
-module Auth exposing
+module Components.Auth exposing
   ( Model, Message
   , init, token, update, view
   ,decodeToken

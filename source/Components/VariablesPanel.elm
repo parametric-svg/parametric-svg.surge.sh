@@ -1,4 +1,4 @@
-module VariablesPanel exposing
+module Components.VariablesPanel exposing
   ( Model, Variable, Message
   , init, getVariables, update, view, css
   )

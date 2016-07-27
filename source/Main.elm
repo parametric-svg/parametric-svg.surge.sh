@@ -1,5 +1,5 @@
 import Html.App exposing (beginnerProgram)
-import ParametricSvgEditor
+import Components.ParametricSvgEditor as ParametricSvgEditor
 
 main : Program Never
 main = beginnerProgram

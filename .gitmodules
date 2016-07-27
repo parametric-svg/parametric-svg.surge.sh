@@ -1,0 +1,3 @@
+[submodule "vendor/localstorage"]
+	path = vendor/localstorage
+	url = git@github.com:fredcy/localstorage

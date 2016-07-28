@@ -1,11 +1,12 @@
 module Components.Auth exposing
   ( Model, Message
   , init, token, update, view, css
+  , decodeCode
   )
 
-import Html exposing (Html, node, a, text)
+import Html exposing (Html, node, a, text, div)
 import Html.Events exposing (on)
-import Html.Attributes exposing (attribute, href, target)
+import Html.Attributes exposing (attribute, href, target, id)
 import Html.CssHelpers exposing (withNamespace)
 import Css.Namespace exposing (namespace)
 import Css exposing
@@ -102,18 +103,40 @@ view model =
           ]
         ]
 
-  in
-    case model.token of
-      Just _ ->
-        failureToasts
-
-      Nothing ->
-        [ node "github-auth"
-          [ onReceiveCode ReceiveCode
+    staticContents =
+      case (model.code, model.token) of
+        (Nothing, Nothing) ->
+          [ node "github-auth"
+            [ onReceiveCode ReceiveCode
+            ]
+            <| iconButton "cloud-queue" "Enable gist integration"
           ]
-          <| iconButton "cloud-queue" "Enable gist integration"
-        ]
-        ++ failureToasts
+
+        (Just _, Nothing) ->
+          [ div []
+            [ node "paper-spinner-lite"
+              [ id spinnerId
+              , attribute "active" ""
+              , class [Spinner]
+              ] []
+            , node "paper-tooltip"
+              [ attribute "for" spinnerId
+              , attribute "offset" "20"
+              ]
+              [ text "signing in with github…"
+              ]
+            ]
+          ]
+
+        _ ->
+          []
+
+    spinnerId =
+      componentNamespace ++ "spinner"
+
+  in
+    staticContents ++ failureToasts
+
 
 onReceiveCode : (Code -> Message) -> Html.Attribute Message
 onReceiveCode action =
@@ -121,7 +144,8 @@ onReceiveCode action =
 
 decodeCode : (Code -> message) -> Decoder message
 decodeCode action =
-  Decode.at ["detail", "data"] Decode.string
+  Decode.at ["detail", "payload"] Decode.string
+  |> Decode.map (Debug.log "here")
   |> Decode.maybe
   |> Decode.map action
 
@@ -130,12 +154,17 @@ decodeCode action =
 
 type Classes
   = ToastLink
+  | Spinner
 
 css : Stylesheet
 css = stylesheet <| namespace componentNamespace <|
   [ (.) ToastLink
     [ property "color" "inherit"
       -- https://github.com/rtfeldman/elm-css/issues/148
+    ]
+
+  , (.) Spinner
+    [ property "--paper-spinner-color" "currentColor"
     ]
   ]
 

@@ -9,5 +9,8 @@
 
   const codeMatch = /[?&]code=(.+?)(?:$|&)/.exec(location.search);
   if (!codeMatch) send({ error: 'no code received' });
-  else send({ data: code });
+  else {
+    const code = codeMatch[1];
+    send({ payload: code });
+  }
 </script>

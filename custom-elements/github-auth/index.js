@@ -14,7 +14,7 @@ const click = (event) => {
   window.addEventListener('message', (messageEvent) => {
     const message = messageEvent.data;
     element.dispatchEvent(new CustomEvent('message', {
-      detail: { message },
+      detail: message,
       bubbles: false,
     }));
   });

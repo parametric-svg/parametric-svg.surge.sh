@@ -169,6 +169,11 @@
       "from": "@polymer/paper-ripple@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/paper-ripple/-/paper-ripple-0.0.3.tgz"
     },
+    "@polymer/paper-spinner": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-spinner@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-spinner/-/paper-spinner-0.0.3.tgz"
+    },
     "@polymer/paper-styles": {
       "version": "0.0.3",
       "from": "@polymer/paper-styles@>=0.0.3 <0.0.4",

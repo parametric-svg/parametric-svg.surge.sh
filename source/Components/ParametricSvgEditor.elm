@@ -25,6 +25,7 @@ import Maybe exposing (andThen)
 
 import Components.VariablesPanel as VariablesPanel
 import Components.Auth as Auth
+import Components.IconButton as IconButton
 
 {class} =
   withNamespace componentNamespace
@@ -59,6 +60,7 @@ type Message
   | InjectSourceIntoDrawing
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
+  | Noop ()
 
 update : Message -> Model -> Model
 update message model =
@@ -82,6 +84,9 @@ update message model =
       { model
       | auth = Auth.update message model.auth
       }
+
+    Noop _ ->
+      model
 
 
 -- VIEW
@@ -138,34 +143,6 @@ view model =
     parametricAttribute variable =
       attribute variable.name variable.rawValue
 
-    iconButton symbol state tooltip =
-      let
-        iconId =
-          componentNamespace ++ symbol ++ "-toolbar-icon-button"
-
-        disabled =
-          case state of
-            Disabled ->
-              [attribute "disabled" ""]
-
-            Active ->
-              []
-
-      in
-        [ node "paper-icon-button"
-          ( [ attribute "icon" symbol
-            , attribute "alt" tooltip
-            , id iconId
-            ]
-            ++ disabled
-          ) []
-        , node "paper-tooltip"
-          [ attribute "for" iconId
-          ]
-          [ text tooltip
-          ]
-        ]
-
     title titleLine =
       [ div
         [ Html.Attributes.class "title"
@@ -177,13 +154,15 @@ view model =
     toolbarButtons =
       case Auth.token model.auth of
         Just _ ->
-          ( iconButton "cloud-download" Disabled "Open gist"
-          ++ iconButton "cloud-upload" Disabled "Save as gist"
+          ( iconButton "cloud-download" "Open gist"
+          ++ iconButton "cloud-upload" "Save as gist"
           )
 
         Nothing ->
-          List.map (App.map AuthMessage) <| Auth.view model.auth <|
-            iconButton "cloud-queue" Active "Enable gist integration"
+          List.map (App.map AuthMessage) <| Auth.view model.auth
+
+    iconButton =
+      IconButton.view Noop componentNamespace
 
   in
     node "paper-header-panel"

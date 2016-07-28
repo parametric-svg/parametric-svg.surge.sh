@@ -4,7 +4,8 @@
     "repository": "https://github.com/parametric-svg/parametric-svg-dot-surge-dot-sh.git",
     "license": "MIT",
     "source-directories": [
-        "source"
+        "source",
+        "vendor/localstorage/src"
     ],
     "exposed-modules": [],
     "dependencies": {

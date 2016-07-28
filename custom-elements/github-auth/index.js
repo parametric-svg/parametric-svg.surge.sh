@@ -7,16 +7,16 @@ const click = (event) => {
       'scope=gist',
     ].join('&')}`
   );
-  // Will redirect to /oauth, which will post a message back here.
+  // Will redirect to /oauth, which will post the auth code back here.
 
-  const me = event.currentTarget;
-  window.addEventListener('message', (message) => {
-    const token = message.data;
-    const tokenEvent = new CustomEvent('token', {
-      detail: { token },
+  const element = event.currentTarget;
+
+  window.addEventListener('message', (messageEvent) => {
+    const message = messageEvent.data;
+    element.dispatchEvent(new CustomEvent('message', {
+      detail: { message },
       bubbles: false,
-    });
-    me.dispatchEvent(tokenEvent);
+    }));
   });
 };
 

@@ -10,6 +10,7 @@ import String
 
 import Components.ParametricSvgEditor as ParametricSvgEditor
 import Components.VariablesPanel as VariablesPanel
+import Components.Auth as Auth
 
 
 port files : CssFileStructure -> Cmd msg
@@ -37,6 +38,7 @@ cssFiles =
     , merge <| List.map compile
       [ ParametricSvgEditor.css
       , VariablesPanel.css
+      , Auth.css
       ]
     )]
 

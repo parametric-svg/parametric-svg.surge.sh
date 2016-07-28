@@ -1,34 +1,13 @@
 <!doctype html>
 
-<head>
-  <title>authentication • parametric-svg.surge.sh</title>
-</head>
+<title>authenticating…</title>
+<script>
+  const send = (message) => {
+    window.opener.postMessage(message, 'http://0.0.0.0:9229');
+    window.close();
+  };
 
-<body>
-  <div id="display" style="font-family: sans-serif">Waiting for authentication. Make sure you don’t close this window – we’ll get you back to the app as soon as possible.</div>
-
-  <script>
-    const display = document.querySelector('#display');
-    const fail = () => {
-      display.innerHTML = (
-        '<p>' +
-          'Yikes! Something went wrong when authenticating you at github. ' +
-          '<a href="javascript:window.close()">Try again</a> – and if that ' +
-          'doesn’t work, <a href="https://github.com/parametric-svg/' +
-          'parametric-svg.surge.sh/issues">let us know in an issue</a>.' +
-        '</p>'
-      );
-    };
-
-    const codeMatch = /[?&]code=(.+?)(?:$|&)/.exec(location.search);
-    if (!codeMatch) fail();
-    const code = codeMatch[1];
-
-    fetch(`http://parametric-svg-auth.herokuapp.com/authenticate/${code}`).then(
-      r => r.json()
-    ).then((data) => {
-      window.opener.postMessage(data.token, 'http://0.0.0.0:9229');
-      window.close();
-    });
-  </script>
-</body>
+  const codeMatch = /[?&]code=(.+?)(?:$|&)/.exec(location.search);
+  if (!codeMatch) send({ error: 'no code received' });
+  else send({ data: code });
+</script>

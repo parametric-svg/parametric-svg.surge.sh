@@ -173,7 +173,6 @@ onReceiveCode action =
 decodeCode : (Code -> message) -> Decoder message
 decodeCode action =
   Decode.at ["detail", "payload"] Decode.string
-  |> Decode.map (Debug.log "here")
   |> Decode.maybe
   |> Decode.map action
 

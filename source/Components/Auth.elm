@@ -16,6 +16,7 @@ import Css exposing
   )
 import Json.Decode as Decode exposing (Decoder, andThen)
 import Http
+import Task
 
 import Components.IconButton as IconButton
 
@@ -47,6 +48,7 @@ token = .token
 
 type Message
   = ReceiveToken String
+  | FailReceivingToken Http.Error
   | ReceiveCode Code
   | Noop ()
 
@@ -76,7 +78,7 @@ update message model =
         fetchToken =
           Http.get
             (Decode.at ["token"] Decode.string)
-            "http://parametric-svg-auth.herokuapp.com/authenticate/" ++ code
+            ("http://parametric-svg-auth.herokuapp.com/authenticate/" ++ code)
 
       in
         { model

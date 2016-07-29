@@ -15,6 +15,7 @@ import Css exposing
   , property
   )
 import Json.Decode as Decode exposing (Decoder, andThen)
+import Http
 
 import Components.IconButton as IconButton
 
@@ -61,19 +62,34 @@ update message model =
       }
       ! []
 
-
-    ReceiveCode (Just code) ->
+    FailReceivingToken _ ->
       { model
-      | code = Just code
+      | code = Nothing
+      , failureMessages =
+        "Blimey! Failed to get a github authentication token."
+        :: model.failureMessages
       }
       ! []
+
+    ReceiveCode (Just code) ->
+      let
+        fetchToken =
+          Http.get
+            (Decode.at ["token"] Decode.string)
+            "http://parametric-svg-auth.herokuapp.com/authenticate/" ++ code
+
+      in
+        { model
+        | code = Just code
+        }
+        ! [ Task.perform FailReceivingToken ReceiveToken fetchToken
+          ]
 
     ReceiveCode Nothing ->
       { model
       | failureMessages =
         "Yikes! Failed to get an authentication code from github."
-        ::
-        model.failureMessages
+        :: model.failureMessages
       }
       ! []
 

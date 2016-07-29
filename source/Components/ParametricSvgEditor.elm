@@ -1,6 +1,6 @@
 module Components.ParametricSvgEditor exposing
   ( Model, Message
-  , init, update, view, css
+  , init, update, subscriptions, view, css
   )
 
 import Html exposing (node, div, text, textarea, span, Html)
@@ -44,13 +44,20 @@ type alias Model =
   , auth : Auth.Model
   }
 
-init : Model
+init : (Model, Cmd Message)
 init =
-  { source = ""
-  , liveSource = ""
-  , variablesPanel = VariablesPanel.init
-  , auth = Auth.init
-  }
+  let
+    (authModel, authCommand) =
+      Auth.init
+
+  in
+    { source = ""
+    , liveSource = ""
+    , variablesPanel = VariablesPanel.init
+    , auth = authModel
+    }
+    ! [ Cmd.map AuthMessage authCommand
+      ]
 
 
 -- UPDATE
@@ -62,31 +69,48 @@ type Message
   | AuthMessage Auth.Message
   | Noop ()
 
-update : Message -> Model -> Model
+update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     UpdateSource source ->
       { model
       | source = source
       }
+      ! []
 
     InjectSourceIntoDrawing ->
       { model
       | liveSource = model.source
       }
+      ! []
 
     VariablesPanelMessage message ->
       { model
       | variablesPanel = VariablesPanel.update message model.variablesPanel
       }
+      ! []
 
     AuthMessage message ->
-      { model
-      | auth = Auth.update message model.auth
-      }
+      let
+        (authModel, authCommand) =
+          Auth.update message model.auth
+
+      in
+        { model
+        | auth = authModel
+        }
+        ! [ Cmd.map AuthMessage authCommand
+          ]
 
     Noop _ ->
-      model
+      model ! []
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+  Sub.map AuthMessage <| Auth.subscriptions model.auth
 
 
 -- VIEW

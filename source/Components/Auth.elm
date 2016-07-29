@@ -1,6 +1,6 @@
 module Components.Auth exposing
   ( Model, Message
-  , init, token, update, view, css
+  , init, token, update, subscriptions, view, css
   , decodeCode
   )
 
@@ -30,12 +30,13 @@ type alias Model =
   , failureMessages : List String
   }
 
-init : Model
+init : (Model, Cmd Message)
 init =
   { token = Nothing
   , code = Nothing
   , failureMessages = []
   }
+  ! []
 
 token : Model -> Maybe String
 token = .token
@@ -51,18 +52,21 @@ type Message
 type alias Code =
   Maybe String
 
-update : Message -> Model -> Model
+update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     ReceiveToken token ->
       { model
       | token = Just token
       }
+      ! []
+
 
     ReceiveCode (Just code) ->
       { model
       | code = Just code
       }
+      ! []
 
     ReceiveCode Nothing ->
       { model
@@ -71,9 +75,17 @@ update message model =
         ::
         model.failureMessages
       }
+      ! []
 
     Noop _ ->
-      model
+      model ! []
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+  Sub.none
 
 
 -- VIEW

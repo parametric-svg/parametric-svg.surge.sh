@@ -40,7 +40,7 @@ init =
   , failureMessages = []
   }
   ! [ LocalStorage.get storageKey
-      |> Task.perform FailLoadingToken LoadToken
+      |> Task.perform FailToLoadToken LoadToken
     ]
 
 token : Model -> Maybe String
@@ -51,10 +51,10 @@ token = .token
 
 type Message
   = LoadToken (Maybe String)
-  | FailLoadingToken LocalStorage.Error
+  | FailToLoadToken LocalStorage.Error
   | ReceiveToken String
-  | FailReceivingToken Http.Error
-  | FailSavingToken LocalStorage.Error
+  | FailToReceiveToken Http.Error
+  | FailToSaveToken LocalStorage.Error
   | ReceiveCode Code
   | Noop ()
 
@@ -79,7 +79,7 @@ update message model =
       LoadToken Nothing ->
         model ! []
 
-      FailLoadingToken _ ->
+      FailToLoadToken _ ->
         model ! []
 
       ReceiveToken token ->
@@ -87,10 +87,10 @@ update message model =
         | token = Just token
         }
         ! [ LocalStorage.set storageKey token
-            |> Task.perform FailSavingToken Noop
+            |> Task.perform FailToSaveToken Noop
           ]
 
-      FailSavingToken _ ->
+      FailToSaveToken _ ->
         withFailure
           ( "Damn, we haven’t managed to save authentication details "
           ++ "for the future. Never mind though, you can keep using the app. "
@@ -100,7 +100,7 @@ update message model =
           model
         ! []
 
-      FailReceivingToken _ ->
+      FailToReceiveToken _ ->
         withFailure "Blimey! Failed to get a github authentication token."
           { model
           | code = Nothing
@@ -118,7 +118,7 @@ update message model =
           { model
           | code = Just code
           }
-          ! [ Task.perform FailReceivingToken ReceiveToken fetchToken
+          ! [ Task.perform FailToReceiveToken ReceiveToken fetchToken
             ]
 
       ReceiveCode Nothing ->

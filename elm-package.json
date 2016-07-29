@@ -1,15 +1,17 @@
 {
     "version": "0.0.0",
     "summary": "A songbook web app",
-    "repository": "https://github.com/parametric-svg/parametric-svg-dot-surge-dot-sh.git",
+    "repository": "https://github.com/fredcy/localstorage.git",
     "license": "MIT",
     "source-directories": [
         "source",
         "vendor/localstorage/src"
     ],
     "exposed-modules": [],
+    "native-modules": true,
     "dependencies": {
         "elm-lang/core": "4.0.1 <= v < 5.0.0",
+        "elm-lang/dom": "1.0.0 <= v < 2.0.0",
         "elm-lang/html": "1.1.0 <= v < 2.0.0",
         "elm-lang/svg": "1.1.0 <= v < 2.0.0",
         "evancz/elm-http": "3.0.1 <= v < 4.0.0",

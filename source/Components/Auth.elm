@@ -17,6 +17,7 @@ import Css exposing
 import Json.Decode as Decode exposing (Decoder, andThen)
 import Http
 import Task
+import LocalStorage
 
 import Components.IconButton as IconButton
 
@@ -38,7 +39,9 @@ init =
   , code = Nothing
   , failureMessages = []
   }
-  ! []
+  ! [ LocalStorage.get storageKey
+      |> Task.perform FailLoadingToken LoadToken
+    ]
 
 token : Model -> Maybe String
 token = .token
@@ -47,8 +50,11 @@ token = .token
 -- UPDATE
 
 type Message
-  = ReceiveToken String
+  = LoadToken (Maybe String)
+  | FailLoadingToken LocalStorage.Error
+  | ReceiveToken String
   | FailReceivingToken Http.Error
+  | FailSavingToken LocalStorage.Error
   | ReceiveCode Code
   | Noop ()
 
@@ -57,46 +63,76 @@ type alias Code =
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
-  case message of
-    ReceiveToken token ->
+  let
+    withFailure message model =
       { model
-      | token = Just token
+      | failureMessages = message :: model.failureMessages
       }
-      ! []
 
-    FailReceivingToken _ ->
-      { model
-      | code = Nothing
-      , failureMessages =
-        "Blimey! Failed to get a github authentication token."
-        :: model.failureMessages
-      }
-      ! []
-
-    ReceiveCode (Just code) ->
-      let
-        fetchToken =
-          Http.get
-            (Decode.at ["token"] Decode.string)
-            ("http://parametric-svg-auth.herokuapp.com/authenticate/" ++ code)
-
-      in
+  in
+    case message of
+      LoadToken (Just token) ->
         { model
-        | code = Just code
+        | token = Just token
+        } ! []
+
+      LoadToken Nothing ->
+        model ! []
+
+      FailLoadingToken _ ->
+        model ! []
+
+      ReceiveToken token ->
+        { model
+        | token = Just token
         }
-        ! [ Task.perform FailReceivingToken ReceiveToken fetchToken
+        ! [ LocalStorage.set storageKey token
+            |> Task.perform FailSavingToken Noop
           ]
 
-    ReceiveCode Nothing ->
-      { model
-      | failureMessages =
-        "Yikes! Failed to get an authentication code from github."
-        :: model.failureMessages
-      }
-      ! []
+      FailSavingToken _ ->
+        withFailure
+          ( "Damn, we haven’t managed to save authentication details "
+          ++ "for the future. Never mind though, you can keep using the app. "
+          ++ "All your changes will be saved to gist as always. "
+          ++ "You’ll just have to log in next time as well."
+          )
+          model
+        ! []
 
-    Noop _ ->
-      model ! []
+      FailReceivingToken _ ->
+        withFailure "Blimey! Failed to get a github authentication token."
+          { model
+          | code = Nothing
+          }
+        ! []
+
+      ReceiveCode (Just code) ->
+        let
+          fetchToken =
+            Http.get
+              (Decode.at ["token"] Decode.string)
+              ("http://parametric-svg-auth.herokuapp.com/authenticate/" ++ code)
+
+        in
+          { model
+          | code = Just code
+          }
+          ! [ Task.perform FailReceivingToken ReceiveToken fetchToken
+            ]
+
+      ReceiveCode Nothing ->
+        withFailure "Yikes! Failed to get an authentication code from github."
+          model
+        ! []
+
+      Noop _ ->
+        model ! []
+
+
+storageKey : String
+storageKey =
+  componentNamespace ++ "auth-key"
 
 
 -- SUBSCRIPTIONS

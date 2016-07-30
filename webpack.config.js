@@ -9,7 +9,7 @@ module.exports = {
 
   output: {
     path: './public',
-    filename: 'index.[hash].js',
+    filename: 'index.js',
   },
 
   module: {

@@ -5,13 +5,13 @@ import Html.App as App
 import Html.Attributes exposing (attribute, id)
 
 view : (a -> message) -> String -> String -> String -> List (Html message)
-view message componentNamespace symbol tooltip =
+view noopAction componentNamespace symbol tooltip =
   let
     iconId =
       componentNamespace ++ symbol ++ "-toolbar-icon-button"
 
   in
-    List.map (App.map message) <|
+    List.map (App.map noopAction) <|
       [ node "paper-icon-button"
         [ attribute "icon" symbol
         , attribute "alt" tooltip

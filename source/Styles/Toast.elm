@@ -19,4 +19,4 @@ css = (stylesheet << namespace componentNamespace) <|
   ]
 
 componentNamespace : String
-componentNamespace = "b7sj97j-Toast-"
+componentNamespace = "b4ea81c-Toast-"

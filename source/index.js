@@ -2,6 +2,6 @@ require('./custom-elements');
 
 const Elm = require('./Main.elm');
 
-Elm.Main.embed(
+window.github$com_parametricSvg_parametricSvgSurgeSh$app = Elm.Main.embed(
   document.querySelector('#main')
 );

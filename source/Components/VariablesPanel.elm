@@ -1,6 +1,7 @@
 module Components.VariablesPanel exposing
-  ( Model, Variable, Message
-  , init, variables, update, view
+  ( Model, Message
+  , init, update, view
+  , variables
   )
 
 import Dict exposing (empty, Dict)
@@ -9,6 +10,7 @@ import Html.Attributes exposing (attribute)
 import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 
+import UniversalTypes exposing (Variable)
 import Styles.VariablesPanel exposing
   ( Classes(Root, Input, InputField, Parameter, Value)
   , componentNamespace
@@ -27,12 +29,7 @@ type alias Model =
 
 type alias VariableField =
   { name : Maybe String
-  , rawValue : Maybe String
-  }
-
-type alias Variable =
-  { name : String
-  , rawValue : String
+  , value : Maybe String
   }
 
 type alias Id =
@@ -44,18 +41,20 @@ init =
     (Dict.fromList [emptyVariableField 0])
     1
 
+
 variables : Model -> List Variable
 variables { variableFields } =
   let
     toVariable field =
-      case (field.name, field.rawValue) of
-        (Just name, Just rawValue) ->
-          Just {name = name, rawValue = rawValue}
+      case (field.name, field.value) of
+        (Just name, Just value) ->
+          Just {name = name, value = value}
         _ ->
           Nothing
   in
     Dict.values variableFields
     |> List.filterMap toVariable
+
 
 emptyVariableField : Id -> (Id, VariableField)
 emptyVariableField id =
@@ -79,7 +78,7 @@ update message model =
       }
 
     updateValue value variable =
-      {variable | rawValue =
+      {variable | value =
         if value == ""
           then Nothing
           else Just value
@@ -91,7 +90,7 @@ update message model =
       ++ [emptyVariableField model.nextId]
 
     notEmpty (_, fieldData) =
-      if fieldData == {name = Nothing, rawValue = Nothing}
+      if fieldData == {name = Nothing, value = Nothing}
         then False
         else True
 
@@ -129,7 +128,7 @@ view model =
           , onInput (UpdateVariableName id)
           ] []
         , node "paper-input"
-          [ value <| field.rawValue
+          [ value <| field.value
           , label "value"
           , class [InputField, Value]
           , onInput (UpdateVariableValue id)

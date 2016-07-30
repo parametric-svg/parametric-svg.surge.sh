@@ -156,7 +156,7 @@ view model =
         <| variables model.variablesPanel
 
     parametricAttribute variable =
-      attribute variable.name variable.rawValue
+      attribute variable.name variable.value
 
     title titleLine =
       [ div

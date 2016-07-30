@@ -1,7 +1,6 @@
 module Components.Auth exposing
   ( Model, Message
   , init, token, update, subscriptions, view
-  , decodeCode
   )
 
 import Html exposing (Html, node, a, text, div)

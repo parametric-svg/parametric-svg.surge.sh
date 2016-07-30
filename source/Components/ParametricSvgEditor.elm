@@ -19,10 +19,8 @@ import Styles.ParametricSvgEditor exposing
   ( Classes(Root, Display, Display_ImplicitSize, DisplaySizer, Editor, Toolbar)
   , componentNamespace
   )
-import Components.IconButton as IconButton
 import Components.VariablesPanel as VariablesPanel exposing (variables)
 import Components.Auth as Auth exposing (token)
-import Components.IconButton as IconButton
 import Components.SaveToGist as SaveToGist
 
 {class} =
@@ -77,7 +75,6 @@ type Message
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
-  | Noop ()
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -117,9 +114,6 @@ update message model =
         }
         ! [ Cmd.map SaveToGistMessage saveToGistCommand
           ]
-
-    Noop _ ->
-      model ! []
 
 
 -- SUBSCRIPTIONS
@@ -193,9 +187,6 @@ view model =
 
         Nothing ->
           List.map (App.map AuthMessage) (Auth.view model.auth)
-
-    iconButton =
-      IconButton.view Noop componentNamespace
 
   in
     node "paper-header-panel"

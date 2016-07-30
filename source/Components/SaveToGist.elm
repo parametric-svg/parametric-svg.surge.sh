@@ -4,6 +4,7 @@ port module Components.SaveToGist exposing
   )
 
 import Html exposing (Html)
+import Html.Events exposing (onClick)
 -- import Html.Attributes exposing ()
 -- import Json.Decode as Decode exposing (Decoder, andThen)
 -- import Http
@@ -42,7 +43,6 @@ init =
 type Message
   = RequestFileContents
   | ReceiveFileContents String
-  | Noop ()
 
 port requestFileContents : (Markup, List Variable) -> Cmd message
 
@@ -59,9 +59,6 @@ update message model =
       | fileContents = Just <| Debug.log "fileContents" fileContents
       }
       ! []
-
-    Noop _ ->
-      model ! []
 
 
 
@@ -83,10 +80,15 @@ view : Model -> List (Html Message)
 view model =
   let
     iconButton =
-      IconButton.view Noop componentNamespace
+      IconButton.view componentNamespace
 
     componentNamespace =
       "d34616d-SaveToGist-"
 
   in
-    iconButton "cloud-upload" "Save as gist"
+    iconButton
+      [ onClick RequestFileContents
+      ]
+      { symbol = "cloud-upload"
+      , tooltip = "Save as gist"
+      }

@@ -143,7 +143,7 @@ view : Model -> List (Html Message)
 view model =
   let
     iconButton =
-      IconButton.view Noop componentNamespace
+      IconButton.view componentNamespace
 
     failureToasts =
       List.map Toast.view <| List.reverse model.failureMessages
@@ -154,7 +154,12 @@ view model =
           [ node "github-auth"
             [ onReceiveCode ReceiveCode
             ]
-            <| iconButton "cloud-queue" "Enable gist integration"
+            <|
+              iconButton
+                []
+                { symbol = "cloud-queue"
+                , tooltip = "Enable gist integration"
+                }
           ]
 
         (Just _, Nothing) ->

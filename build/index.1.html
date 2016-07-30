@@ -9,8 +9,7 @@
     @font-face {
       font-family: 'source sans pro';
       src: url('fonts/source-sans-pro.regular.woff') format('woff');
-    }
-    @font-face {
+    } @font-face {
       font-family: 'source code pro';
       font-style: italic;
       src: url('/fonts/source-code-pro.regular.woff') format('woff');
@@ -33,4 +32,19 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+    }
+
+    .preloader-fader {
+      animation-name: preloader-fader;
+      animation-duration: 2s;
+      animation-delay: 1s;
+      animation-fill-mode: both;
+      animation-timing-function: cubic-bezier(0.6, 0, 1, 1);
+    } @keyframes preloader-fader {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
     }

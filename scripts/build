@@ -12,5 +12,5 @@ set -x
 
 git clean -dXf public/
 
-"$local"/webpack
 "$scripts"/styles
+"$local"/webpack

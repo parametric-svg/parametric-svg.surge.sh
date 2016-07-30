@@ -12,6 +12,10 @@ Usage:
 "; exit; fi
 set -x
 
-"$local"/concurrently \
-  "$scripts/start.server $@" \
-  "$scripts/start.styles"
+"$local"/webpack-dev-server \
+  --path-to-elm-make=node_modules/.bin/elm-make \
+  --port=9229 \
+  --host=0.0.0.0 \
+  --content-base=public/ \
+  --inline \
+  $@

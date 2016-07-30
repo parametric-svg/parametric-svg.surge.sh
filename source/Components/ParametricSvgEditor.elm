@@ -19,8 +19,8 @@ import Styles.ParametricSvgEditor exposing
   , componentNamespace
   )
 import Components.IconButton as IconButton
-import Components.VariablesPanel as VariablesPanel
-import Components.Auth as Auth
+import Components.VariablesPanel as VariablesPanel exposing (variables)
+import Components.Auth as Auth exposing (token)
 import Components.IconButton as IconButton
 
 {class} =
@@ -149,7 +149,7 @@ view model =
     parametricAttributes =
       List.map
         parametricAttribute
-        <| VariablesPanel.getVariables model.variablesPanel
+        <| variables model.variablesPanel
 
     parametricAttribute variable =
       attribute variable.name variable.rawValue
@@ -163,7 +163,7 @@ view model =
       ]
 
     toolbarButtons =
-      case Auth.token model.auth of
+      case token model.auth of
         Just _ ->
           ( iconButton "cloud-download" "Open gist"
           ++ iconButton "cloud-upload" "Save as gist"

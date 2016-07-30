@@ -1,6 +1,6 @@
 module Components.VariablesPanel exposing
   ( Model, Variable, Message
-  , init, getVariables, update, view
+  , init, variables, update, view
   )
 
 import Dict exposing (empty, Dict)
@@ -44,8 +44,8 @@ init =
     (Dict.fromList [emptyVariableField 0])
     1
 
-getVariables : Model -> List Variable
-getVariables { variableFields } =
+variables : Model -> List Variable
+variables { variableFields } =
   let
     toVariable field =
       case (field.name, field.rawValue) of

@@ -1,6 +1,7 @@
 module Components.ParametricSvgEditor exposing
   ( Model, Message
   , init, update, subscriptions, view
+  , markup
   )
 
 import Html exposing (node, div, text, textarea, span, Html)
@@ -34,7 +35,7 @@ styles =
 -- MODEL
 
 type alias Model =
-  { source : String
+  { rawMarkup : String
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
   }
@@ -46,12 +47,20 @@ init =
       Auth.init
 
   in
-    { source = ""
+    { rawMarkup = ""
     , variablesPanel = VariablesPanel.init
     , auth = authModel
     }
     ! [ Cmd.map AuthMessage authCommand
       ]
+
+
+markup : Model -> String
+markup model =
+  if contains (regex "^\\s*<svg\\b") model.rawMarkup
+    then model.rawMarkup
+    else "<svg>" ++ model.rawMarkup ++ "</svg>"
+
 
 
 -- UPDATE
@@ -65,9 +74,9 @@ type Message
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
-    UpdateSource source ->
+    UpdateSource rawMarkup ->
       { model
-      | source = source
+      | rawMarkup = rawMarkup
       }
       ! []
 
@@ -106,7 +115,7 @@ view : Model -> Html Message
 view model =
   let
     display =
-      case getSize model.source of
+      case getSize model.rawMarkup of
         Just (drawingWidth, drawingHeight) ->
           div
             [ class [Display]
@@ -132,19 +141,14 @@ view model =
 
     parametricSvg =
       node "parametric-svg"
-        ( [ innerHtml svgSource
+        ( [ innerHtml (markup model)
           ]
           ++ parametricAttributes
         )
         []
 
-    innerHtml source =
-      Html.Attributes.property "innerHTML" <| string source
-
-    svgSource =
-      if contains (regex "^\\s*<svg\\b") model.source
-        then model.source
-        else "<svg>" ++ model.source ++ "</svg>"
+    innerHtml rawMarkup =
+      Html.Attributes.property "innerHTML" <| string rawMarkup
 
     parametricAttributes =
       List.map

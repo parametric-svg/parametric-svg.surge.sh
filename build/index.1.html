@@ -9,7 +9,8 @@
     @font-face {
       font-family: 'source sans pro';
       src: url('fonts/source-sans-pro.regular.woff') format('woff');
-    } @font-face {
+    }
+    @font-face {
       font-family: 'source code pro';
       font-style: italic;
       src: url('/fonts/source-code-pro.regular.woff') format('woff');
@@ -24,4 +25,12 @@
 
     *, *::after, *::before {
       box-sizing: border-box;
+    }
+
+    .preloader {
+      --paper-spinner-color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }

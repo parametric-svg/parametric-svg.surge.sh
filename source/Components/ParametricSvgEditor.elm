@@ -23,6 +23,7 @@ import Components.IconButton as IconButton
 import Components.VariablesPanel as VariablesPanel exposing (variables)
 import Components.Auth as Auth exposing (token)
 import Components.IconButton as IconButton
+import Components.SaveToGist as SaveToGist
 
 {class} =
   withNamespace componentNamespace
@@ -38,6 +39,7 @@ type alias Model =
   { rawMarkup : String
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
+  , saveToGist : SaveToGist.Model
   }
 
 init : (Model, Cmd Message)
@@ -46,12 +48,17 @@ init =
     (authModel, authCommand) =
       Auth.init
 
+    (saveToGistModel, saveToGistCommand) =
+      SaveToGist.init
+
   in
     { rawMarkup = ""
     , variablesPanel = VariablesPanel.init
     , auth = authModel
+    , saveToGist = saveToGistModel
     }
     ! [ Cmd.map AuthMessage authCommand
+      , Cmd.map SaveToGistMessage saveToGistCommand
       ]
 
 
@@ -69,6 +76,7 @@ type Message
   = UpdateSource String
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
+  | SaveToGistMessage SaveToGist.Message
   | Noop ()
 
 update : Message -> Model -> (Model, Cmd Message)
@@ -96,6 +104,18 @@ update message model =
         | auth = authModel
         }
         ! [ Cmd.map AuthMessage authCommand
+          ]
+
+    SaveToGistMessage message ->
+      let
+        (saveToGistModel, saveToGistCommand) =
+          SaveToGist.update message model.saveToGist
+
+      in
+        { model
+        | saveToGist = saveToGistModel
+        }
+        ! [ Cmd.map SaveToGistMessage saveToGistCommand
           ]
 
     Noop _ ->
@@ -169,12 +189,10 @@ view model =
     toolbarButtons =
       case token model.auth of
         Just _ ->
-          ( iconButton "cloud-download" "Open gist"
-          ++ iconButton "cloud-upload" "Save as gist"
-          )
+          List.map (App.map SaveToGistMessage) (SaveToGist.view model.saveToGist)
 
         Nothing ->
-          List.map (App.map AuthMessage) <| Auth.view model.auth
+          List.map (App.map AuthMessage) (Auth.view model.auth)
 
     iconButton =
       IconButton.view Noop componentNamespace

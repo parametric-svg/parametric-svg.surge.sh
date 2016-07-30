@@ -35,7 +35,6 @@ styles =
 
 type alias Model =
   { source : String
-  , liveSource : String
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
   }
@@ -48,7 +47,6 @@ init =
 
   in
     { source = ""
-    , liveSource = ""
     , variablesPanel = VariablesPanel.init
     , auth = authModel
     }
@@ -60,7 +58,6 @@ init =
 
 type Message
   = UpdateSource String
-  | InjectSourceIntoDrawing
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | Noop ()
@@ -71,12 +68,6 @@ update message model =
     UpdateSource source ->
       { model
       | source = source
-      }
-      ! []
-
-    InjectSourceIntoDrawing ->
-      { model
-      | liveSource = model.source
       }
       ! []
 

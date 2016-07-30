@@ -5,12 +5,12 @@ import Css.File exposing
   , compile, toFileStructure
   )
 import Html exposing (div)
-import Html.App as Html
+import Html.App as App
 import String
 
-import Components.ParametricSvgEditor as ParametricSvgEditor
-import Components.VariablesPanel as VariablesPanel
-import Components.Auth as Auth
+import Styles.ParametricSvgEditor as ParametricSvgEditor
+import Styles.VariablesPanel as VariablesPanel
+import Styles.Auth as Auth
 
 
 port files : CssFileStructure -> Cmd msg
@@ -45,7 +45,7 @@ cssFiles =
 
 main : Program Never
 main =
-  Html.program
+  App.program
     { init = ( (), files cssFiles )
     , view = \_ -> (div [] [])
     , update = \_ _ -> ( (), Cmd.none )

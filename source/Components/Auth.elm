@@ -1,6 +1,6 @@
 module Components.Auth exposing
   ( Model, Message
-  , init, token, update, subscriptions, view, css
+  , init, token, update, subscriptions, view
   , decodeCode
   )
 
@@ -8,17 +8,15 @@ import Html exposing (Html, node, a, text, div)
 import Html.Events exposing (on)
 import Html.Attributes exposing (attribute, href, target, id)
 import Html.CssHelpers exposing (withNamespace)
-import Css.Namespace exposing (namespace)
-import Css exposing
-  ( Stylesheet
-  , stylesheet, (.)
-  , property
-  )
 import Json.Decode as Decode exposing (Decoder, andThen)
 import Http
 import Task
 import LocalStorage
 
+import Styles.Auth exposing
+  ( Classes(ToastLink, Spinner)
+  , componentNamespace
+  )
 import Components.IconButton as IconButton
 
 {class} =
@@ -213,26 +211,3 @@ decodeCode action =
   Decode.at ["detail", "payload"] Decode.string
   |> Decode.maybe
   |> Decode.map action
-
-
--- STYLES
-
-type Classes
-  = ToastLink
-  | Spinner
-
-css : Stylesheet
-css = stylesheet <| namespace componentNamespace <|
-  [ (.) ToastLink
-    [ property "color" "inherit"
-      -- https://github.com/rtfeldman/elm-css/issues/148
-    ]
-
-  , (.) Spinner
-    [ property "--paper-spinner-color" "currentColor"
-    ]
-  ]
-
-componentNamespace : String
-componentNamespace =
-  "fe43cfb-"

@@ -8,6 +8,7 @@ mkdir -p "$build_artifacts"/styles/
   --output="$build_artifacts"/styles/
 
 cat "$build_artifacts"/styles/styles.css \
+  | sed 's/^    /  /g' \
   | sed 's/^/    /g' \
   | cat build/index.1.html - build/index.2.html \
   > public/index.html

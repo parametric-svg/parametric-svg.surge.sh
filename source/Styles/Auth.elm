@@ -9,17 +9,11 @@ import Css exposing
 
 
 type Classes
-  = ToastLink
-  | Spinner
+  = Spinner
 
 css : Stylesheet
 css = stylesheet <| namespace componentNamespace <|
-  [ (.) ToastLink
-    [ property "color" "inherit"
-      -- https://github.com/rtfeldman/elm-css/issues/148
-    ]
-
-  , (.) Spinner
+  [ (.) Spinner
     [ property "--paper-spinner-color" "currentColor"
     ]
   ]

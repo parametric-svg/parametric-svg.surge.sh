@@ -11,6 +11,7 @@ import String
 import Styles.ParametricSvgEditor as ParametricSvgEditor
 import Styles.VariablesPanel as VariablesPanel
 import Styles.Auth as Auth
+import Styles.Toast as Toast
 
 
 port files : CssFileStructure -> Cmd msg
@@ -39,6 +40,7 @@ cssFiles =
       [ ParametricSvgEditor.css
       , VariablesPanel.css
       , Auth.css
+      , Toast.css
       ]
     )]
 

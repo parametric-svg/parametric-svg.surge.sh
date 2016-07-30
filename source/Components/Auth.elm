@@ -13,10 +13,11 @@ import Task
 import LocalStorage
 
 import Styles.Auth exposing
-  ( Classes(ToastLink, Spinner)
+  ( Classes(Spinner)
   , componentNamespace
   )
 import Components.IconButton as IconButton
+import Components.Toast as Toast
 
 {class} =
   withNamespace componentNamespace
@@ -148,23 +149,7 @@ view model =
       IconButton.view Noop componentNamespace
 
     failureToasts =
-      List.map toast <| List.reverse model.failureMessages
-
-    toast message =
-      node "paper-toast"
-        [ attribute "opened" ""
-        , attribute "text" message
-        ]
-        [ a
-          [ href "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
-          , target "_blank"
-          , class [ToastLink]
-          ]
-          [ node "paper-button" []
-            [ text "Get help"
-            ]
-          ]
-        ]
+      List.map Toast.view <| List.reverse model.failureMessages
 
     staticContents =
       case (model.code, model.token) of

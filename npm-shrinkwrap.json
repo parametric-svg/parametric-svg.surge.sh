@@ -5369,6 +5369,11 @@
         }
       }
     },
+    "webpack-shell-plugin": {
+      "version": "0.4.2",
+      "from": "tomekwi/webpack-shell-plugin#bfec4169ea1912aad4b4bc4796a9837812d372aa",
+      "resolved": "git://github.com/tomekwi/webpack-shell-plugin.git#bfec4169ea1912aad4b4bc4796a9837812d372aa"
+    },
     "websocket-driver": {
       "version": "0.6.5",
       "from": "websocket-driver@>=0.5.1",

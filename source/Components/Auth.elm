@@ -3,24 +3,16 @@ module Components.Auth exposing
   , init, token, update, subscriptions, view
   )
 
-import Html exposing (Html, node, a, text, div)
+import Html exposing (Html, node, div)
 import Html.Events exposing (on)
-import Html.Attributes exposing (attribute, href, target, id)
-import Html.CssHelpers exposing (withNamespace)
 import Json.Decode as Decode exposing (Decoder, andThen)
 import Http
 import Task
 import LocalStorage
 
-import Styles.Auth exposing
-  ( Classes(Spinner)
-  , componentNamespace
-  )
 import Components.IconButton as IconButton
 import Components.Toast as Toast
-
-{class} =
-  withNamespace componentNamespace
+import Components.Spinner as Spinner
 
 
 -- MODEL
@@ -132,6 +124,11 @@ storageKey : String
 storageKey =
   componentNamespace ++ "auth-key"
 
+componentNamespace : String
+componentNamespace =
+  "cc2ede8-Auth-"
+
+
 
 -- SUBSCRIPTIONS
 
@@ -162,25 +159,11 @@ view model =
 
         (Just _, Nothing) ->
           [ div []
-            [ node "paper-spinner-lite"
-              [ id spinnerId
-              , attribute "active" ""
-              , class [Spinner]
-              ] []
-            , node "paper-tooltip"
-              [ attribute "for" spinnerId
-              , attribute "offset" "20"
-              ]
-              [ text "signing in with github…"
-              ]
-            ]
+            <| Spinner.view "signing in with github…"
           ]
 
         _ ->
           []
-
-    spinnerId =
-      componentNamespace ++ "spinner"
 
   in
     staticContents ++ failureToasts

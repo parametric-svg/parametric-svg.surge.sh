@@ -1,4 +1,4 @@
-module Styles.Auth exposing (Classes(..), css, componentNamespace)
+module Styles.Spinner exposing (Classes(..), css, componentNamespace)
 
 import Css.Namespace exposing (namespace)
 import Css exposing
@@ -8,8 +8,7 @@ import Css exposing
   )
 
 
-type Classes
-  = Spinner
+type Classes = Spinner
 
 css : Stylesheet
 css = stylesheet <| namespace componentNamespace <|
@@ -20,4 +19,4 @@ css = stylesheet <| namespace componentNamespace <|
 
 componentNamespace : String
 componentNamespace =
-  "fe43cfb-Auth-"
+  "abd8ef4-Spinner-"

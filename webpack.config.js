@@ -1,5 +1,3 @@
-const WebpackShellPlugin = require('webpack-shell-plugin');
-
 const directories =
   names => new RegExp(`(?:^|/)(?:${names.join('|')})/`);
 
@@ -7,14 +5,6 @@ const extensions =
   names => new RegExp(`\\.(?:${names.join('|')})$`);
 
 module.exports = {
-  plugins: [
-    new WebpackShellPlugin({
-      beforeBuildStart: [
-        './scripts/styles',
-      ],
-    }),
-  ],
-
   entry: './source/index.js',
 
   output: {

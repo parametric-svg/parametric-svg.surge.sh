@@ -24,12 +24,12 @@ type alias CompiledStylesheet =
 
 merge : List CompiledStylesheet -> CompiledStylesheet
 merge compiledStylesheets =
-  { css = String.join "\n"
-    << List.map .css
-    <| compiledStylesheets
-  , warnings = List.concat
-    << List.map .warnings
-    <| compiledStylesheets
+  { css = compiledStylesheets
+    |> List.map .css
+    |> String.join "\n"
+  , warnings = compiledStylesheets
+    |> List.map .warnings
+    |> List.concat
   }
 
 cssFiles : CssFileStructure

@@ -26,4 +26,4 @@ css = stylesheet <| namespace componentNamespace <|
 
 componentNamespace : String
 componentNamespace =
-  "fe43cfb-"
+  "fe43cfb-Auth-"

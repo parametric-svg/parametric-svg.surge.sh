@@ -4,18 +4,20 @@
   "author": "Tomek Wiszniewski <t.wiszniewski@gmail.com",
   "devDependencies": {
     "@polymer/paper-toolbar": "0.0.3",
-    "browserify": "^13.0.1",
     "concurrently": "^2.1.0",
     "elm": "^0.17.1",
     "elm-css": "^0.5.1",
-    "elm-live": "^2.4.1",
+    "elm-webpack-loader": "^3.0.3",
     "eslint": "^2.13.1",
     "eslint-config-airbnb-base": "^3.0.1",
     "eslint-plugin-import": "^1.10.0",
     "npm": "3.10.5",
+    "raw-loader": "^0.5.1",
     "surge": "^0.18.0",
     "vulcanize": "^1.14.8",
-    "watch-spawn": "^2.0.0"
+    "watch-spawn": "^2.0.0",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "@parametric-svg/element": "^1.3.1",
@@ -28,7 +30,6 @@
     "@polymer/paper-spinner": "0.0.3",
     "@polymer/paper-toast": "0.0.3",
     "@polymer/paper-tooltip": "0.0.3",
-    "brfs": "^1.4.3",
     "codemirror": "^5.16.0",
     "jss-lite": "^1.2.0",
     "private-parts": "^0.4.1"

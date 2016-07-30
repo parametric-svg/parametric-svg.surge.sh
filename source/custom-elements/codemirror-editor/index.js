@@ -2,7 +2,6 @@
   // brfs doesn’t play well with template strings ATM
   // jss-lite looks more elegant when all properties are quoted
 const codemirror = require('codemirror');
-const fs = require('fs');
 const jssLite = require('jss-lite');
 const privateParts = require('private-parts');
 
@@ -11,12 +10,8 @@ require('codemirror/keymap/sublime');
 
 const _ = privateParts.createKey();
 
-const baseCss = fs.readFileSync(
-  __dirname + '/../../node_modules/codemirror/lib/codemirror.css', 'utf8'
-);
-const themeCss = fs.readFileSync(
-  __dirname + '/../../node_modules/codemirror/theme/material.css', 'utf8'
-);
+const baseCss = require('codemirror/lib/codemirror.css');
+const themeCss = require('codemirror/theme/material.css');
 const styleOverrides = jssLite({
   '.CodeMirror': {
     'font-family': '"source code pro", monospace',

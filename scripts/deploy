@@ -1,15 +1,16 @@
 #! /bin/sh -ex
 source "$(dirname "$0")"/_/env.source.sh
 
-scripts/build
+"$scripts"/build
 
-rm -rf build/public
-cp -r public build/public
-rm build/public/polymer
+mkdir -p "$build_artifacts"
+rm -rf "$build_artifacts"/deploy
+cp -r public "$build_artifacts"/deploy
+rm "$build_artifacts"/deploy/polymer
 
 "$local"/vulcanize public/polymer.html \
-  > build/public/polymer.html
+  > "$build_artifacts"/deploy/polymer.html
 
 "$local"/surge \
-  --project=build/public/ \
+  --project="$build_artifacts"/deploy/ \
   --domain=https://parametric-svg.surge.sh

@@ -10,13 +10,13 @@ Usage:
 "; exit; fi
 set -x
 
-mkdir -p build/artifacts/npm
-mv node_modules/@polymer/web-animations-js build/artifacts/npm/
+mkdir -p "$build_artifacts"/npm
+mv node_modules/@polymer/web-animations-js "$build_artifacts"/npm/
 
 "$local"/npm $@
 "$local"/npm shrinkwrap --dev
 
-mv build/artifacts/npm/web-animations-js node_modules/@polymer/
+mv "$build_artifacts"/npm/web-animations-js node_modules/@polymer/
 
 set +x
 read \

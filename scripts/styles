@@ -1,11 +1,13 @@
 #! /bin/sh -ex
 source "$(dirname "$0")"/_/env.source.sh
 
+mkdir -p "$build_artifacts"/styles/
+
 "$local"/elm-css \
   source/Stylesheets.elm \
-  --output=build/
+  --output="$build_artifacts"/styles/
 
-cat build/styles.css \
+cat "$build_artifacts"/styles/styles.css \
   | sed 's/^/    /g' \
   | cat build/index.1.html - build/index.2.html \
   > public/index.html

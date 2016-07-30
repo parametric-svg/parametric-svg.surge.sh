@@ -10,8 +10,7 @@ Usage:
 "; exit; fi
 set -x
 
-"$local"/elm-make \
-  $(cat "$private"/elm-make-args.txt)
+git clean -dXf public/
 
-"$scripts"/custom-elements
+"$local"/webpack
 "$scripts"/styles

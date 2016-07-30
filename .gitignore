@@ -1,7 +1,3 @@
-npm-debug.log
-/elm-stuff/
-*~
-
 /node_modules/*
 !/node_modules/@polymer
 /node_modules/@polymer/*
@@ -13,6 +9,8 @@ npm-debug.log
 !/public/fonts/
 !/public/oauth/
 
-/build/styles.css
-/build/public/
-/build/artifacts/
+/scripts/.build-artifacts/
+
+npm-debug.log
+/elm-stuff/
+*~

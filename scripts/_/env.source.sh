@@ -1,5 +1,5 @@
-cd "$(dirname "$0")"/..
+cd "$(dirname "$0")/.."
 
-scripts="$(pwd)"/scripts
-private="$scripts"/_
+scripts="$(pwd)/scripts"
+build_artifacts="$(pwd)/scripts/.build-artifacts"
 local="$(pwd)/node_modules/.bin"

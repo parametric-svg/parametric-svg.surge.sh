@@ -49,7 +49,7 @@ test((
 ));
 
 test((
-  'Adds variables to the end of <defs>'
+  'Adds variables at the end of existing <defs>'
 ), withInput({
   markup: '<svg><defs><whatever/></defs></svg>',
   variables: [{ name: 'a', value: '2' }],
@@ -57,6 +57,27 @@ test((
   '<svg>' +
     '<defs>' +
       '<whatever/>' +
+      '<param name="a" value="2"/>' +
+    '</defs>' +
+  '</svg>'
+));
+
+test((
+  'Updates the values of existing variables'
+), withInput({
+  markup: (
+    '<svg>' +
+      '<defs>' +
+        '<param name="a" value="3"/>' +
+        '<param name="b" value="5"/>' +
+      '</defs>' +
+    '</svg>'
+  ),
+  variables: [{ name: 'a', value: '2' }],
+}).expectResult(
+  '<svg>' +
+    '<defs>' +
+      '<param name="b" value="5"/>' +
       '<param name="a" value="2"/>' +
     '</defs>' +
   '</svg>'

@@ -12,7 +12,21 @@ module.exports = ({ inPort }) => {
       ? existingDefs
       : svg.createElement('defs');
 
+    const existingParams = {};
+    if (hasExistingDefs) {
+      const paramElements = Array.from(defs.getElementsByTagName('param'));
+      paramElements.forEach((paramElement) => {
+        const name = paramElement.getAttribute('name');
+        existingParams[name] = paramElement;
+      });
+    }
+
     variables.forEach(({ name, value }) => {
+      const existingParam = existingParams[name];
+      if (hasExistingDefs && !!existingParam) {
+        existingParam.parentNode.removeChild(existingParam);
+      }
+
       const param = svg.createElement('param');
       param.setAttribute('name', name);
       param.setAttribute('value', value);

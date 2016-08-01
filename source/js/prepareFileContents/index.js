@@ -6,7 +6,12 @@ const serializer = new XMLSerializer();
 module.exports = ({ inPort }) => {
   const sendFileContents = ({ markup, variables }) => {
     const svg = parser.parseFromString(markup, 'image/svg+xml');
-    const defs = svg.createElement('defs');
+    const existingDefs = svg.getElementsByTagName('defs')[0];
+    const hasExistingDefs = !!existingDefs;
+    const defs = hasExistingDefs
+      ? existingDefs
+      : svg.createElement('defs');
+
     variables.forEach(({ name, value }) => {
       const param = svg.createElement('param');
       param.setAttribute('name', name);
@@ -14,8 +19,10 @@ module.exports = ({ inPort }) => {
       defs.appendChild(param);
     });
 
-    const firstChild = svg.documentElement.firstChild;
-    svg.documentElement.insertBefore(defs, firstChild);
+    if (!hasExistingDefs) {
+      const firstChild = svg.documentElement.firstChild;
+      svg.documentElement.insertBefore(defs, firstChild);
+    }
 
     inPort(serializer.serializeToString(svg));
   };

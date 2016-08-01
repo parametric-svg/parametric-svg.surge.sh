@@ -47,3 +47,17 @@ test((
     '<circle/>' +
   '</svg>'
 ));
+
+test((
+  'Adds variables to the end of <defs>'
+), withInput({
+  markup: '<svg><defs><whatever/></defs></svg>',
+  variables: [{ name: 'a', value: '2' }],
+}).expectResult(
+  '<svg>' +
+    '<defs>' +
+      '<whatever/>' +
+      '<param name="a" value="2"/>' +
+    '</defs>' +
+  '</svg>'
+));

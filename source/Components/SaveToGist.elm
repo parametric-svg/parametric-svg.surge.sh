@@ -44,14 +44,17 @@ type Message
   = RequestFileContents
   | ReceiveFileContents String
 
-port requestFileContents : (Markup, List Variable) -> Cmd message
+port requestFileContents : {markup : Markup, variables : List Variable} -> Cmd message
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     RequestFileContents ->
       model
-      ! [ requestFileContents (model.markup, model.variables)
+      ! [ requestFileContents
+          { markup = model.markup
+          , variables = model.variables
+          }
         ]
 
     ReceiveFileContents fileContents ->

@@ -1,7 +1,13 @@
 require('./custom-elements');
+const prepareFileContents = require('./js/prepareFileContents');
 
 const Elm = require('./Main.elm');
 
-window.github$com_parametricSvg_parametricSvgSurgeSh$app = Elm.Main.embed(
+const app = Elm.Main.embed(
   document.querySelector('#main')
 );
+
+const { sendFileContents } = prepareFileContents({
+  inPort: app.ports.fileContents,
+});
+app.ports.requestFileContents.subscribe(sendFileContents);

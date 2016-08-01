@@ -3,7 +3,7 @@ const { DOMParser, XMLSerializer } = require('global');
 const parser = new DOMParser();
 const serializer = new XMLSerializer();
 
-module.exports = ({ inPort }) => {
+module.exports = ({ listener }) => {
   const sendFileContents = ({ markup, variables }) => {
     const svg = parser.parseFromString(markup, 'image/svg+xml');
     const existingDefs = svg.getElementsByTagName('defs')[0];
@@ -38,7 +38,7 @@ module.exports = ({ inPort }) => {
       svg.documentElement.insertBefore(defs, firstChild);
     }
 
-    inPort(serializer.serializeToString(svg));
+    listener(serializer.serializeToString(svg));
   };
 
   return { sendFileContents };

@@ -8,6 +8,6 @@ const app = Elm.Main.embed(
 );
 
 const { sendFileContents } = prepareFileContents({
-  inPort: app.ports.fileContents,
+  listener: app.ports.fileContents,
 });
 app.ports.requestFileContents.subscribe(sendFileContents);

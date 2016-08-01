@@ -15,11 +15,11 @@ const withInput = (
 ) => ({ expectResult: (
   result
 ) => (is) => {
-  const inPort = sinon.stub();
-  const { sendFileContents } = prepareFileContents({ inPort });
+  const listener = sinon.stub();
+  const { sendFileContents } = prepareFileContents({ listener });
   sendFileContents(input);
-  is.ok(inPort.calledOnce);
-  is.ok(inPort.calledWithExactly(result));
+  is.ok(listener.calledOnce);
+  is.ok(listener.calledWithExactly(result));
   is.end();
 } });
 

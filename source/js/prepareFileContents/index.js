@@ -1,6 +1,7 @@
-const { DOMParser } = require('global');
+const { DOMParser, XMLSerializer } = require('global');
 
 const parser = new DOMParser();
+const serializer = new XMLSerializer();
 
 module.exports = ({ inPort }) => {
   const sendFileContents = ({ markup, variables }) => {
@@ -13,8 +14,10 @@ module.exports = ({ inPort }) => {
       defs.appendChild(param);
     });
 
-    const firstChild = svg.firstChild;
-    svg.appendBefore(defs, firstChild);
+    const firstChild = svg.documentElement.firstChild;
+    svg.documentElement.insertBefore(defs, firstChild);
+
+    inPort(serializer.serializeToString(svg));
   };
 
   return { sendFileContents };

@@ -3,10 +3,10 @@ const test = require('tape-catch');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 
-const { DOMParser } = require('xmldom');
+const { DOMParser, XMLSerializer } = require('xmldom');
 /* eslint-disable quote-props */
 const prepareFileContents = proxyquire('.', {
-  'global': { DOMParser },
+  'global': { DOMParser, XMLSerializer },
 });
 /* eslint-enable quote-props */
 
@@ -30,7 +30,7 @@ test((
 ).expectResult(
   '<svg>' +
     '<defs>' +
-      '<param name="a" value="2" />' +
+      '<param name="a" value="2"/>' +
     '</defs>' +
   '</svg>'
 ));
@@ -38,12 +38,12 @@ test((
 test((
   'Adds <defs> at the beginning of the <svg>'
 ), withInput(
-  { markup: '<svg><circle /></svg>', variables: [{ name: 'a', value: '2' }] }
+  { markup: '<svg><circle/></svg>', variables: [{ name: 'a', value: '2' }] }
 ).expectResult(
   '<svg>' +
     '<defs>' +
-      '<param name="a" value="2" />' +
+      '<param name="a" value="2"/>' +
     '</defs>' +
-    '<circle />' +
+    '<circle/>' +
   '</svg>'
 ));

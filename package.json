@@ -19,6 +19,7 @@
     "private-parts": "^0.4.1"
   },
   "devDependencies": {
+    "detect-node": "^2.0.3",
     "elm": "^0.17.1",
     "elm-css": "^0.5.1",
     "elm-webpack-loader": "^3.0.3",
@@ -35,6 +36,7 @@
     "tap-spec-integrated": "^1.0.1",
     "tape": "^4.6.0",
     "tape-catch": "^1.0.6",
+    "tape-run": "^2.1.4",
     "vulcanize": "^1.14.8",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1",

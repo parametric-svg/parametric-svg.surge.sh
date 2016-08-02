@@ -146,7 +146,7 @@ view model =
       IconButton.view componentNamespace
 
     failureToasts =
-      List.map Toast.view <| List.reverse model.failureMessages
+      List.map Toast.basic <| List.reverse model.failureMessages
 
     staticContents =
       case (model.code, model.token) of

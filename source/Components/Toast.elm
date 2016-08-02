@@ -1,4 +1,4 @@
-module Components.Toast exposing (view)
+module Components.Toast exposing (custom, basic)
 
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
@@ -15,19 +15,28 @@ import Styles.Toast exposing
 
 -- VIEW
 
-view : String -> Html a
-view message =
+custom : {message : String, buttonText : String, buttonUrl : String} -> Html a
+custom {message, buttonText, buttonUrl} =
   node "paper-toast"
     [ attribute "opened" ""
     , attribute "text" message
     ]
     [ a
-      [ href "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+      [ href buttonUrl
       , target "_blank"
       , class [Link]
       ]
       [ node "paper-button" []
-        [ text "Get help"
+        [ text buttonText
         ]
       ]
     ]
+
+basic : String -> Html a
+basic message =
+  custom
+    { message = message
+    , buttonText = "Get help"
+    , buttonUrl =
+      "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+    }

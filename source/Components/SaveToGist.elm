@@ -1,5 +1,5 @@
 port module Components.SaveToGist exposing
-  ( Model, Message
+  ( Model, Message(UpdateMarkup, UpdateVariables)
   , init, update, subscriptions, view
   )
 
@@ -27,10 +27,10 @@ type alias Model =
 type alias Markup =
   String
 
-init : (Model, Cmd Message)
-init =
+init : String -> (Model, Cmd Message)
+init markup =
   { fileContents = Nothing
-  , markup = ""
+  , markup = markup
   , variables = []
   }
   ! []
@@ -43,6 +43,8 @@ init =
 type Message
   = RequestFileContents
   | ReceiveFileContents String
+  | UpdateMarkup String
+  | UpdateVariables (List Variable)
 
 port requestFileContents : {markup : Markup, variables : List Variable} -> Cmd message
 
@@ -60,6 +62,18 @@ update message model =
     ReceiveFileContents fileContents ->
       { model
       | fileContents = Just <| Debug.log "fileContents" fileContents
+      }
+      ! []
+
+    UpdateMarkup markup ->
+      { model
+      | markup = markup
+      }
+      ! []
+
+    UpdateVariables variables ->
+      { model
+      | variables = variables
       }
       ! []
 

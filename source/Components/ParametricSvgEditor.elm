@@ -47,7 +47,7 @@ init =
       Auth.init
 
     (saveToGistModel, saveToGistCommand) =
-      SaveToGist.init
+      SaveToGist.init (svgMarkup "")
 
   in
     { rawMarkup = ""
@@ -60,18 +60,22 @@ init =
       ]
 
 
+svgMarkup : String -> String
+svgMarkup rawMarkup =
+  if contains (regex "^\\s*<svg\\b") rawMarkup
+    then rawMarkup
+    else "<svg>" ++ rawMarkup ++ "</svg>"
+
+
 markup : Model -> String
 markup model =
-  if contains (regex "^\\s*<svg\\b") model.rawMarkup
-    then model.rawMarkup
-    else "<svg>" ++ model.rawMarkup ++ "</svg>"
-
+  svgMarkup model.rawMarkup
 
 
 -- UPDATE
 
 type Message
-  = UpdateSource String
+  = UpdateRawMarkup String
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
@@ -79,17 +83,32 @@ type Message
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
-    UpdateSource rawMarkup ->
+    UpdateRawMarkup rawMarkup ->
       { model
       | rawMarkup = rawMarkup
+      , saveToGist =
+        SaveToGist.update
+          (SaveToGist.UpdateMarkup <| svgMarkup rawMarkup)
+          model.saveToGist
+        |> fst
       }
       ! []
 
     VariablesPanelMessage message ->
-      { model
-      | variablesPanel = VariablesPanel.update message model.variablesPanel
-      }
-      ! []
+      let
+        variablesPanel =
+          VariablesPanel.update message model.variablesPanel
+
+      in
+        { model
+        | variablesPanel = variablesPanel
+        , saveToGist =
+          SaveToGist.update
+            (SaveToGist.UpdateVariables <| variables variablesPanel)
+            model.saveToGist
+          |> fst
+        }
+        ! []
 
     AuthMessage message ->
       let
@@ -120,7 +139,10 @@ update message model =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-  Sub.map AuthMessage <| Auth.subscriptions model.auth
+  Sub.batch
+    [ Sub.map AuthMessage <| Auth.subscriptions model.auth
+    , Sub.map SaveToGistMessage <| SaveToGist.subscriptions model.saveToGist
+    ]
 
 
 -- VIEW
@@ -207,7 +229,7 @@ view model =
         [ class [Editor]
         ]
         [ textarea
-          [ onInput UpdateSource
+          [ onInput UpdateRawMarkup
           ] []
         ]
       ]

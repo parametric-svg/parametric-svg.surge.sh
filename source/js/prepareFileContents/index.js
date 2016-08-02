@@ -38,7 +38,8 @@ module.exports = ({ listener }) => {
       svg.documentElement.insertBefore(defs, firstChild);
     }
 
-    listener(serializer.serializeToString(svg));
+    const payload = serializer.serializeToString(svg);
+    listener({ payload, error: null });
   };
 
   return { sendFileContents };

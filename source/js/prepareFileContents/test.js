@@ -12,22 +12,29 @@ const prepareFileContents = proxyquire('.', {
 
 const withInput = (
   input
-) => ({ expectResult: (
-  result
-) => (is) => {
-  const listener = sinon.stub();
-  const { sendFileContents } = prepareFileContents({ listener });
-  sendFileContents(input);
-  is.ok(listener.calledOnce);
-  is.ok(listener.calledWithExactly(result));
-  is.end();
-} });
+) => ({
+  expectPayload: (result) => (is) => {
+    const listener = sinon.stub();
+    const { sendFileContents } = prepareFileContents({ listener });
+    sendFileContents(input);
+    is.ok(listener.calledOnce,
+      'calls the listener'
+    );
+    is.equal(listener.lastCall.args[0].payload, result,
+      'passes the correct `payload`'
+    );
+    is.equal(listener.lastCall.args[0].error, null,
+      'passes no `error`'
+    );
+    is.end();
+  },
+});
 
 test((
   'Adds <defs>'
 ), withInput(
   { markup: '<svg></svg>', variables: [{ name: 'a', value: '2' }] }
-).expectResult(
+).expectPayload(
   '<svg>' +
     '<defs>' +
       '<param name="a" value="2"/>' +
@@ -39,7 +46,7 @@ test((
   'Adds <defs> at the beginning of the <svg>'
 ), withInput(
   { markup: '<svg><circle/></svg>', variables: [{ name: 'a', value: '2' }] }
-).expectResult(
+).expectPayload(
   '<svg>' +
     '<defs>' +
       '<param name="a" value="2"/>' +
@@ -53,7 +60,7 @@ test((
 ), withInput({
   markup: '<svg><defs><whatever/></defs></svg>',
   variables: [{ name: 'a', value: '2' }],
-}).expectResult(
+}).expectPayload(
   '<svg>' +
     '<defs>' +
       '<whatever/>' +
@@ -74,7 +81,7 @@ test((
     '</svg>'
   ),
   variables: [{ name: 'a', value: '2' }],
-}).expectResult(
+}).expectPayload(
   '<svg>' +
     '<defs>' +
       '<param name="b" value="5"/>' +

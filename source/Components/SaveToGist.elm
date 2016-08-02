@@ -12,6 +12,7 @@ import Html.Events exposing (onClick)
 
 import UniversalTypes exposing (Variable)
 import Components.IconButton as IconButton
+import Components.Toast as Toast
 
 
 
@@ -22,6 +23,13 @@ type alias Model =
   { fileContents : Maybe String
   , markup : Markup
   , variables : List Variable
+  , failureToasts : List FailureToast
+  }
+
+type alias FailureToast =
+  { message : String
+  , buttonText : String
+  , buttonUrl : String
   }
 
 type alias Markup =
@@ -32,6 +40,7 @@ init markup =
   { fileContents = Nothing
   , markup = markup
   , variables = []
+  , failureToasts = []
   }
   ! []
 
@@ -42,11 +51,18 @@ init markup =
 
 type Message
   = RequestFileContents
-  | ReceiveFileContents String
+  | ReceiveFileContents SerializationOutput
   | UpdateMarkup String
   | UpdateVariables (List Variable)
 
-port requestFileContents : {markup : Markup, variables : List Variable} -> Cmd message
+type alias SerializationOutput =
+  { payload : Maybe String
+  , error : Maybe FailureToast
+  }
+
+port requestFileContents
+  : {markup : Markup, variables : List Variable}
+  -> Cmd message
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -59,11 +75,21 @@ update message model =
           }
         ]
 
-    ReceiveFileContents fileContents ->
-      { model
-      | fileContents = Just <| Debug.log "fileContents" fileContents
-      }
-      ! []
+    ReceiveFileContents {payload, error} -> case (payload, error) of
+      (Just fileContents, Nothing) ->
+        { model
+        | fileContents = Just fileContents
+        }
+        ! []
+
+      (Nothing, Just failureToast) ->
+        { model
+        | failureToasts = failureToast :: model.failureToasts
+        }
+        ! []
+
+      _ ->
+        model ! []
 
     UpdateMarkup markup ->
       { model
@@ -82,7 +108,7 @@ update message model =
 
 -- SUBSCRIPTIONS
 
-port fileContents : (String -> message) -> Sub message
+port fileContents : (SerializationOutput -> message) -> Sub message
 
 subscriptions : Model -> Sub Message
 subscriptions model =
@@ -102,6 +128,10 @@ view model =
     componentNamespace =
       "d34616d-SaveToGist-"
 
+    toasts =
+      List.reverse model.failureToasts
+        |> List.map Toast.custom
+
   in
     iconButton
       [ onClick RequestFileContents
@@ -109,3 +139,5 @@ view model =
       { symbol = "cloud-upload"
       , tooltip = "Save as gist"
       }
+
+    ++ toasts

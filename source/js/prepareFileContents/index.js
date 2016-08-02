@@ -39,7 +39,25 @@ module.exports = ({ listener }) => {
     }
 
     const payload = serializer.serializeToString(svg);
-    listener({ payload, error: null });
+
+    if (/<parsererror\b/.test(payload)) {
+      // This seems to be the most portable way to check for a parser error
+      // currently. The spec says <parsererror> should have the namespace
+      // “http://www.mozilla.org/newlayout/xml/parsererror.xml”, but Chrome
+      // renders it with the namespace “http://www.w3.org/1999/xhtml”.
+
+      listener({ payload: null, error: {
+        message: (
+          'Uh-oh! We can’t serialize the contents of your SVG. Make sure ' +
+          'it’s valid XML. If you need help, you can copy the markup ' +
+          'and paste it into an online validator.'
+        ),
+        buttonText: 'Validate your markup',
+        buttonUrl: 'https://xmlvalidation.com/',
+      } });
+    } else {
+      listener({ payload, error: null });
+    }
   };
 
   return { sendFileContents };

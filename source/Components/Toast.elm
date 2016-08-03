@@ -18,7 +18,8 @@ import Styles.Toast exposing
 custom : {message : String, buttonText : String, buttonUrl : String} -> Html a
 custom {message, buttonText, buttonUrl} =
   node "paper-toast"
-    [ attribute "opened" ""
+    [ attribute "duration" "10000"
+    , attribute "opened" ""
     , attribute "text" message
     ]
     [ a

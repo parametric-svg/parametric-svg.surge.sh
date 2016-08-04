@@ -3,9 +3,9 @@ port module Components.SaveToGist exposing
   , init, update, subscriptions, view
   )
 
-import Html exposing (Html)
+import Html exposing (Html, node, text, div, span)
 import Html.Events exposing (onClick)
--- import Html.Attributes exposing ()
+import Html.Attributes exposing (attribute, tabindex)
 -- import Json.Decode as Decode exposing (Decoder, andThen)
 -- import Http
 -- import Task
@@ -24,6 +24,7 @@ type alias Model =
   , markup : Markup
   , variables : List Variable
   , failureToasts : List FailureToast
+  , displayFileNameDialog : Bool
   }
 
 type alias FailureToast =
@@ -41,6 +42,7 @@ init markup =
   , markup = markup
   , variables = []
   , failureToasts = []
+  , displayFileNameDialog = True
   }
   ! []
 
@@ -79,6 +81,7 @@ update message model =
       (Just fileContents, Nothing) ->
         { model
         | fileContents = Just fileContents
+        , displayFileNameDialog = True
         }
         ! []
 
@@ -132,6 +135,36 @@ view model =
       List.reverse model.failureToasts
         |> List.map Toast.custom
 
+    dialogs =
+      if model.displayFileNameDialog
+        then
+          [ node "paper-dialog"
+            [ attribute "opened" ""
+            -- TODO: on "iron-overlay-closed"
+            ]
+            [ node "paper-input"
+              [ attribute "label" "file name"
+              , tabindex 0
+              ]
+              [ div
+                [ attribute "suffix" ""
+                ]
+                [ text ".parametric.svg"
+                ]
+              ]
+            , div
+              [ Html.Attributes.class "buttons"
+              ]
+              [ node "paper-button" []
+                [ text "Save to gist"
+                ]
+              ]
+            ]
+          ]
+
+        else
+          []
+
   in
     iconButton
       [ onClick RequestFileContents
@@ -140,4 +173,5 @@ view model =
       , tooltip = "Save as gist"
       }
 
+    ++ dialogs
     ++ toasts

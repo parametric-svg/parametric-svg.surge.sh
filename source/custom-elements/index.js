@@ -1,4 +1,5 @@
+require('@parametric-svg/element');
 require('./codemirror-editor');
 require('./github-auth');
 require('./focus-on-mount');
-require('@parametric-svg/element');
+require('./submit-on-enter');

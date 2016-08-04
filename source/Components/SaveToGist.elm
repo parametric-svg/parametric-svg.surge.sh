@@ -138,27 +138,29 @@ view model =
     dialogs =
       if model.displayFileNameDialog
         then
-          [ node "paper-dialog"
-            [ attribute "opened" ""
-            -- TODO: on "iron-overlay-closed"
-            ]
-            [ node "focus-on-mount" []
-              [ node "paper-input"
-                [ attribute "label" "file name"
-                , tabindex 0
-                ]
-                [ div
-                  [ attribute "suffix" ""
-                  ]
-                  [ text ".parametric.svg"
-                  ]
-                ]
+          [ node "submit-on-enter" []
+            [ node "paper-dialog"
+              [ attribute "opened" ""
+              -- TODO: on "iron-overlay-closed"
               ]
-            , div
-              [ Html.Attributes.class "buttons"
-              ]
-              [ node "paper-button" []
-                [ text "Save to gist"
+              [ node "focus-on-mount" []
+                [ node "paper-input"
+                  [ attribute "label" "file name"
+                  , tabindex 0
+                  ]
+                  [ div
+                    [ attribute "suffix" ""
+                    ]
+                    [ text ".parametric.svg"
+                    ]
+                  ]
+                ]
+              , div
+                [ Html.Attributes.class "buttons"
+                ]
+                [ node "paper-button" []
+                  [ text "Save to gist"
+                  ]
                 ]
               ]
             ]

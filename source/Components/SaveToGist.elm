@@ -142,14 +142,16 @@ view model =
             [ attribute "opened" ""
             -- TODO: on "iron-overlay-closed"
             ]
-            [ node "paper-input"
-              [ attribute "label" "file name"
-              , tabindex 0
-              ]
-              [ div
-                [ attribute "suffix" ""
+            [ node "focus-on-mount" []
+              [ node "paper-input"
+                [ attribute "label" "file name"
+                , tabindex 0
                 ]
-                [ text ".parametric.svg"
+                [ div
+                  [ attribute "suffix" ""
+                  ]
+                  [ text ".parametric.svg"
+                  ]
                 ]
               ]
             , div

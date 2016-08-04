@@ -139,6 +139,16 @@
       "from": "@polymer/paper-button@latest",
       "resolved": "https://registry.npmjs.org/@polymer/paper-button/-/paper-button-0.0.3.tgz"
     },
+    "@polymer/paper-dialog": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-dialog@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-dialog/-/paper-dialog-0.0.3.tgz"
+    },
+    "@polymer/paper-dialog-behavior": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-dialog-behavior@>=0.0.3 <0.0.4",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-dialog-behavior/-/paper-dialog-behavior-0.0.3.tgz"
+    },
     "@polymer/paper-fab": {
       "version": "0.0.3",
       "from": "@polymer/paper-fab@0.0.3",

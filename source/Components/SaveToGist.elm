@@ -4,8 +4,8 @@ port module Components.SaveToGist exposing
   )
 
 import Html exposing (Html, node, text, div, span)
-import Html.Events exposing (onClick, on)
-import Html.Attributes exposing (attribute, tabindex)
+import Html.Events exposing (onClick, on, onInput)
+import Html.Attributes exposing (attribute, tabindex, value)
 import Json.Decode as Decode
 -- import Http
 -- import Task
@@ -25,6 +25,7 @@ type alias Model =
   , variables : List Variable
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
+  , fileName : String
   }
 
 type alias FailureToast =
@@ -43,6 +44,7 @@ init markup =
   , variables = []
   , failureToasts = []
   , displayFileNameDialog = False
+  , fileName = ""
   }
   ! []
 
@@ -55,6 +57,7 @@ type Message
   = RequestFileContents
   | ReceiveFileContents SerializationOutput
   | CloseDialog
+  | UpdateFileName String
   | UpdateMarkup String
   | UpdateVariables (List Variable)
 
@@ -98,6 +101,12 @@ update message model =
     CloseDialog ->
       { model
       | displayFileNameDialog = False
+      }
+      ! []
+
+    UpdateFileName fileName ->
+      { model
+      | fileName = fileName
       }
       ! []
 
@@ -155,8 +164,10 @@ view model =
               ]
               [ node "focus-on-mount" []
                 [ node "paper-input"
-                  [ attribute "label" "file name"
+                  [ attribute "label" "enter a file name"
                   , tabindex 0
+                  , onInput UpdateFileName
+                  , value model.fileName
                   ]
                   [ div
                     [ attribute "suffix" ""

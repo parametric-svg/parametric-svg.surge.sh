@@ -4,9 +4,9 @@ port module Components.SaveToGist exposing
   )
 
 import Html exposing (Html, node, text, div, span)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, on)
 import Html.Attributes exposing (attribute, tabindex)
--- import Json.Decode as Decode exposing (Decoder, andThen)
+import Json.Decode as Decode
 -- import Http
 -- import Task
 
@@ -42,7 +42,7 @@ init markup =
   , markup = markup
   , variables = []
   , failureToasts = []
-  , displayFileNameDialog = True
+  , displayFileNameDialog = False
   }
   ! []
 
@@ -54,6 +54,7 @@ init markup =
 type Message
   = RequestFileContents
   | ReceiveFileContents SerializationOutput
+  | CloseDialog
   | UpdateMarkup String
   | UpdateVariables (List Variable)
 
@@ -93,6 +94,12 @@ update message model =
 
       _ ->
         model ! []
+
+    CloseDialog ->
+      { model
+      | displayFileNameDialog = False
+      }
+      ! []
 
     UpdateMarkup markup ->
       { model
@@ -135,13 +142,16 @@ view model =
       List.reverse model.failureToasts
         |> List.map Toast.custom
 
+    onCloseOverlay message =
+      on "iron-overlay-closed" (Decode.succeed message)
+
     dialogs =
       if model.displayFileNameDialog
         then
           [ node "submit-on-enter" []
             [ node "paper-dialog"
               [ attribute "opened" ""
-              -- TODO: on "iron-overlay-closed"
+              , onCloseOverlay CloseDialog
               ]
               [ node "focus-on-mount" []
                 [ node "paper-input"

@@ -6,9 +6,12 @@ port module Components.SaveToGist exposing
 import Html exposing (Html, node, text, div, span)
 import Html.Events exposing (onClick, on, onInput)
 import Html.Attributes exposing (attribute, tabindex, value)
-import Json.Decode as Decode
--- import Http
--- import Task
+import Json.Decode as Decode exposing ((:=))
+import Json.Encode as Encode exposing (encode)
+import Http exposing
+  ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
+  )
+import Task exposing (Task)
 
 import UniversalTypes exposing (Variable)
 import Components.IconButton as IconButton
@@ -25,7 +28,8 @@ type alias Model =
   , variables : List Variable
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
-  , fileName : String
+  , fileBasename : String
+  , gistResponse : Maybe GistResponse
   }
 
 type alias FailureToast =
@@ -37,6 +41,10 @@ type alias FailureToast =
 type alias Markup =
   String
 
+type alias GistResponse =
+  { url : String
+  }
+
 init : String -> (Model, Cmd Message)
 init markup =
   { fileContents = Nothing
@@ -44,7 +52,8 @@ init markup =
   , variables = []
   , failureToasts = []
   , displayFileNameDialog = False
-  , fileName = ""
+  , fileBasename = ""
+  , gistResponse = Nothing
   }
   ! []
 
@@ -56,10 +65,21 @@ init markup =
 type Message
   = RequestFileContents
   | ReceiveFileContents SerializationOutput
+
   | CloseDialog
-  | UpdateFileName String
+
+  | UpdateFileBasename String
+
+  | CreateGist
+  | FailToCreateGist GistError
+  | SaveGistResponse GistResponse
+
   | UpdateMarkup String
   | UpdateVariables (List Variable)
+
+type GistError
+  = NoFileContents
+  | HttpError Http.Error
 
 type alias SerializationOutput =
   { payload : Maybe String
@@ -104,11 +124,44 @@ update message model =
       }
       ! []
 
-    UpdateFileName fileName ->
+    UpdateFileBasename fileBasename ->
       { model
-      | fileName = fileName
+      | fileBasename = fileBasename
       }
       ! []
+
+    CreateGist ->
+      model
+      ! [ Task.perform FailToCreateGist SaveGistResponse <|
+          sendToGist model
+        ]
+
+    SaveGistResponse gistResponse ->
+      { model
+      | gistResponse = Just <| Debug.log "gistResponse" gistResponse
+      }
+      ! []
+
+    FailToCreateGist NoFileContents ->
+      failWithMessage model <|
+        "Oops! This should never happen. No file contents to send"
+    FailToCreateGist (HttpError Timeout) ->
+      failWithMessage model <|
+        "Uh-oh! The github API request timed out. Trying again should help. " ++
+        "Really."
+    FailToCreateGist (HttpError NetworkError) ->
+      failWithMessage model <|
+        "Aw, shucks! The network failed us this time. Try again in a few " ++
+        "moments."
+    FailToCreateGist (HttpError (UnexpectedPayload message)) ->
+      failWithMessage model <|
+        "Huh? We don’t understand the response from the github API. " ++
+        "Here’s what our decoder says: “" ++ message ++ "”."
+    FailToCreateGist (HttpError (BadResponse number message)) ->
+      failWithMessage model <|
+        "Yikes! The github API responded " ++
+        "with a " ++ toString number ++ " error. " ++
+        "Here’s what they say: “" ++ message ++ "”."
 
     UpdateMarkup markup ->
       { model
@@ -122,6 +175,55 @@ update message model =
       }
       ! []
 
+
+failWithMessage : Model -> String -> (Model, Cmd Message)
+failWithMessage model message =
+  let
+    failureToast =
+      { message = message
+      , buttonText = "Get help"
+      , buttonUrl =
+        "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+      }
+
+  in
+    { model
+    | failureToasts = failureToast :: model.failureToasts
+    }
+    ! []
+
+
+sendToGist : Model -> Task GistError GistResponse
+sendToGist model =
+  case model.fileContents of
+    Just fileContents ->
+      let
+        decodeGistResponse =
+          Decode.object1 GistResponse
+            ("url" := Decode.string)
+
+        payload =
+          serializedModel
+          |> encode 0
+          |> Http.string
+
+        serializedModel =
+          Encode.object
+            [ ( "files"
+              , Encode.object
+                [ ( model.fileBasename ++ ".parametric.svg"
+                  , Encode.string fileContents
+                  )
+                ]
+              )
+            ]
+
+      in
+        Task.mapError HttpError <|
+          Http.post decodeGistResponse "https://api.github.com/gists" payload
+
+    Nothing ->
+      Task.fail NoFileContents
 
 
 
@@ -154,6 +256,9 @@ view model =
     onCloseOverlay message =
       on "iron-overlay-closed" (Decode.succeed message)
 
+    onTap message =
+      on "tap" (Decode.succeed message)
+
     dialogs =
       if model.displayFileNameDialog
         then
@@ -166,8 +271,8 @@ view model =
                 [ node "paper-input"
                   [ attribute "label" "enter a file name"
                   , tabindex 0
-                  , onInput UpdateFileName
-                  , value model.fileName
+                  , onInput UpdateFileBasename
+                  , value model.fileBasename
                   ]
                   [ div
                     [ attribute "suffix" ""
@@ -179,7 +284,9 @@ view model =
               , div
                 [ Html.Attributes.class "buttons"
                 ]
-                [ node "paper-button" []
+                [ node "paper-button"
+                  [ onTap CreateGist
+                  ]
                   [ text "Save to gist"
                   ]
                 ]

@@ -30,7 +30,7 @@ type alias Model =
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
   , fileBasename : String
-  , gistResponse : Maybe GistResponse
+  , gistId : Maybe GistId
   , githubToken : Maybe String
   }
 
@@ -43,9 +43,8 @@ type alias FailureToast =
 type alias Markup =
   String
 
-type alias GistResponse =
-  { url : String
-  }
+type alias GistId =
+  String
 
 init : String -> (Model, Cmd Message)
 init markup =
@@ -55,7 +54,7 @@ init markup =
   , failureToasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
-  , gistResponse = Nothing
+  , gistId = Nothing
   , githubToken = Nothing
   }
   ! []
@@ -75,7 +74,7 @@ type Message
 
   | CreateGist
   | FailToCreateGist GistError
-  | SaveGistResponse GistResponse
+  | ReceiveGistId GistId
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
@@ -137,13 +136,13 @@ update message model =
 
     CreateGist ->
       model
-      ! [ Task.perform FailToCreateGist SaveGistResponse <|
+      ! [ Task.perform FailToCreateGist ReceiveGistId <|
           sendToGist model
         ]
 
-    SaveGistResponse gistResponse ->
+    ReceiveGistId gistId ->
       { model
-      | gistResponse = Just <| Debug.log "gistResponse" gistResponse
+      | gistId = Just gistId
       }
       ! []
 
@@ -207,14 +206,13 @@ failWithMessage model message =
     ! []
 
 
-sendToGist : Model -> Task GistError GistResponse
+sendToGist : Model -> Task GistError GistId
 sendToGist model =
   case (model.fileContents, model.githubToken) of
     (Just fileContents, Just githubToken) ->
       let
         decodeGistResponse =
-          Decode.object1 GistResponse
-            ("url" := Decode.string)
+          ("id" := Decode.string)
 
         payload =
           serializedModel

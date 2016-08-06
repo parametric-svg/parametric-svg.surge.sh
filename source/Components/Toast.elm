@@ -2,15 +2,8 @@ module Components.Toast exposing (custom, basic)
 
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
-import Html.CssHelpers exposing (withNamespace)
 
-import Styles.Toast exposing
-  ( Classes(Link)
-  , componentNamespace
-  )
-
-{class} =
-  withNamespace componentNamespace
+import Components.Link exposing (link)
 
 
 -- VIEW
@@ -22,10 +15,9 @@ custom {message, buttonText, buttonUrl} =
     , attribute "opened" ""
     , attribute "text" message
     ]
-    [ a
+    [ link
       [ href buttonUrl
       , target "_blank"
-      , class [Link]
       ]
       [ node "paper-button" []
         [ text buttonText

@@ -15,6 +15,7 @@ import Http exposing
 import Task exposing (Task)
 
 import UniversalTypes exposing (Variable)
+import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
 
@@ -322,7 +323,7 @@ view model =
         (Just gistId, Just markupSnapshot) ->
           if model.markup == markupSnapshot
             then
-              [ a
+              [ link
                 [ href <| "https://gist.github.com/" ++ gistId
                 , target "_blank"
                 , tabindex -1

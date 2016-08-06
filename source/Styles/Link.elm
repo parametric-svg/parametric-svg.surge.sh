@@ -1,4 +1,4 @@
-module Styles.Toast exposing (Classes(..), css, componentNamespace)
+module Styles.Link exposing (Classes(..), css, componentNamespace)
 
 import Css.Namespace exposing (namespace)
 import Css exposing
@@ -19,4 +19,4 @@ css = (stylesheet << namespace componentNamespace) <|
   ]
 
 componentNamespace : String
-componentNamespace = "b4ea81c-Toast-"
+componentNamespace = "b4ea81c-Link-"

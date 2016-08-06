@@ -10,7 +10,7 @@ import String
 
 import Styles.ParametricSvgEditor as ParametricSvgEditor
 import Styles.VariablesPanel as VariablesPanel
-import Styles.Toast as Toast
+import Styles.Link as Link
 import Styles.Spinner as Spinner
 
 
@@ -39,7 +39,7 @@ cssFiles =
     , merge <| List.map compile
       [ ParametricSvgEditor.css
       , VariablesPanel.css
-      , Toast.css
+      , Link.css
       , Spinner.css
       ]
     )]

@@ -25,13 +25,13 @@ import Components.Toast as Toast
 
 type alias Model =
   { fileContents : Maybe String
-  , markup : Markup
+  , markup : String
   , variables : List Variable
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
   , fileBasename : String
-  , gistId : Maybe GistId
   , githubToken : Maybe String
+  , gistId : Maybe String
   }
 
 type alias FailureToast =
@@ -39,12 +39,6 @@ type alias FailureToast =
   , buttonText : String
   , buttonUrl : String
   }
-
-type alias Markup =
-  String
-
-type alias GistId =
-  String
 
 init : String -> (Model, Cmd Message)
 init markup =
@@ -54,8 +48,8 @@ init markup =
   , failureToasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
-  , gistId = Nothing
   , githubToken = Nothing
+  , gistId = Nothing
   }
   ! []
 
@@ -74,7 +68,7 @@ type Message
 
   | CreateGist
   | FailToCreateGist GistError
-  | ReceiveGistId GistId
+  | ReceiveGistId String
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
@@ -91,7 +85,7 @@ type alias SerializationOutput =
   }
 
 port requestFileContents
-  : {markup : Markup, variables : List Variable}
+  : {markup : String, variables : List Variable}
   -> Cmd message
 
 update : Message -> Model -> (Model, Cmd Message)
@@ -206,7 +200,7 @@ failWithMessage model message =
     ! []
 
 
-sendToGist : Model -> Task GistError GistId
+sendToGist : Model -> Task GistError String
 sendToGist model =
   case (model.fileContents, model.githubToken) of
     (Just fileContents, Just githubToken) ->

@@ -1,5 +1,5 @@
 module Components.Auth exposing
-  ( Model, Message(ReceiveToken)
+  ( Model, Message(ReceiveToken, LoadToken)
   , init, token, update, subscriptions, view
   )
 

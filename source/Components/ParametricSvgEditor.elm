@@ -116,17 +116,24 @@ update message model =
         updatedModel =
           case message of
             Auth.ReceiveToken token ->
-              { model
-              | auth = authModel
-              , saveToGist = fst <| SaveToGist.update
-                (SaveToGist.PassToken token)
-                model.saveToGist
-              }
+              modelWithToken token
+
+            Auth.LoadToken (Just token) ->
+              modelWithToken token
 
             _ ->
               { model
               | auth = authModel
               }
+
+        modelWithToken token =
+          { model
+          | auth = authModel
+          , saveToGist = fst <| SaveToGist.update
+            (SaveToGist.PassToken token)
+            model.saveToGist
+          }
+
 
       in
         updatedModel

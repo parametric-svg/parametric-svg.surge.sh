@@ -31,7 +31,7 @@ type alias Model =
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
   , fileBasename : String
-  , markupSnapshot : Maybe String
+  , dataSnapshot : Maybe DataSnapshot
   , githubToken : Maybe String
   , gistId : Maybe String
   }
@@ -42,6 +42,11 @@ type alias FailureToast =
   , buttonUrl : String
   }
 
+type alias DataSnapshot =
+  { markup : String
+  , variables : List Variable
+  }
+
 init : String -> (Model, Cmd Message)
 init markup =
   { fileContents = Nothing
@@ -50,7 +55,7 @@ init markup =
   , failureToasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
-  , markupSnapshot = Nothing
+  , dataSnapshot = Nothing
   , githubToken = Nothing
   , gistId = Nothing
   }
@@ -133,7 +138,7 @@ update message model =
 
     CreateGist ->
       { model
-      | markupSnapshot = Just model.markup
+      | dataSnapshot = Just (DataSnapshot model.markup model.variables)
       }
       ! [ Task.perform FailToCreateGist ReceiveGistId <|
           sendToGist model
@@ -319,9 +324,10 @@ view model =
           []
 
     button =
-      case (model.gistId, model.markupSnapshot) of
-        (Just gistId, Just markupSnapshot) ->
-          if model.markup == markupSnapshot
+      case (model.gistId, model.dataSnapshot) of
+        (Just gistId, Just snapshot) ->
+          if (model.markup == snapshot.markup)
+          && (model.variables == snapshot.variables)
             then
               [ link
                 [ href <| "https://gist.github.com/" ++ gistId

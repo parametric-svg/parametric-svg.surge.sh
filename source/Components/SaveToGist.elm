@@ -18,6 +18,7 @@ import UniversalTypes exposing (Variable)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
+import Components.Spinner as Spinner
 
 
 
@@ -34,6 +35,7 @@ type alias Model =
   , dataSnapshot : Maybe DataSnapshot
   , githubToken : Maybe String
   , gistId : Maybe String
+  , status : Status
   }
 
 type alias FailureToast =
@@ -47,6 +49,10 @@ type alias DataSnapshot =
   , variables : List Variable
   }
 
+type Status
+  = Void
+  | Pending
+
 init : String -> (Model, Cmd Message)
 init markup =
   { fileContents = Nothing
@@ -58,6 +64,7 @@ init markup =
   , dataSnapshot = Nothing
   , githubToken = Nothing
   , gistId = Nothing
+  , status = Void
   }
   ! []
 
@@ -139,6 +146,8 @@ update message model =
     CreateGist ->
       { model
       | dataSnapshot = Just (DataSnapshot model.markup model.variables)
+      , status = Pending
+      , displayFileNameDialog = False
       }
       ! [ Task.perform FailToCreateGist ReceiveGistId <|
           sendToGist model
@@ -147,6 +156,7 @@ update message model =
     ReceiveGistId gistId ->
       { model
       | gistId = Just gistId
+      , status = Void
       }
       ! []
 
@@ -324,8 +334,14 @@ view model =
           []
 
     button =
-      case (model.gistId, model.dataSnapshot) of
-        (Just gistId, Just snapshot) ->
+      case (model.status, model.gistId, model.dataSnapshot) of
+        (Pending, Nothing, _) ->
+          Spinner.view "creating gist…"
+
+        (Pending, Just _, _) ->
+          Spinner.view "updating gist…"
+
+        (Void, Just gistId, Just snapshot) ->
           if (model.markup == snapshot.markup)
           && (model.variables == snapshot.variables)
             then

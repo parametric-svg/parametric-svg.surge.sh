@@ -105,161 +105,153 @@ port requestFileContents
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
-  case message of
-    RequestFileContents ->
-      model
-      ! [ requestFileContents
-          { markup = model.markup
-          , variables = model.variables
-          }
-        ]
-
-    ReceiveFileContents {payload, error} -> case (payload, error) of
-      (Just fileContents, Nothing) ->
-        { model
-        | fileContents = Just fileContents
-        , displayFileNameDialog = True
-        }
-        ! []
-
-      (Nothing, Just failureToast) ->
-        { model
-        | failureToasts = failureToast :: model.failureToasts
-        }
-        ! []
-
-      _ ->
-        model ! []
-
-    CloseDialog ->
-      { model
-      | displayFileNameDialog = False
-      }
-      ! []
-
-    UpdateFileBasename fileBasename ->
-      { model
-      | fileBasename = fileBasename
-      }
-      ! []
-
-    CreateGist ->
-      { model
-      | dataSnapshot = Just (DataSnapshot model.markup model.variables)
-      , status = Pending
-      , displayFileNameDialog = False
-      }
-      ! [ Task.perform FailToCreateGist ReceiveGistId <|
-          sendToGist model
-        ]
-
-    ReceiveGistId gistId ->
-      { model
-      | gistId = Just gistId
-      , status = Void
-      }
-      ! []
-
-    FailToCreateGist NoFileContents ->
-      failWithMessage model <|
-        "Oops! This should never happen. No file contents to send."
-    FailToCreateGist NoGithubToken ->
-      failWithMessage model <|
-        "Aw, snap! You’re not logged into gist."
-    FailToCreateGist (HttpError Timeout) ->
-      failWithMessage model <|
-        "Uh-oh! The github API request timed out. Trying again should help. " ++
-        "Really."
-    FailToCreateGist (HttpError NetworkError) ->
-      failWithMessage model <|
-        "Aw, shucks! The network failed us this time. Try again in a few " ++
-        "moments."
-    FailToCreateGist (HttpError (UnexpectedPayload message)) ->
-      failWithMessage model <|
-        "Huh? We don’t understand the response from the github API. " ++
-        "Here’s what our decoder says: “" ++ message ++ "”."
-    FailToCreateGist (HttpError (BadResponse number message)) ->
-      failWithMessage model <|
-        "Yikes! The github API responded " ++
-        "with a " ++ toString number ++ " error. " ++
-        "Here’s what they say: “" ++ message ++ "”."
-
-    UpdateMarkup markup ->
-      { model
-      | markup = markup
-      }
-      ! []
-
-    UpdateVariables variables ->
-      { model
-      | variables = variables
-      }
-      ! []
-
-    PassToken githubToken ->
-      { model
-      | githubToken = Just githubToken
-      }
-      ! []
-
-
-failWithMessage : Model -> String -> (Model, Cmd Message)
-failWithMessage model message =
   let
-    failureToast =
+    failWithMessage message =
+      { model
+      | failureToasts = failureToast message :: model.failureToasts
+      }
+      ! []
+
+    failureToast message =
       { message = message
       , buttonText = "Get help"
       , buttonUrl =
         "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
       }
 
+    sendToGist model =
+      case (model.fileContents, model.githubToken) of
+        (Just fileContents, Just githubToken) ->
+          Task.mapError HttpError <|
+            Http.post
+              decodeGistResponse
+              (url "https://api.github.com/gists" [("access_token", githubToken)])
+              (payload fileContents)
+
+        (Nothing, _) ->
+          Task.fail NoFileContents
+
+        (_, Nothing) ->
+          Task.fail NoGithubToken
+
+    decodeGistResponse =
+      ("id" := Decode.string)
+
+    payload fileContents =
+      serializedModel fileContents
+      |> encode 0
+      |> Http.string
+
+    serializedModel fileContents =
+      Encode.object
+        [ ("files", Encode.object
+          [ (fileName, Encode.object
+            [ ("content", Encode.string fileContents)
+            ])
+          ])
+        ]
+
+    fileName =
+      model.fileBasename ++ ".parametric.svg"
+
   in
-    { model
-    | failureToasts = failureToast :: model.failureToasts
-    }
-    ! []
+    case message of
+      RequestFileContents ->
+        model
+        ! [ requestFileContents
+            { markup = model.markup
+            , variables = model.variables
+            }
+          ]
 
+      ReceiveFileContents {payload, error} -> case (payload, error) of
+        (Just fileContents, Nothing) ->
+          { model
+          | fileContents = Just fileContents
+          , displayFileNameDialog = True
+          }
+          ! []
 
-sendToGist : Model -> Task GistError String
-sendToGist model =
-  case (model.fileContents, model.githubToken) of
-    (Just fileContents, Just githubToken) ->
-      let
-        decodeGistResponse =
-          ("id" := Decode.string)
+        (Nothing, Just failureToast) ->
+          { model
+          | failureToasts = failureToast :: model.failureToasts
+          }
+          ! []
 
-        payload =
-          serializedModel
-          |> encode 0
-          |> Http.string
+        _ ->
+          model ! []
 
-        serializedModel =
-          Encode.object
-            [ ( "files"
-              , Encode.object
-                [ ( model.fileBasename ++ ".parametric.svg"
-                  , Encode.object
-                    [ ( "content"
-                      , Encode.string fileContents
-                      )
-                    ]
-                  )
-                ]
-              )
-            ]
+      CloseDialog ->
+        { model
+        | displayFileNameDialog = False
+        }
+        ! []
 
-      in
-        Task.mapError HttpError <|
-          Http.post
-            decodeGistResponse
-            (url "https://api.github.com/gists" [("access_token", githubToken)])
-            payload
+      UpdateFileBasename fileBasename ->
+        { model
+        | fileBasename = fileBasename
+        }
+        ! []
 
-    (Nothing, _) ->
-      Task.fail NoFileContents
+      CreateGist ->
+        { model
+        | dataSnapshot = Just (DataSnapshot model.markup model.variables)
+        , status = Pending
+        , displayFileNameDialog = False
+        }
+        ! [ Task.perform FailToCreateGist ReceiveGistId <|
+            sendToGist model
+          ]
 
-    (_, Nothing) ->
-      Task.fail NoGithubToken
+      ReceiveGistId gistId ->
+        { model
+        | gistId = Just gistId
+        , status = Void
+        }
+        ! []
+
+      FailToCreateGist NoFileContents ->
+        failWithMessage <|
+          "Oops! This should never happen. No file contents to send."
+      FailToCreateGist NoGithubToken ->
+        failWithMessage <|
+          "Aw, snap! You’re not logged into gist."
+      FailToCreateGist (HttpError Timeout) ->
+        failWithMessage <|
+          "Uh-oh! The github API request timed out. Trying again should help. " ++
+          "Really."
+      FailToCreateGist (HttpError NetworkError) ->
+        failWithMessage <|
+          "Aw, shucks! The network failed us this time. Try again in a few " ++
+          "moments."
+      FailToCreateGist (HttpError (UnexpectedPayload message)) ->
+        failWithMessage <|
+          "Huh? We don’t understand the response from the github API. " ++
+          "Here’s what our decoder says: “" ++ message ++ "”."
+      FailToCreateGist (HttpError (BadResponse number message)) ->
+        failWithMessage <|
+          "Yikes! The github API responded " ++
+          "with a " ++ toString number ++ " error. " ++
+          "Here’s what they say: “" ++ message ++ "”."
+
+      UpdateMarkup markup ->
+        { model
+        | markup = markup
+        }
+        ! []
+
+      UpdateVariables variables ->
+        { model
+        | variables = variables
+        }
+        ! []
+
+      PassToken githubToken ->
+        { model
+        | githubToken = Just githubToken
+        }
+        ! []
+
 
 
 

@@ -84,27 +84,33 @@ update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     UpdateRawMarkup rawMarkup ->
-      { model
-      | rawMarkup = rawMarkup
-      , saveToGist =
-        SaveToGist.update
-          (SaveToGist.UpdateMarkup <| svgMarkup rawMarkup)
-          model.saveToGist
-        |> fst
-      }
-      ! []
+      let
+        (saveToGist, _, _) =
+          SaveToGist.update
+            (SaveToGist.UpdateMarkup <| svgMarkup rawMarkup)
+            model.saveToGist
+
+      in
+        { model
+        | rawMarkup = rawMarkup
+        , saveToGist = saveToGist
+        }
+        ! []
 
     VariablesPanelMessage message ->
       let
         variablesPanel =
           VariablesPanel.update message model.variablesPanel
 
+        (saveToGist, _, _) =
+          SaveToGist.update
+            (SaveToGist.UpdateVariables (variables variablesPanel))
+            model.saveToGist
+
       in
         { model
         | variablesPanel = variablesPanel
-        , saveToGist = fst <| SaveToGist.update
-          (SaveToGist.UpdateVariables (variables variablesPanel))
-          model.saveToGist
+        , saveToGist = saveToGist
         }
         ! []
 
@@ -127,13 +133,17 @@ update message model =
               }
 
         modelWithToken token =
-          { model
-          | auth = authModel
-          , saveToGist = fst <| SaveToGist.update
-            (SaveToGist.PassToken token)
-            model.saveToGist
-          }
+          let
+            (saveToGist, _, _) =
+              SaveToGist.update
+                (SaveToGist.PassToken token)
+                model.saveToGist
 
+          in
+            { model
+            | auth = authModel
+            , saveToGist = saveToGist
+            }
 
       in
         updatedModel
@@ -142,7 +152,7 @@ update message model =
 
     SaveToGistMessage message ->
       let
-        (saveToGistModel, saveToGistCommand) =
+        (saveToGistModel, saveToGistCommand, _) =
           SaveToGist.update message model.saveToGist
 
       in

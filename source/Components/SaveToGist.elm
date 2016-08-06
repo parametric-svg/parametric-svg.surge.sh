@@ -107,7 +107,10 @@ port requestFileContents
   : {markup : String, variables : List Variable}
   -> Cmd message
 
-update : Message -> Model -> (Model, Cmd Message)
+type MessageToParent
+  = Nada
+
+update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   let
     failWithMessage message =
@@ -115,6 +118,7 @@ update message model =
       | failureToasts = failureToast message :: model.failureToasts
       }
       ! []
+      !! Nada
 
     failureToast message =
       { message = message
@@ -190,6 +194,7 @@ update message model =
             , variables = model.variables
             }
           ]
+        !! Nada
 
       ReceiveFileContents {payload, error} -> case (payload, error) of
         (Just fileContents, Nothing) ->
@@ -198,27 +203,31 @@ update message model =
           , displayFileNameDialog = True
           }
           ! []
+          !! Nada
 
         (Nothing, Just failureToast) ->
           { model
           | failureToasts = failureToast :: model.failureToasts
           }
           ! []
+          !! Nada
 
         _ ->
-          model ! []
+          model ! [] !! Nada
 
       CloseDialog ->
         { model
         | displayFileNameDialog = False
         }
         ! []
+        !! Nada
 
       UpdateFileBasename fileBasename ->
         { model
         | fileBasename = fileBasename
         }
         ! []
+        !! Nada
 
       CreateGist ->
         { model
@@ -229,6 +238,7 @@ update message model =
         ! [ Task.perform FailToCreateGist ReceiveGistId <|
             sendToGist model
           ]
+        !! Nada
 
       ReceiveGistId gistId ->
         { model
@@ -236,6 +246,7 @@ update message model =
         , status = Void
         }
         ! []
+        !! Nada
 
       FailToCreateGist NoFileContents ->
         failWithMessage <|
@@ -266,18 +277,26 @@ update message model =
         | markup = markup
         }
         ! []
+        !! Nada
 
       UpdateVariables variables ->
         { model
         | variables = variables
         }
         ! []
+        !! Nada
 
       PassToken githubToken ->
         { model
         | githubToken = Just githubToken
         }
         ! []
+        !! Nada
+
+
+(!!) : (a, b) -> MessageToParent -> (a, b, MessageToParent)
+(!!) (model, command) messageToParent =
+  (model, command, messageToParent)
 
 
 

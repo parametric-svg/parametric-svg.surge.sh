@@ -20,6 +20,10 @@ import Components.IconButton as IconButton
 import Components.Toast as Toast
 import Components.Spinner as Spinner
 
+(=>) : a -> b -> (a, b)
+(=>) =
+  (,)
+
 
 
 
@@ -122,11 +126,7 @@ update message model =
     sendToGist model =
       case (model.fileContents, model.githubToken) of
         (Just fileContents, Just githubToken) ->
-          Task.mapError HttpError <|
-            Http.post
-              decodeGistResponse
-              (url "https://api.github.com/gists" [("access_token", githubToken)])
-              (payload fileContents)
+          Task.mapError HttpError <| saveGist githubToken fileContents
 
         (Nothing, _) ->
           Task.fail NoFileContents
@@ -134,22 +134,49 @@ update message model =
         (_, Nothing) ->
           Task.fail NoGithubToken
 
+    saveGist token fileContents =
+      case model.gistId of
+        Just gistId ->
+          patch
+            decodeGistResponse
+            (githubUrl token <| "/gists/" ++ gistId)
+            (payload fileContents [])
+
+        Nothing ->
+          Http.post
+            decodeGistResponse
+            (githubUrl token "/gists")
+            ( payload fileContents
+              [ "description" =>
+                Encode.string "Created via parametric-svg.surge.sh"
+              ]
+            )
+
+    patch decoder url body =
+      Http.fromJson decoder <| Http.send Http.defaultSettings
+        { verb = "PATCH"
+        , headers = []
+        , url = url
+        , body = body
+        }
+
+    githubUrl token path =
+      url ("https://api.github.com" ++ path) ["access_token" => token]
+
     decodeGistResponse =
       ("id" := Decode.string)
 
-    payload fileContents =
-      serializedModel fileContents
+    payload fileContents extraFields =
+      Encode.object
+        [ "files" => Encode.object
+          [ fileName => Encode.object
+            ( ["content" => Encode.string fileContents]
+            ++ extraFields
+            )
+          ]
+        ]
       |> encode 0
       |> Http.string
-
-    serializedModel fileContents =
-      Encode.object
-        [ ("files", Encode.object
-          [ (fileName, Encode.object
-            [ ("content", Encode.string fileContents)
-            ])
-          ])
-        ]
 
     fileName =
       model.fileBasename ++ ".parametric.svg"

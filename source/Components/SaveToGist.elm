@@ -3,9 +3,9 @@ port module Components.SaveToGist exposing
   , init, update, subscriptions, view
   )
 
-import Html exposing (Html, node, text, div, span)
+import Html exposing (Html, node, text, div, span, a)
 import Html.Events exposing (onClick, on, onInput)
-import Html.Attributes exposing (attribute, tabindex, value)
+import Html.Attributes exposing (attribute, tabindex, value, href, target)
 import Json.Decode as Decode exposing ((:=))
 import Json.Encode as Encode exposing (encode)
 import Http exposing
@@ -30,6 +30,7 @@ type alias Model =
   , failureToasts : List FailureToast
   , displayFileNameDialog : Bool
   , fileBasename : String
+  , markupSnapshot : Maybe String
   , githubToken : Maybe String
   , gistId : Maybe String
   }
@@ -48,6 +49,7 @@ init markup =
   , failureToasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
+  , markupSnapshot = Nothing
   , githubToken = Nothing
   , gistId = Nothing
   }
@@ -129,7 +131,9 @@ update message model =
       ! []
 
     CreateGist ->
-      model
+      { model
+      | markupSnapshot = Just model.markup
+      }
       ! [ Task.perform FailToCreateGist ReceiveGistId <|
           sendToGist model
         ]
@@ -313,13 +317,39 @@ view model =
         else
           []
 
-  in
-    iconButton
-      [ onClick RequestFileContents
-      ]
-      { symbol = "cloud-upload"
-      , tooltip = "Save as gist"
-      }
+    button =
+      case (model.gistId, model.markupSnapshot) of
+        (Just gistId, Just markupSnapshot) ->
+          if model.markup == markupSnapshot
+            then
+              [ a
+                [ href <| "https://gist.github.com/" ++ gistId
+                , target "_blank"
+                , tabindex -1
+                ]
+                <| iconButton []
+                  { symbol = "check"
+                  , tooltip = "Saved – click to view"
+                  }
+              ]
 
+            else
+              iconButton
+                [ onClick RequestFileContents
+                ]
+                { symbol = "save"
+                , tooltip = "Unsaved changes – click to sync"
+                }
+
+        _ ->
+          iconButton
+            [ onClick RequestFileContents
+            ]
+            { symbol = "cloud-upload"
+            , tooltip = "Save as gist"
+            }
+
+  in
+    button
     ++ dialogs
     ++ toasts

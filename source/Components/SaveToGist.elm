@@ -227,7 +227,7 @@ sendToGist model =
               , Encode.object
                 [ ( model.fileBasename ++ ".parametric.svg"
                   , Encode.object
-                    [ ( "contents"
+                    [ ( "content"
                       , Encode.string fileContents
                       )
                     ]

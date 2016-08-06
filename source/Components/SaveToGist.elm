@@ -10,6 +10,7 @@ import Json.Decode as Decode exposing ((:=))
 import Json.Encode as Encode exposing (encode)
 import Http exposing
   ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
+  , url
   )
 import Task exposing (Task)
 
@@ -30,6 +31,7 @@ type alias Model =
   , displayFileNameDialog : Bool
   , fileBasename : String
   , gistResponse : Maybe GistResponse
+  , githubToken : Maybe String
   }
 
 type alias FailureToast =
@@ -54,6 +56,7 @@ init markup =
   , displayFileNameDialog = False
   , fileBasename = ""
   , gistResponse = Nothing
+  , githubToken = Nothing
   }
   ! []
 
@@ -79,6 +82,7 @@ type Message
 
 type GistError
   = NoFileContents
+  | NoGithubToken
   | HttpError Http.Error
 
 type alias SerializationOutput =
@@ -144,7 +148,10 @@ update message model =
 
     FailToCreateGist NoFileContents ->
       failWithMessage model <|
-        "Oops! This should never happen. No file contents to send"
+        "Oops! This should never happen. No file contents to send."
+    FailToCreateGist NoGithubToken ->
+      failWithMessage model <|
+        "Aw, snap! You’re not logged into gist."
     FailToCreateGist (HttpError Timeout) ->
       failWithMessage model <|
         "Uh-oh! The github API request timed out. Trying again should help. " ++
@@ -195,8 +202,8 @@ failWithMessage model message =
 
 sendToGist : Model -> Task GistError GistResponse
 sendToGist model =
-  case model.fileContents of
-    Just fileContents ->
+  case (model.fileContents, model.githubToken) of
+    (Just fileContents, Just githubToken) ->
       let
         decodeGistResponse =
           Decode.object1 GistResponse
@@ -224,10 +231,16 @@ sendToGist model =
 
       in
         Task.mapError HttpError <|
-          Http.post decodeGistResponse "https://api.github.com/gists" payload
+          Http.post
+            decodeGistResponse
+            (url "https://api.github.com/gists" [("access_token", githubToken)])
+            payload
 
-    Nothing ->
+    (Nothing, _) ->
       Task.fail NoFileContents
+
+    (_, Nothing) ->
+      Task.fail NoGithubToken
 
 
 

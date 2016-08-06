@@ -1,5 +1,5 @@
 port module Components.SaveToGist exposing
-  ( Model, Message(UpdateMarkup, UpdateVariables)
+  ( Model, Message(UpdateMarkup, UpdateVariables, PassToken)
   , init, update, subscriptions, view
   )
 
@@ -79,6 +79,7 @@ type Message
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
+  | PassToken String
 
 type GistError
   = NoFileContents
@@ -179,6 +180,12 @@ update message model =
     UpdateVariables variables ->
       { model
       | variables = variables
+      }
+      ! []
+
+    PassToken githubToken ->
+      { model
+      | githubToken = Just githubToken
       }
       ! []
 

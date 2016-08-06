@@ -102,11 +102,9 @@ update message model =
       in
         { model
         | variablesPanel = variablesPanel
-        , saveToGist =
-          SaveToGist.update
-            (SaveToGist.UpdateVariables <| variables variablesPanel)
-            model.saveToGist
-          |> fst
+        , saveToGist = fst <| SaveToGist.update
+          (SaveToGist.UpdateVariables (variables variablesPanel))
+          model.saveToGist
         }
         ! []
 
@@ -115,10 +113,23 @@ update message model =
         (authModel, authCommand) =
           Auth.update message model.auth
 
+        updatedModel =
+          case message of
+            Auth.ReceiveToken token ->
+              { model
+              | auth = authModel
+              , saveToGist = fst <| SaveToGist.update
+                (SaveToGist.PassToken token)
+                model.saveToGist
+              }
+
+            _ ->
+              { model
+              | auth = authModel
+              }
+
       in
-        { model
-        | auth = authModel
-        }
+        updatedModel
         ! [ Cmd.map AuthMessage authCommand
           ]
 

@@ -5,7 +5,15 @@ const serializer = new XMLSerializer();
 
 module.exports = ({ listener }) => {
   const sendFileContents = ({ markup, variables }) => {
+    // Workaround for https://github.com/jindw/xmldom/issues/173
+    /* eslint-disable no-console */
+    const originalConsoleError = console.error;
+    let xmldomError = false;
+    console.error = () => { xmldomError = true; };
     const svg = parser.parseFromString(markup, 'image/svg+xml');
+    console.error = originalConsoleError;
+    /* eslint-enable no-console */
+
     const existingDefs = svg.getElementsByTagName('defs')[0];
     const hasExistingDefs = !!existingDefs;
     const defs = hasExistingDefs
@@ -40,7 +48,7 @@ module.exports = ({ listener }) => {
 
     const payload = serializer.serializeToString(svg);
 
-    if (/<parsererror\b/.test(payload)) {
+    if (xmldomError || /<parsererror\b/.test(payload)) {
       // This seems to be the most portable way to check for a parser error
       // currently. The spec says <parsererror> should have the namespace
       // “http://www.mozilla.org/newlayout/xml/parsererror.xml”, but Chrome

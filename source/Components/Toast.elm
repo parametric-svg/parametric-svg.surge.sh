@@ -1,4 +1,4 @@
-module Components.Toast exposing (custom, basic)
+module Components.Toast exposing (custom, basic, toasts)
 
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
@@ -8,6 +8,11 @@ import Components.Link exposing (link)
 
 
 -- VIEW
+
+toasts : {a | toasts : List ToastContent} -> List (Html b)
+toasts componentModel =
+  List.reverse componentModel.toasts
+  |> List.map custom
 
 custom : ToastContent -> Html a
 custom {message, buttonText, buttonUrl} =

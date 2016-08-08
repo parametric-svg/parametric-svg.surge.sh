@@ -287,10 +287,6 @@ view model =
     componentNamespace =
       "d34616d-SaveToGist-"
 
-    toasts =
-      List.reverse model.toasts
-        |> List.map Toast.custom
-
     onCloseOverlay message =
       on "iron-overlay-closed" (Decode.succeed message)
 
@@ -377,4 +373,4 @@ view model =
   in
     button
     ++ dialogs
-    ++ toasts
+    ++ Toast.toasts model

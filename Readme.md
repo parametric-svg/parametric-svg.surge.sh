@@ -14,12 +14,17 @@
 * [x] Minimal mobile-first UI
 * [x] Customizable controls
 * [ ] Gist integration
-  * [ ] Display info about serialization errors
+  * [x] Authentication
+  * [x] Create gist
+  * [x] Update gist
+  * [x] Display info about serialization errors
   * [ ] Improve export quality
   * [ ] Make sure you’re only asked for the file name once
   * [ ] Persist gist ID in route
-* [ ] Import / export
+  * [ ] Open gist
+* [ ] Welcome screen
 * [ ] Offline support
+* [ ] Import / export
 * [ ] Tweak editor focus UX
 
 

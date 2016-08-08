@@ -23,6 +23,7 @@ import Styles.ParametricSvgEditor exposing
 import Components.VariablesPanel as VariablesPanel exposing (variables)
 import Components.Auth as Auth exposing (token)
 import Components.SaveToGist as SaveToGist
+import Components.Toast as Toast
 
 {class} =
   withNamespace componentNamespace
@@ -302,24 +303,25 @@ view model =
       [ class [Root]
       , attribute "mode" "waterfall"
       ]
-      [ node "paper-toolbar"
-        [ class [Toolbar]
-        ]
-        <| title "parametric-svg"
-        ++ toolbarButtons
+      <| [ node "paper-toolbar"
+          [ class [Toolbar]
+          ]
+          <| title "parametric-svg"
+          ++ toolbarButtons
 
-      , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
+        , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
 
-      , display
+        , display
 
-      , node "codemirror-editor"
-        [ class [Editor]
+        , node "codemirror-editor"
+          [ class [Editor]
+          ]
+          [ textarea
+            [ onInput UpdateRawMarkup
+            ] []
+          ]
         ]
-        [ textarea
-          [ onInput UpdateRawMarkup
-          ] []
-        ]
-      ]
+      ++ Toast.toasts model
 
 type IconButtonState
   = Active

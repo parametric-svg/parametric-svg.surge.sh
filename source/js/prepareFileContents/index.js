@@ -1,10 +1,14 @@
-const { DOMParser, XMLSerializer } = require('global');
+const { DOMParser, XMLSerializer, document } = require('global');
 
 const parser = new DOMParser();
 const serializer = new XMLSerializer();
 
 module.exports = ({ listener }) => {
-  const sendFileContents = ({ markup, variables }) => {
+  const sendFileContents = ({ drawingId, variables }) => {
+    const markup = document.getElementById(drawingId)
+      .querySelector('svg')
+      .outerHTML;
+
     // Workaround for https://github.com/jindw/xmldom/issues/173
     /* eslint-disable no-console */
     const originalConsoleError = console.error;

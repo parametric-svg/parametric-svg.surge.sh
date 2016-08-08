@@ -1,15 +1,38 @@
 require('tap-spec-integrated');
 const test = require('tape-catch');
 const sinon = require('sinon');
+const inNode = require('detect-node');
+const randomString = require('random-string');
+
+const svgElementMocks = {};
+const addElement = ({ drawingId, markup }) => {
+  if (inNode) {
+    svgElementMocks[drawingId] = markup;
+  } else {
+    const div = document.createElement('div');
+    div.id = drawingId;
+    div.innerHTML = markup;
+    document.body.appendChild(div);
+  }
+};
 
 /* eslint-disable quote-props, global-require */
-const inNode = require('detect-node');
 const prepareFileContents = (inNode
   ? (() => {
     const { DOMParser, XMLSerializer } = require('xmldom');
     const proxyquire = require('proxyquire');
+
+    const document = {
+      getElementById: (id) => ({
+        querySelector: (selector) => {
+          if (selector !== 'svg') throw Error('Not implemented');
+          return { outerHTML: svgElementMocks[id] };
+        },
+      }),
+    };
+
     return proxyquire('.', {
-      'global': { DOMParser, XMLSerializer },
+      'global': { DOMParser, XMLSerializer, document },
     });
   })()
 
@@ -17,25 +40,35 @@ const prepareFileContents = (inNode
 );
 /* eslint-enable quote-props, global-require */
 
-const withInput = (
-  input
-) => ({
-  expectPayload: (result) => (is) => {
+const withInput = ({
+  markup, variables,
+}) => {
+  const expect = (expectation) => (is) => {
     const listener = sinon.stub();
     const { sendFileContents } = prepareFileContents({ listener });
-    sendFileContents(input);
+
+    const drawingId = randomString();
+    addElement({ drawingId, markup });
+    sendFileContents({ drawingId, variables });
+
     is.ok(listener.calledOnce,
       'calls the listener'
     );
+    expectation({ is, listener });
+    is.end();
+  };
+
+  const expectPayload = (result) => expect(({ is, listener }) => {
     is.equal(listener.lastCall.args[0].payload, result,
       'passes the correct `payload`'
     );
     is.equal(listener.lastCall.args[0].error, null,
       'passes no `error`'
     );
-    is.end();
-  },
-});
+  });
+
+  return { expect, expectPayload };
+};
 
 test((
   'Adds <defs>'
@@ -99,17 +132,10 @@ test((
 
 test((
   'Passes an error when given an SVG with invalid contents'
-), (is) => {
-  const listener = sinon.stub();
-  const { sendFileContents } = prepareFileContents({ listener });
-  sendFileContents({
-    markup: '<svg><invalid</svg>',
-    variables: [],
-  });
-
-  is.ok(listener.calledOnce,
-    'calls the listener'
-  );
+), withInput({
+  markup: '<svg><invalid</svg>',
+  variables: [],
+}).expect(({ is, listener }) => {
   is.equal(listener.lastCall.args[0].payload, null,
     'passes no `payload`'
   );
@@ -125,5 +151,4 @@ test((
     },
     'passes a descriptive `error`'
   );
-  is.end();
-});
+}));

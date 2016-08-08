@@ -83,7 +83,7 @@ markup model =
 -- UPDATE
 
 port requestFileContents
-  : {markup : String, variables : List Variable}
+  : {drawingId : String, variables : List Variable}
   -> Cmd message
 
 type Message
@@ -119,7 +119,7 @@ update message model =
     RequestFileContents ->
       model
       ! [ requestFileContents
-          { markup = markup model
+          { drawingId = drawingId
           , variables = variables model.variablesPanel
           }
         ]
@@ -215,6 +215,11 @@ update message model =
           ]
 
 
+drawingId : String
+drawingId =
+  componentNamespace ++ "drawing"
+
+
 
 
 -- SUBSCRIPTIONS
@@ -259,6 +264,7 @@ view model =
         Nothing ->
           div
             [ class [Display, Display_ImplicitSize]
+            , id drawingId
             ]
             [ parametricSvg
             ]

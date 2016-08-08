@@ -1,4 +1,4 @@
-module Components.ParametricSvgEditor exposing
+port module Components.ParametricSvgEditor exposing
   ( Model, Message
   , init, update, subscriptions, view
   , markup
@@ -15,6 +15,7 @@ import Regex exposing (regex, contains)
 import String
 import Maybe exposing (andThen)
 
+import UniversalTypes exposing (ToastContent, Variable)
 import Styles.ParametricSvgEditor exposing
   ( Classes(Root, Display, Display_ImplicitSize, DisplaySizer, Editor, Toolbar)
   , componentNamespace
@@ -31,6 +32,8 @@ styles =
   Html.Attributes.style << Css.asPairs
 
 
+
+
 -- MODEL
 
 type alias Model =
@@ -38,6 +41,7 @@ type alias Model =
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
   , saveToGist : SaveToGist.Model
+  , toasts : List ToastContent
   }
 
 init : (Model, Cmd Message)
@@ -54,6 +58,7 @@ init =
     , variablesPanel = VariablesPanel.init
     , auth = authModel
     , saveToGist = saveToGistModel
+    , toasts = []
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -72,13 +77,26 @@ markup model =
   svgMarkup model.rawMarkup
 
 
+
+
 -- UPDATE
+
+port requestFileContents
+  : {markup : String, variables : List Variable}
+  -> Cmd message
 
 type Message
   = UpdateRawMarkup String
+  | RequestFileContents
+  | ReceiveFileContents FileContentsSerializationOutput
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
+
+type alias FileContentsSerializationOutput =
+  { payload : Maybe String
+  , error : Maybe ToastContent
+  }
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -96,6 +114,30 @@ update message model =
         , saveToGist = saveToGist
         }
         ! []
+
+    RequestFileContents ->
+      model
+      ! [ requestFileContents
+          { markup = markup model
+          , variables = variables model.variablesPanel
+          }
+        ]
+
+    ReceiveFileContents {payload, error} ->
+      case (payload, error) of
+        (_, Just failureToast) ->
+          { model
+          | toasts = failureToast :: model.toasts
+          }
+          ! []
+
+        (Just fileContents, Nothing) ->
+          update
+            (SaveToGistMessage <| SaveToGist.PassFileContents fileContents)
+            model
+
+        (Nothing, Nothing) ->
+          model ! []
 
     VariablesPanelMessage message ->
       let
@@ -152,25 +194,42 @@ update message model =
 
     SaveToGistMessage message ->
       let
-        (saveToGistModel, saveToGistCommand, _) =
+        (saveToGistModel, saveToGistCommand, messageToParent) =
           SaveToGist.update message model.saveToGist
 
+        (parentModel, parentCommand) =
+          case messageToParent of
+            SaveToGist.FileContentsPlease ->
+              update RequestFileContents model
+
+            SaveToGist.Nada ->
+              model ! []
+
       in
-        { model
+        { parentModel
         | saveToGist = saveToGistModel
         }
         ! [ Cmd.map SaveToGistMessage saveToGistCommand
+          , parentCommand
           ]
 
 
+
+
 -- SUBSCRIPTIONS
+
+port fileContents
+  : (FileContentsSerializationOutput -> message)
+  -> Sub message
 
 subscriptions : Model -> Sub Message
 subscriptions model =
   Sub.batch
     [ Sub.map AuthMessage <| Auth.subscriptions model.auth
-    , Sub.map SaveToGistMessage <| SaveToGist.subscriptions model.saveToGist
+    , fileContents ReceiveFileContents
     ]
+
+
 
 
 -- VIEW

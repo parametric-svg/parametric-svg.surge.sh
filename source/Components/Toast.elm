@@ -3,12 +3,13 @@ module Components.Toast exposing (custom, basic)
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
 
+import UniversalTypes exposing (ToastContent)
 import Components.Link exposing (link)
 
 
 -- VIEW
 
-custom : {message : String, buttonText : String, buttonUrl : String} -> Html a
+custom : ToastContent -> Html a
 custom {message, buttonText, buttonUrl} =
   node "paper-toast"
     [ attribute "duration" "10000"

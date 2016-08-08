@@ -1,6 +1,9 @@
-port module Components.SaveToGist exposing
-  ( Model, Message(UpdateMarkup, UpdateVariables, PassToken)
-  , init, update, subscriptions, view
+module Components.SaveToGist exposing
+  ( Model
+  , Message(UpdateMarkup, UpdateVariables, PassToken, PassFileContents)
+  , MessageToParent(..)
+
+  , init, update, view
   )
 
 import Html exposing (Html, node, text, div, span, a)
@@ -14,7 +17,7 @@ import Http exposing
   )
 import Task exposing (Task)
 
-import UniversalTypes exposing (Variable)
+import UniversalTypes exposing (Variable, ToastContent)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
@@ -33,19 +36,13 @@ type alias Model =
   { fileContents : Maybe String
   , markup : String
   , variables : List Variable
-  , failureToasts : List FailureToast
+  , toasts : List ToastContent
   , displayFileNameDialog : Bool
   , fileBasename : String
   , dataSnapshot : Maybe DataSnapshot
   , githubToken : Maybe String
   , gistId : Maybe String
   , status : Status
-  }
-
-type alias FailureToast =
-  { message : String
-  , buttonText : String
-  , buttonUrl : String
   }
 
 type alias DataSnapshot =
@@ -62,7 +59,7 @@ init markup =
   { fileContents = Nothing
   , markup = markup
   , variables = []
-  , failureToasts = []
+  , toasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
   , dataSnapshot = Nothing
@@ -78,8 +75,8 @@ init markup =
 -- UPDATE
 
 type Message
-  = RequestFileContents
-  | ReceiveFileContents SerializationOutput
+  = AskForFileContents
+  | PassFileContents String
 
   | CloseDialog
 
@@ -98,24 +95,16 @@ type GistError
   | NoGithubToken
   | HttpError Http.Error
 
-type alias SerializationOutput =
-  { payload : Maybe String
-  , error : Maybe FailureToast
-  }
-
-port requestFileContents
-  : {markup : String, variables : List Variable}
-  -> Cmd message
-
 type MessageToParent
   = Nada
+  | FileContentsPlease
 
 update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   let
     failWithMessage message =
       { model
-      | failureToasts = failureToast message :: model.failureToasts
+      | toasts = failureToast message :: model.toasts
       }
       ! []
       !! Nada
@@ -187,33 +176,20 @@ update message model =
 
   in
     case message of
-      RequestFileContents ->
-        model
-        ! [ requestFileContents
-            { markup = model.markup
-            , variables = model.variables
-            }
-          ]
+      AskForFileContents ->
+        { model
+        | dataSnapshot = Just (DataSnapshot model.markup model.variables)
+        }
+        ! []
+        !! FileContentsPlease
+
+      PassFileContents fileContents ->
+        { model
+        | fileContents = Just fileContents
+        , displayFileNameDialog = True
+        }
+        ! []
         !! Nada
-
-      ReceiveFileContents {payload, error} -> case (payload, error) of
-        (Just fileContents, Nothing) ->
-          { model
-          | fileContents = Just fileContents
-          , displayFileNameDialog = True
-          }
-          ! []
-          !! Nada
-
-        (Nothing, Just failureToast) ->
-          { model
-          | failureToasts = failureToast :: model.failureToasts
-          }
-          ! []
-          !! Nada
-
-        _ ->
-          model ! [] !! Nada
 
       CloseDialog ->
         { model
@@ -231,8 +207,7 @@ update message model =
 
       CreateGist ->
         { model
-        | dataSnapshot = Just (DataSnapshot model.markup model.variables)
-        , status = Pending
+        | status = Pending
         , displayFileNameDialog = False
         }
         ! [ Task.perform FailToCreateGist ReceiveGistId <|
@@ -301,17 +276,6 @@ update message model =
 
 
 
--- SUBSCRIPTIONS
-
-port fileContents : (SerializationOutput -> message) -> Sub message
-
-subscriptions : Model -> Sub Message
-subscriptions model =
-  fileContents ReceiveFileContents
-
-
-
-
 -- VIEW
 
 view : Model -> List (Html Message)
@@ -324,7 +288,7 @@ view model =
       "d34616d-SaveToGist-"
 
     toasts =
-      List.reverse model.failureToasts
+      List.reverse model.toasts
         |> List.map Toast.custom
 
     onCloseOverlay message =
@@ -396,7 +360,7 @@ view model =
 
             else
               iconButton
-                [ onClick RequestFileContents
+                [ onClick AskForFileContents
                 ]
                 { symbol = "save"
                 , tooltip = "Unsaved changes – click to sync"
@@ -404,7 +368,7 @@ view model =
 
         _ ->
           iconButton
-            [ onClick RequestFileContents
+            [ onClick AskForFileContents
             ]
             { symbol = "cloud-upload"
             , tooltip = "Save as gist"

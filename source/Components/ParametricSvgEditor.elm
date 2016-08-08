@@ -239,7 +239,7 @@ view : Model -> Html Message
 view model =
   let
     display =
-      case getSize model.rawMarkup of
+      case size of
         Just (drawingWidth, drawingHeight) ->
           div
             [ class [Display]
@@ -262,6 +262,39 @@ view model =
             ]
             [ parametricSvg
             ]
+
+    size =
+      case (dimensionFloat "width", dimensionFloat "height") of
+        (Just width, Just height) ->
+          Just (width, height)
+
+        _ ->
+          Nothing
+
+    dimensionFloat : String -> Maybe Float
+    dimensionFloat dimension =
+      ( List.head <| Regex.find (Regex.AtMost 1)
+        (dimensionRegex dimension)
+        model.rawMarkup
+      )
+
+      `andThen`
+      \match -> List.head match.submatches
+
+      `andThen`
+      \submatch ->
+        case submatch of
+          Just value ->
+            Result.toMaybe <| String.toFloat value
+
+          Nothing ->
+            Nothing
+
+    dimensionRegex dimension =
+      regex
+        <| "^\\s*<svg\\b[^>]*\\b"
+        ++ dimension
+        ++ "=\"(\\d+|\\d*(?:\\.\\d+)?)\""
 
     parametricSvg =
       node "parametric-svg"
@@ -326,42 +359,3 @@ view model =
 type IconButtonState
   = Active
   | Disabled
-
-type alias Size =
-  Maybe (Float, Float)
-
-getSize : String -> Size
-getSize source =
-  let
-    dimensionRegex dimension =
-      regex
-        <| "^\\s*<svg\\b[^>]*\\b"
-        ++ dimension
-        ++ "=\"(\\d+|\\d*(?:\\.\\d+)?)\""
-
-    dimensionFloat : String -> Maybe Float
-    dimensionFloat dimension =
-      ( List.head <| Regex.find (Regex.AtMost 1)
-          (dimensionRegex dimension)
-          source
-      )
-
-      `andThen`
-      \match -> List.head match.submatches
-
-      `andThen`
-      \submatch ->
-        case submatch of
-          Just value ->
-            Result.toMaybe <| String.toFloat value
-
-          Nothing ->
-            Nothing
-
-  in
-    case (dimensionFloat "width", dimensionFloat "height") of
-      (Just width, Just height) ->
-        Just (width, height)
-
-      _ ->
-        Nothing

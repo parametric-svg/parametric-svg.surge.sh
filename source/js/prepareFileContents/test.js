@@ -7,7 +7,23 @@ const randomString = require('random-string');
 const svgElementMocks = {};
 const addElement = ({ drawingId, markup }) => {
   if (inNode) {
-    svgElementMocks[drawingId] = markup;
+    const { DOMParser } = require('xmldom'); // eslint-disable-line global-require
+    const parser = new DOMParser();
+
+    // Workaround for https://github.com/jindw/xmldom/issues/173
+    /* eslint-disable no-console */
+    const originalConsoleError = console.error;
+    let xmldomError = false;
+    console.error = () => { xmldomError = true; };
+    const svg = parser.parseFromString(markup, 'image/svg+xml');
+    const mock = (!xmldomError
+      ? svg
+      : parser.parseFromString('<svg><parsererror/></svg>', 'image/svg+xml')
+    );
+    console.error = originalConsoleError;
+    /* eslint-enable no-console */
+
+    svgElementMocks[drawingId] = mock;
   } else {
     const div = document.createElement('div');
     div.id = drawingId;
@@ -26,7 +42,7 @@ const prepareFileContents = (inNode
       getElementById: (id) => ({
         querySelector: (selector) => {
           if (selector !== 'svg') throw Error('Not implemented');
-          return { outerHTML: svgElementMocks[id] };
+          return svgElementMocks[id];
         },
       }),
     };

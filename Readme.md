@@ -18,9 +18,7 @@
   * [x] Create gist
   * [x] Update gist
   * [x] Display info about serialization errors
-  * [ ] Improve export quality
-    * [x] parametric namespace
-    * [ ] size
+  * [x] Improve export quality
   * [ ] Make sure you’re only asked for the file name once
   * [ ] Persist gist ID in route
   * [ ] Open gist

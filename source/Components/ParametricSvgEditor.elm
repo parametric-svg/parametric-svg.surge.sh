@@ -6,12 +6,13 @@ port module Components.ParametricSvgEditor exposing
 
 import Html exposing (node, div, text, textarea, span, Html)
 import Html.Attributes exposing (attribute, id)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, on)
 import Html.CssHelpers exposing (withNamespace)
 import Html.App as App
 import Css exposing (maxHeight, paddingTop, px, pct)
 import Json.Encode exposing (string)
-import Regex exposing (regex, contains)
+import Json.Decode as Decode exposing ((:=), Decoder)
+import Regex exposing (regex, HowMany(AtMost))
 import String
 import Maybe exposing (andThen)
 
@@ -39,10 +40,16 @@ styles =
 
 type alias Model =
   { rawMarkup : String
+  , canvasSize : Maybe CanvasSize
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
   , saveToGist : SaveToGist.Model
   , toasts : List ToastContent
+  }
+
+type alias CanvasSize =
+  { width : Int
+  , height : Int
   }
 
 init : (Model, Cmd Message)
@@ -52,10 +59,11 @@ init =
       Auth.init
 
     (saveToGistModel, saveToGistCommand) =
-      SaveToGist.init (svgMarkup "")
+      SaveToGist.init (svgMarkup "" Nothing)
 
   in
     { rawMarkup = ""
+    , canvasSize = Nothing
     , variablesPanel = VariablesPanel.init
     , auth = authModel
     , saveToGist = saveToGistModel
@@ -66,16 +74,47 @@ init =
       ]
 
 
-svgMarkup : String -> String
-svgMarkup rawMarkup =
-  if contains (regex "^\\s*<svg\\b") rawMarkup
-    then rawMarkup
-    else "<svg>" ++ rawMarkup ++ "</svg>"
+svgMarkup : String -> Maybe CanvasSize -> String
+svgMarkup rawMarkup canvasSize =
+  let
+    markupWithoutSize =
+      if Regex.contains (regex "^\\s*<svg\\b") rawMarkup
+        then rawMarkup
+        else "<svg>" ++ rawMarkup ++ "</svg>"
+
+  in
+    case canvasSize of
+      Just size ->
+        Regex.replace
+          (AtMost 1)
+          (regex "(^\\s*<svg\\b.*?)(>)")
+          (\{match, submatches} ->
+            case submatches of
+              [Just beginning, Just end] ->
+                beginning
+                ++ " viewBox=\""
+                  ++ "0 "
+                  ++ "0 "
+                  ++ toString size.width ++ " "
+                  ++ toString size.height ++ "\""
+                ++ " width=\"" ++ toString size.width ++ "\""
+                ++ " height=\"" ++ toString size.height ++ "\""
+                ++ end
+
+              _ ->
+                match
+          )
+          markupWithoutSize
+          -- We rely on the fact that the browser ignores repeating attributes
+          -- and only takes its first occurence in an element into account.
+
+      Nothing ->
+        markupWithoutSize
 
 
 markup : Model -> String
 markup model =
-  svgMarkup model.rawMarkup
+  svgMarkup model.rawMarkup model.canvasSize
 
 
 
@@ -90,6 +129,7 @@ type Message
   = UpdateRawMarkup String
   | RequestFileContents
   | ReceiveFileContents FileContentsSerializationOutput
+  | ReceiveCanvasSize CanvasSize
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
@@ -104,15 +144,19 @@ update message model =
   case message of
     UpdateRawMarkup rawMarkup ->
       let
+        modelWithMarkup =
+          { model
+          | rawMarkup = rawMarkup
+          }
+
         (saveToGist, _, _) =
           SaveToGist.update
-            (SaveToGist.UpdateMarkup <| svgMarkup rawMarkup)
+            (SaveToGist.UpdateMarkup <| markup modelWithMarkup)
             model.saveToGist
 
       in
-        { model
-        | rawMarkup = rawMarkup
-        , saveToGist = saveToGist
+        { modelWithMarkup
+        | saveToGist = saveToGist
         }
         ! []
 
@@ -139,6 +183,24 @@ update message model =
 
         (Nothing, Nothing) ->
           model ! []
+
+    ReceiveCanvasSize canvasSize ->
+      let
+        modelWithCanvas =
+          { model
+          | canvasSize = Just canvasSize
+          }
+
+        (saveToGist, _, _) =
+          SaveToGist.update
+            (SaveToGist.UpdateMarkup <| markup modelWithCanvas)
+            model.saveToGist
+
+      in
+        { modelWithCanvas
+        | saveToGist = saveToGist
+        }
+        ! []
 
     VariablesPanelMessage message ->
       let
@@ -262,9 +324,10 @@ view model =
             ]
 
         Nothing ->
-          div
+          node "dimensions-watch"
             [ class [Display, Display_ImplicitSize]
             , id drawingId
+            , onReceiveSize ReceiveCanvasSize
             ]
             [ parametricSvg
             ]
@@ -362,6 +425,18 @@ view model =
         ]
       ++ Toast.toasts model
 
+
 type IconButtonState
   = Active
   | Disabled
+
+onReceiveSize : (CanvasSize -> Message) -> Html.Attribute Message
+onReceiveSize action =
+  on "size" <| Decode.map action decodeSize
+
+decodeSize : Decoder CanvasSize
+decodeSize =
+  Decode.at ["detail"]
+  <| Decode.object2 CanvasSize
+    ("width" := Decode.int)
+    ("height" := Decode.int)

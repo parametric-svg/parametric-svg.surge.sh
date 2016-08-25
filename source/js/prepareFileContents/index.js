@@ -1,5 +1,8 @@
 const { DOMParser, XMLSerializer, document } = require('global');
 
+const PARAMETRIC_NAMESPACE = '//parametric-svg.js.org/v1';
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+
 const parser = new DOMParser();
 const serializer = new XMLSerializer();
 
@@ -10,6 +13,18 @@ module.exports = ({ listener }) => {
     );
 
     const svg = parser.parseFromString(markup, 'image/svg+xml');
+
+    const svgElement = svg.getElementsByTagName('svg')[0];
+    [{
+      attribute: 'xmlns',
+      value: SVG_NAMESPACE,
+    }, {
+      attribute: 'xmlns:parametric',
+      value: PARAMETRIC_NAMESPACE,
+    }].forEach(({ attribute, value }) => {
+      const hasNamespace = svgElement.getAttribute(attribute) === value;
+      if (!hasNamespace) svgElement.setAttribute(attribute, value);
+    });
 
     const existingDefs = svg.getElementsByTagName('defs')[0];
     const hasExistingDefs = !!existingDefs;

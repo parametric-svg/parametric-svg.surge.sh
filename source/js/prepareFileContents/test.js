@@ -1,3 +1,5 @@
+/* eslint-disable prefer-template */
+  // To keep XML markup readable
 require('tap-spec-integrated');
 const test = require('tape-catch');
 const sinon = require('sinon');
@@ -86,12 +88,17 @@ const withInput = ({
   return { expect, expectPayload };
 };
 
+const svgOpeningTag = '<svg ' +
+  'xmlns="http://www.w3.org/2000/svg" ' +
+  'xmlns:parametric="//parametric-svg.js.org/v1"' +
+'>';
+
 test((
   'Adds <defs>'
 ), withInput(
   { markup: '<svg></svg>', variables: [{ name: 'a', value: '2' }] }
 ).expectPayload(
-  '<svg>' +
+  svgOpeningTag +
     '<defs>' +
       '<param name="a" value="2"/>' +
     '</defs>' +
@@ -103,7 +110,7 @@ test((
 ), withInput(
   { markup: '<svg><circle/></svg>', variables: [{ name: 'a', value: '2' }] }
 ).expectPayload(
-  '<svg>' +
+  svgOpeningTag +
     '<defs>' +
       '<param name="a" value="2"/>' +
     '</defs>' +
@@ -117,7 +124,7 @@ test((
   markup: '<svg><defs><whatever/></defs></svg>',
   variables: [{ name: 'a', value: '2' }],
 }).expectPayload(
-  '<svg>' +
+  svgOpeningTag +
     '<defs>' +
       '<whatever/>' +
       '<param name="a" value="2"/>' +
@@ -138,11 +145,25 @@ test((
   ),
   variables: [{ name: 'a', value: '2' }],
 }).expectPayload(
-  '<svg>' +
+  svgOpeningTag +
     '<defs>' +
       '<param name="b" value="5"/>' +
       '<param name="a" value="2"/>' +
     '</defs>' +
+  '</svg>'
+));
+
+test((
+  'Adds the `parametric` namespace and the SVG namespace ' +
+  'unless they’re already there'
+), withInput({
+  markup: (
+    `${svgOpeningTag}</svg>`
+  ),
+  variables: [],
+}).expectPayload(
+  svgOpeningTag +
+    '<defs/>' +
   '</svg>'
 ));
 

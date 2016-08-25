@@ -6,9 +6,9 @@ Usage:
   $0 [--open]
   $0 --help
 
-  We’ll run a preconfifured elm-live server at http://localhost:9229.
-  We’ll also be watching your components for style updates and rebuild
-  the styles with elm-css on every change.
+  We’ll run a preconfifured webpack dev server at http://localhost:9229.
+  We’re not watching your CSS, so make sure you run \`styles\`
+  any time you change those.
 "; exit; fi
 set -x
 

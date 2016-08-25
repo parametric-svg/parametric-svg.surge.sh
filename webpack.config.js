@@ -31,4 +31,8 @@ module.exports = {
 
     noParse: extensions(['elm', 'css']),
   },
+
+  devServer: {
+    stats: 'errors-only',
+  },
 };

@@ -5,4 +5,4 @@ source "$(dirname "$0")"/_/env.source.sh
   --respawn \
   --no-notify \
   --no-deps \
-  test.js
+  test.node.js

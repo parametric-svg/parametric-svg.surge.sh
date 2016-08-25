@@ -1,6 +1,5 @@
 /* eslint-disable prefer-template */
   // To keep XML markup readable
-require('tap-spec-integrated');
 const test = require('tape-catch');
 const sinon = require('sinon');
 const inNode = require('detect-node');

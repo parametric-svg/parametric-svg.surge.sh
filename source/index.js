@@ -1,7 +1,7 @@
 require('./custom-elements');
 const prepareFileContents = require('./js/prepareFileContents');
 
-const Elm = require('./Main.elm');
+const Elm = require('./App.elm');
 
 const app = Elm.Main.embed(
   document.querySelector('#main')

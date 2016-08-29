@@ -42,6 +42,7 @@
     "tape-catch": "^1.0.6",
     "tape-run": "^2.1.4",
     "vulcanize": "^1.14.8",
+    "webdriverio": "^4.2.8",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1",
     "xmldom": "^0.1.22"

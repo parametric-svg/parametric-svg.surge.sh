@@ -153,6 +153,17 @@ test((
 ));
 
 test((
+  'Works with attributes and namespaced attributes'
+), withInput(
+  { markup: '<svg><circle r="5" parametric:r="5"/></svg>', variables: [] }
+).expectPayload(
+  svgOpeningTag +
+    '<defs/>' +
+    '<circle r="5" parametric:r="5"/>' +
+  '</svg>'
+));
+
+test((
   'Adds the `parametric` namespace and the SVG namespace ' +
   'unless they’re already there'
 ), withInput({

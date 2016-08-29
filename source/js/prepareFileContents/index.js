@@ -12,19 +12,27 @@ module.exports = ({ listener }) => {
       document.getElementById(drawingId).querySelector('svg')
     );
 
-    const svg = parser.parseFromString(markup, 'image/svg+xml');
-
-    const svgElement = svg.getElementsByTagName('svg')[0];
-    [{
+    const markupWithNamespaces = [{
       attribute: 'xmlns',
       value: SVG_NAMESPACE,
     }, {
       attribute: 'xmlns:parametric',
       value: PARAMETRIC_NAMESPACE,
-    }].forEach(({ attribute, value }) => {
-      const hasNamespace = svgElement.getAttribute(attribute) === value;
-      if (!hasNamespace) svgElement.setAttribute(attribute, value);
-    });
+    }].reduce((currentMarkup, { attribute, value }) => {
+      const hasNamespace =
+        RegExp(`<svg[^>]*\\s${attribute}="`, 'i').test(markup);
+
+      return (
+        hasNamespace
+        ? currentMarkup
+        : currentMarkup.replace(
+          /(<svg[^>]*?)(\/?>)/i,
+          `$1 ${attribute}="${value}"$2`
+        )
+      );
+    }, markup);
+
+    const svg = parser.parseFromString(markupWithNamespaces, 'image/svg+xml');
 
     const existingDefs = svg.getElementsByTagName('defs')[0];
     const hasExistingDefs = !!existingDefs;

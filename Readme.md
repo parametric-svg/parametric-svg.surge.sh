@@ -13,14 +13,15 @@
 
 * [x] Minimal mobile-first UI
 * [x] Customizable controls
+* [ ] E2E test suite
 * [ ] Gist integration
   * [x] Authentication
   * [x] Create gist
   * [x] Update gist
   * [x] Display info about serialization errors
   * [x] Improve export quality
-  * [ ] Make sure you’re only asked for the file name once
   * [ ] Persist gist ID in route
+  * [ ] Make sure you’re only asked for the file name once
   * [ ] Open gist
 * [ ] Welcome screen
 * [ ] Offline support

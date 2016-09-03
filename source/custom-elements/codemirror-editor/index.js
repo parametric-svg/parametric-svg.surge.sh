@@ -62,18 +62,31 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     };
     editor.on('change', updateTextareaValue);
 
+    const updateEditorValue = (event) => {
+      if (event.target.value === editor.getValue()) return;
+      editor.setValue(event.target.value);
+    };
+
     const rewireTextarea = () => {
       const nextTextarea = Array.from(this.children)
         .find(child => child.tagName === 'TEXTAREA');
 
       if (nextTextarea !== textarea) {
+        if (textarea !== undefined) {
+          textarea.removeEventListener('input', updateEditorValue);
+        }
+
         textarea = nextTextarea;
         if (textarea === undefined) return;
-        nextTextarea.style.display = 'none';
+
+        textarea.style.display = 'none';
         updateTextareaValue();
+        textarea.addEventListener('input', updateEditorValue);
       }
     };
     rewireTextarea();
+
+    // Always keep the first <textarea> wired up
     const observer = new MutationObserver(rewireTextarea);
     observer.observe(this, { childList: true });
   },

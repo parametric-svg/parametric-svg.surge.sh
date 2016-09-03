@@ -79,7 +79,9 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
         textarea = nextTextarea;
         if (textarea === undefined) return;
 
-        textarea.style.display = 'none';
+        textarea.style.position = 'absolute';
+        // textarea.style.top = '-999999px';
+        // textarea.style.left = '-999999px';
         updateTextareaValue();
         textarea.addEventListener('input', updateEditorValue);
       }

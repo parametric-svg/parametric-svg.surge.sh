@@ -18,7 +18,14 @@ import Maybe exposing (andThen)
 
 import UniversalTypes exposing (ToastContent, Variable)
 import Styles.ParametricSvgEditor exposing
-  ( Classes(Root, Display, Display_ImplicitSize, DisplaySizer, Editor, Toolbar)
+  ( Classes
+    ( Root
+    , Display, Display_ImplicitSize
+    , DisplaySizer
+    , Editor
+    , Textarea
+    , Toolbar
+    )
   , componentNamespace
   )
 import Components.VariablesPanel as VariablesPanel exposing (variables)
@@ -420,6 +427,7 @@ view model =
           ]
           [ textarea
             [ onInput UpdateRawMarkup
+            , class [Textarea]
             ] []
           ]
         ]

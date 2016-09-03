@@ -17,6 +17,7 @@ type Classes
   | Display | Display_ImplicitSize
   | DisplaySizer
   | Editor
+  | Textarea
   | Toolbar
 
 css : Stylesheet

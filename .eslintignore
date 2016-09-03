@@ -1,3 +1,4 @@
 /node_modules/
 /elm-stuff/
 /static/
+!/features/.step-definitions.js

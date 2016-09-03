@@ -22,8 +22,23 @@ const ParametricSvgEditor = component('ParametricSvgEditor', [
   'Textarea',
 ]);
 
+const VariablesPanel = component('VariablesPanel', [
+  'Input',
+  'Parameter',
+  'Value',
+]);
+
 
 // CUSTOM COMMANDS
+
+browser.addCommand('setValueAttribute', (selector, value) => {
+  const callback = ([element], input) => {
+    if (element === undefined) throw new Error('No element found!');
+    element.setAttribute('value', input);
+  };
+
+  browser.selectorExecute(selector, callback, value);
+});
 
 browser.addCommand('setTextareaValue', (selector, value) => {
   const callback = ([element], input) => {
@@ -68,6 +83,12 @@ module.exports = function stepDefinitions() {
       `${lastInput} ${elmClass(VariablesPanel.Value)}`,
       value
     );
+  });
+
+  this.When((
+    /^I stop to see what’s up – TODO: Remove before committing!$/
+  ), () => {
+    browser.debug();
   });
 
   this.Then((

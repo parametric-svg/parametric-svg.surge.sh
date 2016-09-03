@@ -3347,6 +3347,11 @@
       "from": "interpret@>=0.6.4 <0.7.0",
       "resolved": "https://registry.npmjs.org/interpret/-/interpret-0.6.6.tgz"
     },
+    "invariant": {
+      "version": "2.2.1",
+      "from": "invariant@>=2.2.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/invariant/-/invariant-2.2.1.tgz"
+    },
     "ipaddr.js": {
       "version": "1.1.1",
       "from": "ipaddr.js@1.1.1",
@@ -3802,7 +3807,7 @@
     },
     "lodash": {
       "version": "4.14.0",
-      "from": "lodash@>=4.2.0 <5.0.0",
+      "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz"
     },
     "lodash._arraycopy": {
@@ -3929,6 +3934,18 @@
       "version": "1.0.1",
       "from": "longest@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/longest/-/longest-1.0.1.tgz"
+    },
+    "loose-envify": {
+      "version": "1.2.0",
+      "from": "loose-envify@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/loose-envify/-/loose-envify-1.2.0.tgz",
+      "dependencies": {
+        "js-tokens": {
+          "version": "1.0.3",
+          "from": "js-tokens@>=1.0.1 <2.0.0",
+          "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-1.0.3.tgz"
+        }
+      }
     },
     "loud-rejection": {
       "version": "1.6.0",

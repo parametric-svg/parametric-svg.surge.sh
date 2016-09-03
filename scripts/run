@@ -1,0 +1,26 @@
+#! /usr/bin/env node
+/* eslint-disable brace-style */
+  // This is to make the `--help` check more lightweight
+
+const args = process.argv.slice(2);
+
+if (args[0] === '--help') { process.stdout.write(
+`Usage:
+  run <binary> [...<args>]
+  run --help
+
+  We’ll run the local executable from node_modules/.bin/<binary>
+  in your current working directory. If you pass any <args>, we’ll pass them
+  over to the executable.
+`); process.exit(0); }
+
+const { spawnSync } = require('child_process');
+
+const executable = args[0];
+const executableArgs = args.slice(1);
+const { status } = spawnSync(
+  `node_modules/.bin/${executable}`,
+  executableArgs,
+  { stdio: 'inherit' }
+);
+process.exit(status);

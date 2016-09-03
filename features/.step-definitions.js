@@ -1,4 +1,3 @@
-const expect = require('expect');
 const { flatten } = require('lodash');
 
 
@@ -103,6 +102,8 @@ module.exports = function stepDefinitions() {
     );
 
     const expectedMarkup = new RegExp(`<circle\\b[^>]*\\br="${radius}"`);
-    expect(markup).toMatch(expectedMarkup);
+    browser.waitUntil(() => (
+      expectedMarkup.test(markup)
+    ), 2000, `'${markup}' should match ${expectedMarkup}`);
   });
 };

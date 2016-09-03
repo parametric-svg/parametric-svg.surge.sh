@@ -85,9 +85,27 @@ update message model =
       }
 
     normalizeVariableFields fields =
-      Dict.fromList
-      <| List.filter notEmpty (Dict.toList fields)
-      ++ [emptyVariableField model.nextId]
+      let
+        nonEmptyFields =
+          List.filter notEmpty (Dict.toList fields)
+
+        emptyFieldIfNecessary =
+          if List.all valid nonEmptyFields
+            then [emptyVariableField model.nextId]
+            else []
+
+        valid (_, fieldData) =
+          case (fieldData.name, fieldData.value) of
+            (Just _, Just _) ->
+              True
+
+            _ ->
+              False
+
+      in
+        Dict.fromList
+        <| nonEmptyFields
+        ++ emptyFieldIfNecessary
 
     notEmpty (_, fieldData) =
       if fieldData == {name = Nothing, value = Nothing}

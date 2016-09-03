@@ -1,4 +1,5 @@
 const expect = require('expect');
+const { flatten } = require('lodash');
 
 
 // UTILITY FUNCTIONS
@@ -9,17 +10,21 @@ const component = (name, classes) => (
   }), {})
 );
 
-const elmClass = (elmClassName) => [
+const elmSelectors = (elmClassName) => [
   `[class$='${elmClassName}']`,
   `[class*='${elmClassName} ']`,
-].join(', ');
+];
+
+const elmClass = (elmClassName) => (
+  elmSelectors(elmClassName).join(', ')
+);
 
 
 // COMPONENT CLASSES
 
 const ParametricSvgEditor = component('ParametricSvgEditor', [
   'Display',
-  'Textarea',
+  'Editor',
 ]);
 
 const VariablesPanel = component('VariablesPanel', [
@@ -31,23 +36,9 @@ const VariablesPanel = component('VariablesPanel', [
 
 // CUSTOM COMMANDS
 
-browser.addCommand('setValueAttribute', (selector, value) => {
-  const callback = ([element], input) => {
-    if (element === undefined) throw new Error('No element found!');
-    element.setAttribute('value', input);
-  };
-
-  browser.selectorExecute(selector, callback, value);
-});
-
-browser.addCommand('setTextareaValue', (selector, value) => {
-  const callback = ([element], input) => {
-    if (element === undefined) throw new Error('No element found!');
-    element.value = input;
-    element.dispatchEvent(new Event('input'));
-  };
-
-  browser.selectorExecute(selector, callback, value);
+browser.addCommand('typeInto', (selector, value) => {
+  browser.doubleClick(selector);
+  browser.keys(value);
 });
 
 
@@ -63,8 +54,8 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
-    browser.setTextareaValue(
-      elmClass(ParametricSvgEditor.Textarea),
+    browser.typeInto(
+      elmClass(ParametricSvgEditor.Editor),
       source
     );
   });
@@ -72,15 +63,28 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I add a variable named '([^']*)' with a value of '([^']*)'$/
   ), (name, value) => {
-    const lastInput = (
-      `${elmClass(VariablesPanel.Input)}:last-child`
+    const lastInputSelectors = (
+      elmSelectors(VariablesPanel.Input)
+        .map(selector => `${selector}:last-child`)
     );
-    browser.setValueAttribute(
-      `${lastInput} ${elmClass(VariablesPanel.Parameter)}`,
+
+    const childOfLastInput = (elmClassName) => {
+      const combinations =
+        elmSelectors(elmClassName).map(childSelector => (
+          lastInputSelectors.map(inputSelector => (
+            `${inputSelector} ${childSelector}`
+          ))
+        ));
+
+      return flatten(combinations).join(', ');
+    };
+
+    browser.typeInto(
+      childOfLastInput(VariablesPanel.Parameter),
       name
     );
-    browser.setValueAttribute(
-      `${lastInput} ${elmClass(VariablesPanel.Value)}`,
+    browser.typeInto(
+      childOfLastInput(VariablesPanel.Value),
       value
     );
   });

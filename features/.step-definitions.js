@@ -1,18 +1,42 @@
+const expect = require('expect');
+
+
+// UTILITY FUNCTIONS
+
 const component = (name, classes) => (
   classes.reduce((result, className) => Object.assign({}, result, {
     [className]: `${name}-${className}`,
   }), {})
 );
 
+const elmClass = (elmClassName) => [
+  `[class$='${elmClassName}']`,
+  `[class*='${elmClassName} ']`,
+].join(', ');
+
+
+// COMPONENT CLASSES
+
 const ParametricSvgEditor = component('ParametricSvgEditor', [
   'Display',
   'Textarea',
 ]);
 
-const elmClass = (elmClassName) => [
-  `[class$='${elmClassName}']`,
-  `[class*='${elmClassName} ']`,
-].join(', ');
+
+// CUSTOM COMMANDS
+
+browser.addCommand('setTextareaValue', (selector, value) => {
+  const callback = ([element], input) => {
+    if (element === undefined) throw new Error('No element found!');
+    element.value = input;
+    element.dispatchEvent(new Event('input'));
+  };
+
+  browser.selectorExecute(selector, callback, value);
+});
+
+
+// STEP DEFINITIONS
 
 module.exports = function stepDefinitions() {
   this.Given((
@@ -24,17 +48,25 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
-    const callback = ([element], input) => {
-      if (element === undefined) throw new Error(
-        'No element found!'
-      );
-      element.value = input;
-      element.dispatchEvent(new Event('input'));
-    };
-    browser.selectorExecute(
+    browser.setTextareaValue(
       elmClass(ParametricSvgEditor.Textarea),
-      callback,
       source
+    );
+  });
+
+  this.When((
+    /^I add a variable named '([^']*)' with a value of '([^']*)'$/
+  ), (name, value) => {
+    const lastInput = (
+      `${elmClass(VariablesPanel.Input)}:last-child`
+    );
+    browser.setValueAttribute(
+      `${lastInput} ${elmClass(VariablesPanel.Parameter)}`,
+      name
+    );
+    browser.setValueAttribute(
+      `${lastInput} ${elmClass(VariablesPanel.Value)}`,
+      value
     );
   });
 
@@ -44,9 +76,8 @@ module.exports = function stepDefinitions() {
     const markup = browser.getHTML(
       `${elmClass(ParametricSvgEditor.Display)} svg`
     );
-    const expected = new RegExp(`<circle\\b[^>]*\\br="${radius}"`);
-    if (!expected.test(markup)) throw new Error(
-      'Markup doesn’t match'
-    );
+
+    const expectedMarkup = new RegExp(`<circle\\b[^>]*\\br="${radius}"`);
+    expect(markup).toMatch(expectedMarkup);
   });
 };

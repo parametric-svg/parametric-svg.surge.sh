@@ -11,7 +11,9 @@ Usage:
 set -x
 
 mkdir -p "$build_artifacts"/npm
-mv node_modules/@polymer/web-animations-js "$build_artifacts"/npm/
+if test -e node_modules/@polymer/web-animations-js; then
+  mv node_modules/@polymer/web-animations-js "$build_artifacts"/npm/
+fi
 
 "$local"/npm $@
 "$local"/npm shrinkwrap --dev

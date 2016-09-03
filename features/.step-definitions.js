@@ -24,7 +24,18 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
-    browser.setValue(elmClass(ParametricSvgEditor.Textarea), source);
+    const callback = ([element], input) => {
+      if (element === undefined) throw new Error(
+        'No element found!'
+      );
+      element.value = input;
+      element.dispatchEvent(new Event('input'));
+    };
+    browser.selectorExecute(
+      elmClass(ParametricSvgEditor.Textarea),
+      callback,
+      source
+    );
   });
 
   this.Then((

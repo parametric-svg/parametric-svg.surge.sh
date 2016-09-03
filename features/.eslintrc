@@ -1,5 +1,6 @@
 rules:
   new-cap: off
+  no-param-reassign: off
 
 globals:
   browser: false

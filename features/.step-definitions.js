@@ -9,13 +9,16 @@ const component = (name, classes) => (
   }), {})
 );
 
-const elmSelectors = (elmClassName) => [
-  `[class$='${elmClassName}']`,
-  `[class*='${elmClassName} ']`,
+const elmSelectors = ({
+  className,
+  suffix = '',
+}) => [
+  `[class$='${className}']${suffix}`,
+  `[class*='${className} ']${suffix}`,
 ];
 
-const elmClass = (elmClassName) => (
-  elmSelectors(elmClassName).join(', ')
+const elmSelector = (options) => (
+  elmSelectors(options).join(', ')
 );
 
 
@@ -54,7 +57,9 @@ module.exports = function stepDefinitions() {
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
     browser.typeInto(
-      elmClass(ParametricSvgEditor.Editor),
+      elmSelector({
+        className: ParametricSvgEditor.Editor,
+      }),
       source
     );
   });
@@ -62,14 +67,14 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I add a variable named '([^']*)' with a value of '([^']*)'$/
   ), (name, value) => {
-    const lastInputSelectors = (
-      elmSelectors(VariablesPanel.Input)
-        .map(selector => `${selector}:last-child`)
-    );
+    const lastInputSelectors = elmSelectors({
+      className: VariablesPanel.Input,
+      suffix: ':last-child',
+    });
 
-    const childOfLastInput = (elmClassName) => {
+    const childOfLastInput = (className) => {
       const combinations =
-        elmSelectors(elmClassName).map(childSelector => (
+        elmSelectors({ className }).map(childSelector => (
           lastInputSelectors.map(inputSelector => (
             `${inputSelector} ${childSelector}`
           ))
@@ -98,7 +103,10 @@ module.exports = function stepDefinitions() {
     /^I should see a circle with a radius of '([\d]+)' on the canvas$/
   ), (radius) => {
     const markup = browser.getHTML(
-      `${elmClass(ParametricSvgEditor.Display)} svg`
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+        suffix: ' svg',
+      })
     );
 
     const expectedMarkup = new RegExp(`<circle\\b[^>]*\\br="${radius}"`);

@@ -8,9 +8,9 @@
       "resolved": "https://registry.npmjs.org/@parametric-svg/ast/-/ast-1.0.1.tgz"
     },
     "@parametric-svg/element": {
-      "version": "1.3.3",
+      "version": "1.3.4",
       "from": "@parametric-svg/element@latest",
-      "resolved": "https://registry.npmjs.org/@parametric-svg/element/-/element-1.3.3.tgz"
+      "resolved": "https://registry.npmjs.org/@parametric-svg/element/-/element-1.3.4.tgz"
     },
     "@parametric-svg/expression-to-mathjs": {
       "version": "2.0.1",

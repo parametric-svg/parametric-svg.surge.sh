@@ -23,7 +23,6 @@ import Styles.ParametricSvgEditor exposing
     , Display, Display_ImplicitSize
     , DisplaySizer
     , Editor
-    , Textarea
     , Toolbar
     )
   , componentNamespace
@@ -427,7 +426,6 @@ view model =
           ]
           [ textarea
             [ onInput UpdateRawMarkup
-            , class [Textarea]
             ] []
           ]
         ]

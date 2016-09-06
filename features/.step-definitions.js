@@ -48,6 +48,39 @@ browser.addCommand('typeInto', (selector, value) => {
   browser.keys(value);
 });
 
+browser.addCommand('typeIntoEditor', (value) => {
+  browser.typeInto(
+    elmSelector({
+      className: ParametricSvgEditor.Editor,
+    }),
+    value
+  );
+});
+
+
+// CUSTOM ASSERTIONS
+
+const expectDisplaySvgToHaveSize = ({ width, height }) => {
+  const svgMarkup = browser.getHTML(
+    elmSelector({
+      className: ParametricSvgEditor.Display,
+      suffix: ' svg',
+    })
+  );
+
+  expect(svgMarkup).toMatch(
+    xmlParameterRegExp('svg', `width="${width}"`)
+  );
+
+  expect(svgMarkup).toMatch(
+    xmlParameterRegExp('svg', `height="${height}"`)
+  );
+
+  expect(svgMarkup).toMatch(
+    xmlParameterRegExp('svg', `viewBox="0 0 ${width} ${height}"`)
+  );
+};
+
 
 // STEP DEFINITIONS
 
@@ -61,12 +94,7 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
-    browser.typeInto(
-      elmSelector({
-        className: ParametricSvgEditor.Editor,
-      }),
-      source
-    );
+    browser.typeIntoEditor(source);
   });
 
   this.When((
@@ -121,29 +149,80 @@ module.exports = function stepDefinitions() {
   this.Then((
     /^the SVG canvas should be just as large as the display$/
   ), () => {
-    const { width, height } = browser.getElementSize(
+    const size = browser.getElementSize(
       elmSelector({
         className: ParametricSvgEditor.Display,
       })
     );
 
-    const svgMarkup = browser.getHTML(
+    expectDisplaySvgToHaveSize(size);
+  });
+
+  this.Then((
+    /^the size of the SVG drawing should be '(\d+)' px by '(\d+)' px$/
+  ), (width, height) => {
+    expectDisplaySvgToHaveSize({ width, height });
+  });
+
+  this.When((
+    /^I create a blank '(\d+)' by '(\d+)' SVG drawing$/
+  ), (width, height) => {
+    browser.typeIntoEditor(
+      `<svg ${[
+        `width="${width}"`,
+        `height="${height}"`,
+        `viewBox="0 0 ${width} ${height}"`,
+      ].join(' ')}></svg>`
+    );
+  });
+
+  this.Then((
+    /^the display should be '(\d+)' px high$/
+  ), (height) => {
+    const size = browser.getElementSize(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+      })
+    );
+
+    expect(String(size.height)).toBe(height);
+  });
+
+  this.Then((
+    /^the SVG should be scaled down to fit the '([^']+)' of the display$/
+  ), (dimension) => {
+    const displaySize = browser.getElementSize(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+      })
+    );
+
+    const svgSize = browser.getElementSize(
       elmSelector({
         className: ParametricSvgEditor.Display,
         suffix: ' svg',
       })
     );
 
-    expect(svgMarkup).toMatch(
-      xmlParameterRegExp('svg', `width="${width}"`)
+    expect(svgSize[dimension]).toBe(displaySize[dimension]);
+  });
+
+  this.Then((
+    /^the display should shrink to fit the height of the scaled-down SVG$/
+  ), () => {
+    const svgSize = browser.getElementSize(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+        suffix: ' svg',
+      })
     );
 
-    expect(svgMarkup).toMatch(
-      xmlParameterRegExp('svg', `height="${height}"`)
+    const displaySize = browser.getElementSize(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+      })
     );
 
-    expect(svgMarkup).toMatch(
-      xmlParameterRegExp('svg', `viewBox="0 0 ${width} ${height}"`)
-    );
+    expect(displaySize.height).toBe(svgSize.height);
   });
 };

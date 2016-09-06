@@ -17,7 +17,8 @@
     "@polymer/paper-tooltip": "0.0.3",
     "codemirror": "^5.16.0",
     "jss-lite": "^1.2.0",
-    "private-parts": "^0.4.1"
+    "private-parts": "^0.4.1",
+    "set-immediate-shim": "https://registry.npmjs.org/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz"
   },
   "devDependencies": {
     "@parametric-svg/element": "^1.3.4",

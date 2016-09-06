@@ -1,4 +1,5 @@
 const { flatten } = require('lodash');
+const expect = require('expect');
 
 
 // UTILITY FUNCTIONS
@@ -19,6 +20,10 @@ const elmSelectors = ({
 
 const elmSelector = (options) => (
   elmSelectors(options).join(', ')
+);
+
+const xmlParameterRegExp = (element, parameterRegExp) => (
+  new RegExp(`<${element}\\b[^>]*\\b${parameterRegExp}`)
 );
 
 
@@ -109,9 +114,36 @@ module.exports = function stepDefinitions() {
       })
     );
 
-    const expectedMarkup = new RegExp(`<circle\\b[^>]*\\br="${radius}"`);
-    browser.waitUntil(() => (
-      expectedMarkup.test(markup)
-    ), 2000, `'${markup}' should match ${expectedMarkup}`);
+    const expectedMarkup = xmlParameterRegExp('circle', `r="${radius}"`);
+    expect(markup).toMatch(expectedMarkup);
+  });
+
+  this.Then((
+    /^the SVG canvas should be just as large as the display$/
+  ), () => {
+    const { width, height } = browser.getElementSize(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+      })
+    );
+
+    const svgMarkup = browser.getHTML(
+      elmSelector({
+        className: ParametricSvgEditor.Display,
+        suffix: ' svg',
+      })
+    );
+
+    expect(svgMarkup).toMatch(
+      xmlParameterRegExp('svg', `width="${width}"`)
+    );
+
+    expect(svgMarkup).toMatch(
+      xmlParameterRegExp('svg', `height="${height}"`)
+    );
+
+    expect(svgMarkup).toMatch(
+      xmlParameterRegExp('svg', `viewBox="0 0 ${width} ${height}"`)
+    );
   });
 };

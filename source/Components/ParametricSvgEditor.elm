@@ -444,5 +444,5 @@ decodeSize : Decoder CanvasSize
 decodeSize =
   Decode.at ["detail"]
   <| Decode.object2 CanvasSize
-    ("width" := Decode.int)
-    ("height" := Decode.int)
+    ("width" := Decode.map round Decode.float)
+    ("height" := Decode.map round Decode.float)

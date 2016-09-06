@@ -16,7 +16,7 @@ import Css exposing
 type Classes = Root | Input | InputField | Parameter | Value
 
 css : Stylesheet
-css = (stylesheet << namespace componentNamespace) <|
+css = stylesheet <| namespace componentNamespace <|
   let
     panelBackgroundColor =
       "C5E1A5"

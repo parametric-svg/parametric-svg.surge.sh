@@ -11,7 +11,7 @@ import Css exposing
 type Classes = Link
 
 css : Stylesheet
-css = (stylesheet << namespace componentNamespace) <|
+css = stylesheet <| namespace componentNamespace <|
   [ (.) Link
     [ property "color" "inherit"
       -- https://github.com/rtfeldman/elm-css/issues/148

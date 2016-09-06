@@ -20,7 +20,7 @@ type Classes
   | Toolbar
 
 css : Stylesheet
-css = (stylesheet << namespace componentNamespace) <|
+css = stylesheet <| namespace componentNamespace <|
   let
     toolbarBackgroundColor =
       hex "8BC34A"

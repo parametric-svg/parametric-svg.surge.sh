@@ -32,7 +32,7 @@
     "eslint": "^2.13.1",
     "eslint-config-airbnb-base": "^3.0.1",
     "eslint-plugin-import": "^1.10.0",
-    "expect": "^1.20.2",
+    "expect": "https://registry.npmjs.org/expect/-/expect-1.20.2.tgz",
     "global": "https://registry.npmjs.org/global/-/global-4.3.0.tgz",
     "lodash": "https://registry.npmjs.org/lodash/-/lodash-4.14.0.tgz",
     "node-dev": "^3.1.3",

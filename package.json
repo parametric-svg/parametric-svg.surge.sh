@@ -2,6 +2,9 @@
   "name": "parametric-svg.github.io",
   "version": "0.0.0",
   "author": "Tomek Wiszniewski <t.wiszniewski@gmail.com",
+  "scripts": {
+    "start": "./scripts/start"
+  },
   "dependencies": {
     "@parametric-svg/element": "^1.3.4",
     "@polymer/iron-icons": "0.0.3",

@@ -23,7 +23,7 @@ const elmClass = (elmClassName) => (
 
 const ParametricSvgEditor = component('ParametricSvgEditor', [
   'Display',
-  'Editor',
+  'Textarea',
 ]);
 
 const VariablesPanel = component('VariablesPanel', [
@@ -35,9 +35,24 @@ const VariablesPanel = component('VariablesPanel', [
 
 // CUSTOM COMMANDS
 
-browser.addCommand('typeInto', (selector, value) => {
-  browser.doubleClick(selector);
-  browser.keys(value);
+browser.addCommand('setValueAttribute', (selector, value) => {
+  const callback = ([element], input) => {
+    if (element === undefined) throw new Error('No element found!');
+    element.setAttribute('value', input);
+    element.dispatchEvent(new Event('input'));
+  };
+
+  browser.selectorExecute(selector, callback, value);
+});
+
+browser.addCommand('setTextareaValue', (selector, value) => {
+  const callback = ([element], input) => {
+    if (element === undefined) throw new Error('No element found!');
+    element.value = input;
+    element.dispatchEvent(new Event('input'));
+  };
+
+  browser.selectorExecute(selector, callback, value);
 });
 
 
@@ -53,8 +68,8 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
-    browser.typeInto(
-      elmClass(ParametricSvgEditor.Editor),
+    browser.setTextareaValue(
+      elmClass(ParametricSvgEditor.Textarea),
       source
     );
   });
@@ -78,11 +93,11 @@ module.exports = function stepDefinitions() {
       return flatten(combinations).join(', ');
     };
 
-    browser.typeInto(
+    browser.setValueAttribute(
       childOfLastInput(VariablesPanel.Parameter),
       name
     );
-    browser.typeInto(
+    browser.setValueAttribute(
       childOfLastInput(VariablesPanel.Value),
       value
     );

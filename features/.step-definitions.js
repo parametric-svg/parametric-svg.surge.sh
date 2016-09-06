@@ -44,7 +44,7 @@ browser.addCommand('typeInto', (selector, value) => {
 // STEP DEFINITIONS
 
 module.exports = function stepDefinitions() {
-  this.Given((
+  this.When((
     /^I visit '([^']*)'$/
   ), (path) => {
     browser.url(`http://0.0.0.0:9229${path}`);

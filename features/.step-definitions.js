@@ -92,6 +92,16 @@ module.exports = function stepDefinitions() {
   });
 
   this.When((
+    /^I visit '([^']*)' for the first time$/
+  ), (path) => {
+    browser.url(`http://0.0.0.0:9229${path}`);
+    browser.execute(() => {
+      localStorage.clear();
+    });
+    browser.refresh();
+  });
+
+  this.When((
     /^I type '([^']*)' into the source panel$/
   ), (source) => {
     browser.typeIntoEditor(source);

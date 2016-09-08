@@ -1,0 +1,35 @@
+#! /bin/bash -e
+source "$(dirname "$0")"/_/env.source.sh
+
+if test "$1" == '--help'; then echo "\
+Usage:
+  $(basename "$0") [--help]
+
+  We’ll start a
+"; exit 0; fi
+
+mkdir -p "$build_artifacts"/test-e2e
+
+echo; echo -n 'Starting selenium server…  '
+log_target="$build_artifacts"/test-e2e/selenium.log
+selenium_pid="$(cat "$build_artifacts"/test-e2e/selenium.pid || echo '')"
+if
+  kill -0 "$selenium_pid" &> /dev/null \
+  && \
+  ps -p "$selenium_pid" -o command= | grep -q "$local"/selenium-standalone
+then
+  echo "already running at $selenium_pid ."
+else
+  "$local"/selenium-standalone start \
+    &> "$log_target" \
+    &
+  selenium_new_pid="$!"
+  echo "started at $selenium_new_pid ."
+  echo "$selenium_new_pid" > "$build_artifacts"/test-e2e/selenium.pid
+fi
+echo "Selenium logs are written to $log_target ."
+
+echo; echo 'Running webdriverio E2E tests. Results will follow.'
+set +e
+"$local"/wdio
+exit $?

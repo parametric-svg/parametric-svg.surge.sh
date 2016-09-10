@@ -25,6 +25,7 @@ view message =
     [ node "paper-spinner-lite"
       [ id spinnerId
       , attribute "active" ""
+      , attribute "name" message
       , class [Spinner]
       ] []
     , node "paper-tooltip"

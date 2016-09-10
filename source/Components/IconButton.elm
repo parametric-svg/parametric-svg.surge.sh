@@ -18,7 +18,7 @@ view componentNamespace attributes {symbol, tooltip} =
   in
     [ node "paper-icon-button"
       ( [ attribute "icon" symbol
-        , attribute "alt" tooltip
+        , attribute "name" tooltip
         , id iconId
         ]
       ++ attributes

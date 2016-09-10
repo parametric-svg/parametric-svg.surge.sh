@@ -158,7 +158,7 @@ view model =
               iconButton
                 []
                 { symbol = "cloud-queue"
-                , tooltip = "Enable gist integration"
+                , tooltip = "enable gist integration"
                 }
           ]
 

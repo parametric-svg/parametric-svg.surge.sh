@@ -350,7 +350,7 @@ view model =
                 ]
                 <| iconButton []
                   { symbol = "check"
-                  , tooltip = "Saved – click to view"
+                  , tooltip = "saved – click to view"
                   }
               ]
 
@@ -359,7 +359,7 @@ view model =
                 [ onClick AskForFileContents
                 ]
                 { symbol = "save"
-                , tooltip = "Unsaved changes – click to sync"
+                , tooltip = "unsaved changes – click to sync"
                 }
 
         _ ->
@@ -367,7 +367,7 @@ view model =
             [ onClick AskForFileContents
             ]
             { symbol = "cloud-upload"
-            , tooltip = "Save as gist"
+            , tooltip = "save as gist"
             }
 
   in

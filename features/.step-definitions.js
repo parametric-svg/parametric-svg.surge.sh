@@ -57,6 +57,14 @@ browser.addCommand('typeIntoEditor', (value) => {
   );
 });
 
+browser.addCommand('waitUntilElementDisplayed', (selector) => {
+  browser.waitUntil(() => {
+    const element = browser.element(selector);
+    if (element.type === 'NoSuchElement') return false;
+    return browser.elementIdDisplayed(element.value.ELEMENT);
+  });
+});
+
 
 // CUSTOM ASSERTIONS
 
@@ -234,5 +242,98 @@ module.exports = function stepDefinitions() {
     );
 
     expect(displaySize.height).toBe(svgSize.height);
+  });
+
+  this.Then((
+    /^I click the '([^']*)' icon button$/
+  ), (title) => {
+    browser.click(`paper-icon-button[name="${title}"]`);
+  });
+
+  this.Then((
+    /^a new tab should open$/
+  ), () => {
+    let tabIds = [];
+    browser.waitUntil(() => {
+      tabIds = browser.getTabIds();
+      return tabIds.length === 2;
+    });
+
+    this.newlyOpenedTabId = (tabIds
+      .find(tabId => tabId !== browser.getCurrentTabId())
+    );
+  });
+
+  this.When((
+    /^I switch to the newly-opened tab$/
+  ), () => {
+    expect(this.newlyOpenedTabId).toNotBe(undefined);
+    browser.switchTab(this.newlyOpenedTabId);
+  });
+
+  this.Then((
+    /^the newly-opened tab should close$/
+  ), () => {
+    let tabIds;
+    browser.waitUntil(() => {
+      tabIds = browser.getTabIds();
+      return (
+        tabIds.find(
+          tabId => tabId === this.newlyOpenedTabId
+        ) === undefined
+        &&
+        tabIds.length === 1
+      );
+    });
+
+    this.newlyOpenedTabId = undefined;
+    browser.switchTab(tabIds[0]);
+  });
+
+  this.Then((
+    /^the address bar should contain '([^']*)'$/
+  ), (urlPart) => {
+    expect(browser.getUrl()).toInclude(urlPart);
+  });
+
+  this.When((
+    /^I type '([^']*)' into the '([^']*)' input$/
+  ), (value, name) => {
+    browser.setValue(`input[name="${name}"]`, value);
+  });
+
+  this.When((
+    /^I click the '([^']*)' button$/
+  ), (name) => {
+    const buttonSelectors = [
+      'input[type=button]',
+      'input[type=submit]',
+      'button',
+    ];
+    const selector = (buttonSelectors
+      .map(buttonSelector => `${buttonSelector}[name="${name}"]`)
+      .join(', ')
+    );
+    browser.click(selector);
+  });
+
+  this.When((
+    /^I wait until I see '([^']*)'$/
+  ), (text) => {
+    browser.waitUntil(() => (
+      browser.getText('body').indexOf(text) !== -1
+    ));
+  });
+
+  this.Then((
+    /^eventually I should see a '([^']*)' spinner$/
+  ), (name) => {
+    browser.waitUntilElementDisplayed(`paper-spinner-lite[name="${name}"]`);
+  });
+
+  this.Then((
+    /^eventually I should see a '([^']*)' icon button$/
+  ), (name) => {
+    browser.waitUntilElementDisplayed(`paper-icon-button[name="${name}"]`);
   });
 };

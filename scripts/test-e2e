@@ -3,9 +3,10 @@ source "$(dirname "$0")"/_/env.source.sh
 
 if test "$1" == '--help'; then echo "\
 Usage:
-  $(basename "$0") [--help]
+  $(basename "$0") [--debug]
+  $(basename "$0") --help
 
-  We’ll start a
+  We’ll start a selenium server in the background and run wdio tests.
 "; exit 0; fi
 
 mkdir -p "$build_artifacts"/test-e2e
@@ -30,6 +31,13 @@ fi
 echo "Selenium logs are written to $log_target ."
 
 echo; echo 'Running webdriverio E2E tests. Results will follow.'
+
+args="$(for arg in "$@"; do echo "$arg"; done)"
+wdio_args=''
+if grep -E -q '^--debug$' <<< "$args"; then
+  wdio_args="$wdio_args --cucumberOpts.timeout=9999999"
+fi
+
 set +e
-"$local"/wdio
+"$local"/wdio $wdio_args
 exit $?

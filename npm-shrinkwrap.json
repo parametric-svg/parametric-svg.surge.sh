@@ -3364,7 +3364,7 @@
     },
     "invariant": {
       "version": "2.2.1",
-      "from": "invariant@>=2.2.0 <3.0.0",
+      "from": "https://registry.npmjs.org/invariant/-/invariant-2.2.1.tgz",
       "resolved": "https://registry.npmjs.org/invariant/-/invariant-2.2.1.tgz"
     },
     "ipaddr.js": {

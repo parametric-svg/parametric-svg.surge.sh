@@ -57,12 +57,10 @@ browser.addCommand('typeIntoEditor', (value) => {
   );
 });
 
-browser.addCommand('waitUntilElementDisplayed', (selector) => {
-  browser.waitUntil(() => {
-    const element = browser.element(selector);
-    if (element.type === 'NoSuchElement') return false;
-    return browser.elementIdDisplayed(element.value.ELEMENT);
-  });
+browser.addCommand('elementDisplayed', (selector) => {
+  const element = browser.element(selector);
+  if (element.type === 'NoSuchElement') return false;
+  return !!browser.elementIdDisplayed(element.value.ELEMENT);
 });
 
 
@@ -328,12 +326,24 @@ module.exports = function stepDefinitions() {
   this.Then((
     /^eventually I should see a '([^']*)' spinner$/
   ), (name) => {
-    browser.waitUntilElementDisplayed(`paper-spinner-lite[name="${name}"]`);
+    browser.waitUntil(() => (
+      browser.elementDisplayed(`paper-spinner-lite[name="${name}"]`)
+    ));
+  });
+
+  this.Then((
+    /^I should see a '([^']*)' icon button$/
+  ), (name) => {
+    expect(
+      browser.elementDisplayed(`paper-icon-button[name="${name}"]`)
+    ).toBe(true);
   });
 
   this.Then((
     /^eventually I should see a '([^']*)' icon button$/
   ), (name) => {
-    browser.waitUntilElementDisplayed(`paper-icon-button[name="${name}"]`);
+    browser.waitUntil(() => (
+      browser.elementDisplayed(`paper-icon-button[name="${name}"]`)
+    ));
   });
 };

@@ -373,7 +373,7 @@ view model =
                 [ onClick AskForFileContents
                 ]
                 { symbol = "save"
-                , tooltip = "unsaved changes – click to sync"
+                , tooltip = "unsaved changes – click to save"
                 }
 
         _ ->

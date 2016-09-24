@@ -21,7 +21,8 @@ Feature: Save to gist
 
   Scenario: Uploading the drawing to gist
     When I visit '/'
-    And I type '<circle parametric:r="20 * 5" />' into the source panel
+    And I type '<circle parametric:r="20 * n" />' into the source panel
+    And I add a parameter named 'n' with a value of '5'
     And I click the 'save as gist' icon button
     Then I should see a 'file name' input
 
@@ -34,7 +35,8 @@ Feature: Save to gist
     When I look at the gist under that id
     Then there should be one file inside
     And the file should be named 'e2e-test.parametric.svg'
-    And the file should contain '<circle parametric:r="20 * 5" r="100"/>'
+    And the file should contain '<defs><param name="n" value="5"/></defs>'
+    And the file should contain '<circle parametric:r="20 * n" r="100"/>'
     And the file should contain the attribute 'xmlns="http://www.w3.org/2000/svg"' on the SVG tag
     And the file should contain the attribute 'xmlns:parametric="//parametric-svg.js.org/v1"' on the SVG tag
     And the file should contain the attribute 'width' on the SVG tag
@@ -43,15 +45,21 @@ Feature: Save to gist
 
   Scenario: Saved state feedback
     When I type 'something else' into the source panel
-    Then I should see an 'unsaved changes – click to sync' icon button
+    Then eventually I should see an 'unsaved changes – click to save' icon button
 
-    When I type '<circle parametric:r="20 * 5" />' into the source panel
-    Then I should see a 'saved – click to view' icon button
+    When I type '<circle parametric:r="20 * n" />' into the source panel
+    Then eventually I should see a 'saved – click to view' icon button
+
+    When I change the parameter 'n' to '10'
+    Then eventually I should see an 'unsaved changes – click to save' icon button
+
+    When I change the parameter 'n' to '5'
+    Then eventually I should see a 'saved – click to view' icon button
 
   Scenario: Updating the uploaded gist
     When I type '<rect width="100" parametric:height="2 * 100" />' into the source panel
-    And I click the 'unsaved changes – click to sync' icon button
-    Then I should see a 'updating gist…' spinner
+    And I click the 'unsaved changes – click to save' icon button
+    Then eventually I should see a 'updating gist…' spinner
     And eventually I should see a 'saved – click to view' icon button
     And the icon button should be a link to 'https://gist.github.com/<last gist id>' opening in a new tab
 

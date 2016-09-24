@@ -62,21 +62,21 @@ const VariablesPanel = component('VariablesPanel', [
 
 // CUSTOM COMMANDS
 
-browser.addCommand('typeInto', (selector, value) => {
+browser.addCommand('typeIntoInput', (selector, value) => {
+  browser.doubleClick(selector);
+  browser.keys(value);
+});
+
+browser.addCommand('typeIntoEditor', (value) => {
+  const selector = elmSelector({
+    className: ParametricSvgEditor.Editor,
+  });
+
   // Triple click and type
   browser.click(selector);
   browser.click(selector);
   browser.click(selector);
   browser.keys(value);
-});
-
-browser.addCommand('typeIntoEditor', (value) => {
-  browser.typeInto(
-    elmSelector({
-      className: ParametricSvgEditor.Editor,
-    }),
-    value
-  );
 });
 
 browser.addCommand('elementDisplayed', (selector) => {
@@ -158,12 +158,23 @@ module.exports = function stepDefinitions() {
       return flatten(combinations).join(', ');
     };
 
-    browser.typeInto(
+    browser.typeIntoInput(
       childOfLastInput(VariablesPanel.Parameter),
       name
     );
-    browser.typeInto(
+    browser.typeIntoInput(
       childOfLastInput(VariablesPanel.Value),
+      value
+    );
+  });
+
+  this.When((
+    /^I change the parameter '([^']*)' to '([^']*)'$/
+  ), (name, value) => {
+    browser.typeIntoInput(
+      `paper-input[placeholder="parameter"][value="${name}"]` +
+      ' + ' +
+      'paper-input[placeholder="value"]',
       value
     );
   });
@@ -323,7 +334,7 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the '([^']*)' input$/
   ), (value, name) => {
-    browser.typeInto(input(name), value);
+    browser.typeIntoInput(input(name), value);
   });
 
   this.Then((

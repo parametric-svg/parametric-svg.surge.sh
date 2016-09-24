@@ -472,4 +472,14 @@ module.exports = function stepDefinitions() {
     );
     expect(iconButtonId).toBe(this.lastSeenIconButtonId);
   });
+
+  this.Then((
+    /^the source should be '([^']*)'$/
+  ), (source) => {
+    const selector = browser.element(elmSelector({
+      className: ParametricSvgEditor.Editor,
+      suffix: ' textarea',
+    }));
+    expect(browser.getValue(selector)).toBe(source);
+  });
 };

@@ -47,3 +47,15 @@ Feature: Gist integration
 
     When I type '<circle parametric:r="20 * 5" />' into the source panel
     Then I should see a 'saved – click to view' icon button
+
+  Scenario: Updating the uploaded gist
+    When I type '<rect width="100" parametric:height="2 * 100" />' into the source panel
+    And I click the 'unsaved changes – click to sync' icon button
+    Then I should see a 'updating gist…' spinner
+    And eventually I should see a 'saved – click to view' icon button
+    And the icon button should be a link to 'https://gist.github.com/<last gist id>' opening in a new tab
+
+    When I look at the gist under that id
+    Then there should be one file inside
+    And the file should be named 'e2e-test.parametric.svg'
+    And the file should contain '<rect width="100" parametric:height="2 * 100" height="200"/>'

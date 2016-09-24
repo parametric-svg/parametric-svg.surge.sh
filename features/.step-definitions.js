@@ -389,7 +389,7 @@ module.exports = function stepDefinitions() {
   });
 
   this.Then((
-    /^the icon button should be a link to '([^']*)' opening in a new tab$/
+    /^the icon button should be a link to '([^']*<gist id>)' opening in a new tab$/
   ), (urlStartPattern) => {
     const urlStart = urlStartPattern.replace(/<.*$/, '');
     const link = browser.element(`a[target="_blank"][href^="${urlStart}"]`);
@@ -400,14 +400,10 @@ module.exports = function stepDefinitions() {
     const url = link.getAttribute('href');
     this.lastGistId = url.match(urlPattern)[1];
 
-    const iconButtonElement = (
+    const iconButtonId = elementId(
       browser.elementIdElement(elementId(link), 'paper-icon-button')
     );
-    expect(
-      elementId(iconButtonElement)
-    ).toBe(
-      this.lastSeenIconButtonId
-    );
+    expect(iconButtonId).toBe(this.lastSeenIconButtonId);
   });
 
   this.When((
@@ -452,5 +448,17 @@ module.exports = function stepDefinitions() {
     expect(this.lastFile.content).toMatch(new RegExp(
       `<svg\\b[^>]*\\b${attribute}`
     ));
+  });
+
+  this.Then((
+    /^the icon button should be a link to '([^']*<last gist id>)' opening in a new tab$/
+  ), (urlStartPattern) => {
+    const urlStart = urlStartPattern.replace(/<last gist id>$/, this.lastGistId);
+    const linkId = browser.elementId(`a[target="_blank"][href^="${urlStart}"]`);
+
+    const iconButtonId = elementId(
+      browser.elementIdElement(linkId, 'paper-icon-button')
+    );
+    expect(iconButtonId).toBe(this.lastSeenIconButtonId);
   });
 };

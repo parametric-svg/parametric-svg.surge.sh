@@ -304,6 +304,7 @@ view model =
               [ node "focus-on-mount" []
                 [ node "paper-input"
                   [ attribute "label" "enter a file name"
+                  , attribute "name" "file name"
                   , tabindex 0
                   , onInput UpdateFileBasename
                   , value model.fileBasename
@@ -320,6 +321,7 @@ view model =
                 ]
                 [ node "paper-button"
                   [ onTap CreateGist
+                  , attribute "name" "save to gist"
                   ]
                   [ text "Save to gist"
                   ]

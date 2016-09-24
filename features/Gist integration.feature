@@ -23,14 +23,13 @@ Feature: Gist integration
     When I visit '/'
     And I type '<circle parametric:r="20 * 5" />' into the source panel
     And I click the 'save as gist' icon button
-    Then I should see an 'enter a file name' prompt
-    And I should see a 'save to gist' button
+    Then I should see a 'file name' input
 
-    When I type 'e2e-test' into the 'enter a file name' prompt
-    And I click the 'save as gist' button
+    When I type 'e2e-test' into the 'file name' input
+    And I click the 'save to gist' button
     Then I should see a 'creating gist…' spinner
     And eventually I should see a 'saved – click to view' icon button
-    And clicking the button should lead to a new tab at 'https://gist.github.com/<user>/<gist id>'
+    And the icon button should be a link to 'https://gist.github.com/<gist id>' opening in a new tab
 
     When I look at the gist under that id
     Then there should be one file inside

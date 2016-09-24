@@ -26,6 +26,24 @@ const xmlParameterRegExp = (element, parameterRegExp) => (
   new RegExp(`<${element}\\b[^>]*\\b${parameterRegExp}`)
 );
 
+const nameSelector = (name, baseSelectors) => (
+  baseSelectors
+  .map(selector => `${selector}[name="${name}"]`)
+  .join(', ')
+);
+const input = (name) => nameSelector(name, [
+  'input',
+  'paper-input',
+]);
+const iconButton = name => nameSelector(name, [
+  'paper-icon-button',
+]);
+const spinner = name => nameSelector(name, [
+  'paper-spinner-lite',
+]);
+
+const elementId = element => element.value.ELEMENT;
+
 
 // COMPONENT CLASSES
 
@@ -60,8 +78,12 @@ browser.addCommand('typeIntoEditor', (value) => {
 browser.addCommand('elementDisplayed', (selector) => {
   const element = browser.element(selector);
   if (element.type === 'NoSuchElement') return false;
-  return !!browser.elementIdDisplayed(element.value.ELEMENT);
+  return !!browser.elementIdDisplayed(elementId(element));
 });
+
+browser.addCommand('elementId', (selector) => (
+  elementId(browser.element(selector))
+));
 
 
 // CUSTOM ASSERTIONS
@@ -244,8 +266,8 @@ module.exports = function stepDefinitions() {
 
   this.Then((
     /^I click the '([^']*)' icon button$/
-  ), (title) => {
-    browser.click(`paper-icon-button[name="${title}"]`);
+  ), (name) => {
+    browser.click(iconButton(name));
   });
 
   this.Then((
@@ -297,22 +319,27 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I type '([^']*)' into the '([^']*)' input$/
   ), (value, name) => {
-    browser.setValue(`input[name="${name}"]`, value);
+    browser.typeInto(input(name), value);
+  });
+
+  this.Then((
+    /^I should see an? '([^']*)' input$/
+  ), (name) => {
+    expect(
+      browser.elementDisplayed(input(name))
+    ).toBe(true);
   });
 
   this.When((
     /^I click the '([^']*)' button$/
   ), (name) => {
-    const buttonSelectors = [
+    const button = nameSelector(name, [
       'input[type=button]',
       'input[type=submit]',
       'button',
-    ];
-    const selector = (buttonSelectors
-      .map(buttonSelector => `${buttonSelector}[name="${name}"]`)
-      .join(', ')
-    );
-    browser.click(selector);
+      'paper-button',
+    ]);
+    browser.click(button);
   });
 
   this.When((
@@ -324,26 +351,53 @@ module.exports = function stepDefinitions() {
   });
 
   this.Then((
-    /^eventually I should see a '([^']*)' spinner$/
-  ), (name) => {
-    browser.waitUntil(() => (
-      browser.elementDisplayed(`paper-spinner-lite[name="${name}"]`)
-    ));
-  });
-
-  this.Then((
-    /^I should see a '([^']*)' icon button$/
+    /^I should see an? '([^']*)' spinner$/
   ), (name) => {
     expect(
-      browser.elementDisplayed(`paper-icon-button[name="${name}"]`)
+      browser.elementDisplayed(spinner(name))
     ).toBe(true);
   });
 
   this.Then((
-    /^eventually I should see a '([^']*)' icon button$/
+    /^eventually I should see an? '([^']*)' spinner$/
   ), (name) => {
-    browser.waitUntil(() => (
-      browser.elementDisplayed(`paper-icon-button[name="${name}"]`)
+    browser.waitUntil(() => browser.elementDisplayed(
+      spinner(name)
     ));
+  });
+
+  this.Then((
+    /^I should see an? '([^']*)' icon button$/
+  ), (name) => {
+    expect(
+      browser.elementDisplayed(iconButton(name))
+    ).toBe(true);
+    this.lastSeenIconButtonId = browser.elementId(iconButton(name));
+  });
+
+  this.Then((
+    /^eventually I should see an? '([^']*)' icon button$/
+  ), (name) => {
+    browser.waitUntil(() => browser.elementDisplayed(
+      iconButton(name)
+    ));
+    this.lastSeenIconButtonId = browser.elementId(iconButton(name));
+  });
+
+  this.Then((
+    /^the icon button should be a link to '([^']*)' opening in a new tab$/
+  ), (urlStartPattern) => {
+    const urlStart = urlStartPattern.replace(/<.*$/, '');
+    const linkId = (
+      browser.elementId(`a[target="_blank"][href^="${urlStart}"]`)
+    );
+    const iconButtonElement = (
+      browser.elementIdElement(linkId, 'paper-icon-button')
+    );
+    expect(
+      elementId(iconButtonElement)
+    ).toBe(
+      this.lastSeenIconButtonId
+    );
   });
 };

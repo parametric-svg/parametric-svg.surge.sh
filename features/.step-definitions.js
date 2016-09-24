@@ -140,7 +140,7 @@ module.exports = function stepDefinitions() {
   });
 
   this.When((
-    /^I add a variable named '([^']*)' with a value of '([^']*)'$/
+    /^I add a parameter named '([^']*)' with a value of '([^']*)'$/
   ), (name, value) => {
     const lastInputSelectors = elmSelectors({
       className: VariablesPanel.Input,

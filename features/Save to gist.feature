@@ -1,4 +1,4 @@
-Feature: Gist integration
+Feature: Save to gist
   Scenario: First-time authentication
     When I visit '/' for the first time
     And I click the 'enable gist integration' icon button

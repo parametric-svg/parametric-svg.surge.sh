@@ -63,7 +63,10 @@ const VariablesPanel = component('VariablesPanel', [
 // CUSTOM COMMANDS
 
 browser.addCommand('typeInto', (selector, value) => {
-  browser.doubleClick(selector);
+  // Triple click and type
+  browser.click(selector);
+  browser.click(selector);
+  browser.click(selector);
   browser.keys(value);
 });
 

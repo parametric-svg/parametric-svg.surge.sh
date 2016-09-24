@@ -40,3 +40,10 @@ Feature: Gist integration
     And the file should contain the attribute 'width' on the SVG tag
     And the file should contain the attribute 'height' on the SVG tag
     And the file should contain the attribute 'viewBox' on the SVG tag
+
+  Scenario: Saved state feedback
+    When I type 'something else' into the source panel
+    Then I should see an 'unsaved changes – click to sync' icon button
+
+    When I type '<circle parametric:r="20 * 5" />' into the source panel
+    Then I should see a 'saved – click to view' icon button

@@ -82,9 +82,9 @@ type Message
 
   | UpdateFileBasename String
 
-  | CreateGist
-  | FailToCreateGist GistError
+  | SaveGist
   | ReceiveGistId String
+  | FailToSendGist GistError
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
@@ -184,12 +184,24 @@ update message model =
         !! FileContentsPlease
 
       AcceptFileContents fileContents ->
-        { model
-        | fileContents = Just fileContents
-        , displayFileNameDialog = True
-        }
-        ! []
-        !! Nada
+        case model.gistId of
+          Nothing ->
+            { model
+            | fileContents = Just fileContents
+            , displayFileNameDialog = True
+            }
+            ! []
+            !! Nada
+
+          Just _ ->
+            let
+              newModel =
+                { model
+                | fileContents = Just fileContents
+                }
+
+            in
+              update SaveGist newModel
 
       CloseDialog ->
         { model
@@ -210,7 +222,7 @@ update message model =
         | status = Pending
         , displayFileNameDialog = False
         }
-        ! [ Task.perform FailToCreateGist ReceiveGistId <|
+        ! [ Task.perform FailToSendGist ReceiveGistId <|
             sendToGist model
           ]
         !! Nada
@@ -223,25 +235,25 @@ update message model =
         ! []
         !! Nada
 
-      FailToCreateGist NoFileContents ->
+      FailToSendGist NoFileContents ->
         failWithMessage <|
           "Oops! This should never happen. No file contents to send."
-      FailToCreateGist NoGithubToken ->
+      FailToSendGist NoGithubToken ->
         failWithMessage <|
           "Aw, snap! You’re not logged into gist."
-      FailToCreateGist (HttpError Timeout) ->
+      FailToSendGist (HttpError Timeout) ->
         failWithMessage <|
           "Uh-oh! The github API request timed out. Trying again should help. " ++
           "Really."
-      FailToCreateGist (HttpError NetworkError) ->
+      FailToSendGist (HttpError NetworkError) ->
         failWithMessage <|
           "Aw, shucks! The network failed us this time. Try again in a few " ++
           "moments."
-      FailToCreateGist (HttpError (UnexpectedPayload message)) ->
+      FailToSendGist (HttpError (UnexpectedPayload message)) ->
         failWithMessage <|
           "Huh? We don’t understand the response from the github API. " ++
           "Here’s what our decoder says: “" ++ message ++ "”."
-      FailToCreateGist (HttpError (BadResponse number message)) ->
+      FailToSendGist (HttpError (BadResponse number message)) ->
         failWithMessage <|
           "Yikes! The github API responded " ++
           "with a " ++ toString number ++ " error. " ++
@@ -320,7 +332,7 @@ view model =
                 [ Html.Attributes.class "buttons"
                 ]
                 [ node "paper-button"
-                  [ onTap CreateGist
+                  [ onTap SaveGist
                   , attribute "name" "save to gist"
                   ]
                   [ text "Save to gist"

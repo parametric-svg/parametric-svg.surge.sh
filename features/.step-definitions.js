@@ -1,5 +1,6 @@
 const { flatten } = require('lodash');
 const expect = require('expect');
+const fetch = require('node-fetch');
 
 
 // UTILITY FUNCTIONS
@@ -388,16 +389,65 @@ module.exports = function stepDefinitions() {
     /^the icon button should be a link to '([^']*)' opening in a new tab$/
   ), (urlStartPattern) => {
     const urlStart = urlStartPattern.replace(/<.*$/, '');
-    const linkId = (
-      browser.elementId(`a[target="_blank"][href^="${urlStart}"]`)
+    const link = browser.element(`a[target="_blank"][href^="${urlStart}"]`);
+
+    const urlPattern = new RegExp(
+      `^${urlStartPattern.replace(/<gist id>$/, '(.*)')}$`
     );
+    const url = link.getAttribute('href');
+    this.lastGistId = url.match(urlPattern)[1];
+
     const iconButtonElement = (
-      browser.elementIdElement(linkId, 'paper-icon-button')
+      browser.elementIdElement(elementId(link), 'paper-icon-button')
     );
     expect(
       elementId(iconButtonElement)
     ).toBe(
       this.lastSeenIconButtonId
     );
+  });
+
+  this.When((
+    /^I look at the gist under that id$/
+  ), () => {
+    expect(this.lastGistId).toBeA('string');
+    return fetch(
+      `https://api.github.com/gists/${this.lastGistId}`
+    ).then(
+      response => response.json()
+    ).then(data => {
+      this.gistData = data;
+    });
+  });
+
+  this.Then((
+    /^there should be one file inside$/
+  ), () => {
+    const filenames = Object.keys(this.gistData.files);
+    expect(filenames.length).toBe(1);
+    this.lastFile = {
+      name: filenames[0],
+      content: this.gistData.files[filenames[0]].content,
+    };
+  });
+
+  this.Then((
+    /^the file should be named '([^']*)'$/
+  ), (filename) => {
+    expect(this.lastFile.name).toBe(filename);
+  });
+
+  this.Then((
+    /^the file should contain '([^']*)'$/
+  ), (snippet) => {
+    expect(this.lastFile.content).toContain(snippet);
+  });
+
+  this.Then((
+    /^the file should contain the attribute '([^']*)' on the SVG tag$/
+  ), (attribute) => {
+    expect(this.lastFile.content).toMatch(new RegExp(
+      `<svg\\b[^>]*\\b${attribute}`
+    ));
   });
 };

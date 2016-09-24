@@ -184,7 +184,7 @@ update message model =
 
         (Just fileContents, Nothing) ->
           update
-            (SaveToGistMessage <| SaveToGist.PassFileContents fileContents)
+            (SaveToGistMessage <| SaveToGist.AcceptFileContents fileContents)
             model
 
         (Nothing, Nothing) ->
@@ -247,7 +247,7 @@ update message model =
           let
             (saveToGist, _, _) =
               SaveToGist.update
-                (SaveToGist.PassToken token)
+                (SaveToGist.AcceptToken token)
                 model.saveToGist
 
           in

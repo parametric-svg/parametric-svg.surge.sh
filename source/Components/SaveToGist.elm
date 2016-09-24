@@ -1,6 +1,6 @@
 module Components.SaveToGist exposing
   ( Model
-  , Message(UpdateMarkup, UpdateVariables, PassToken, PassFileContents)
+  , Message(UpdateMarkup, UpdateVariables, AcceptToken, AcceptFileContents)
   , MessageToParent(..)
 
   , init, update, view
@@ -76,7 +76,7 @@ init markup =
 
 type Message
   = AskForFileContents
-  | PassFileContents String
+  | AcceptFileContents String
 
   | CloseDialog
 
@@ -88,7 +88,7 @@ type Message
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
-  | PassToken String
+  | AcceptToken String
 
 type GistError
   = NoFileContents
@@ -141,7 +141,7 @@ update message model =
             (githubUrl token "/gists")
             ( payload fileContents
               [ "description" =>
-                Encode.string "Created via parametric-svg.surge.sh"
+                Encode.string "Created with parametric-svg.surge.sh"
               ]
             )
 
@@ -183,7 +183,7 @@ update message model =
         ! []
         !! FileContentsPlease
 
-      PassFileContents fileContents ->
+      AcceptFileContents fileContents ->
         { model
         | fileContents = Just fileContents
         , displayFileNameDialog = True
@@ -205,7 +205,7 @@ update message model =
         ! []
         !! Nada
 
-      CreateGist ->
+      SaveGist ->
         { model
         | status = Pending
         , displayFileNameDialog = False
@@ -261,7 +261,7 @@ update message model =
         ! []
         !! Nada
 
-      PassToken githubToken ->
+      AcceptToken githubToken ->
         { model
         | githubToken = Just githubToken
         }

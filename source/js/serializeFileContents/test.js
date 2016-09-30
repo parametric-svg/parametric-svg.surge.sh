@@ -34,7 +34,7 @@ const addElement = ({ drawingId, markup }) => {
 };
 
 /* eslint-disable quote-props, global-require */
-const prepareFileContents = (inNode
+const serializeFileContents = (inNode
   ? (() => {
     const { DOMParser, XMLSerializer } = require('xmldom');
     const proxyquire = require('proxyquire');
@@ -62,7 +62,7 @@ const withInput = ({
 }) => {
   const expect = (expectation) => (is) => {
     const listener = sinon.stub();
-    const { sendFileContents } = prepareFileContents({ listener });
+    const { sendFileContents } = serializeFileContents({ listener });
 
     const drawingId = randomString();
     addElement({ drawingId, markup });

@@ -1,1 +1,1 @@
-require('./source/js/prepareFileContents/test');
+require('./source/js/serializeFileContents/test');

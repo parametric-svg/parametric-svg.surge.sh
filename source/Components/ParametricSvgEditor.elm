@@ -1,4 +1,4 @@
-port module Components.ParametricSvgEditor exposing
+module Components.ParametricSvgEditor exposing
   ( Model, Message
   , init, update, subscriptions, view
   , markup
@@ -70,12 +70,17 @@ init =
 
     context =
       { githubAuthToken = Nothing
+      , drawingId = drawingId
+      , variables = variables variablesPanel
       }
+
+    variablesPanel =
+      VariablesPanel.init
 
   in
     { rawMarkup = ""
     , canvasSize = Nothing
-    , variablesPanel = VariablesPanel.init
+    , variablesPanel = variablesPanel
     , auth = authModel
     , saveToGist = saveToGistModel
     , toasts = []
@@ -133,23 +138,12 @@ markup model =
 
 -- UPDATE
 
-port requestFileContents
-  : {drawingId : String, variables : List Variable}
-  -> Cmd message
-
 type Message
   = UpdateRawMarkup String
-  | RequestFileContents
-  | ReceiveFileContents FileContentsSerializationOutput
   | ReceiveCanvasSize CanvasSize
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
-
-type alias FileContentsSerializationOutput =
-  { payload : Maybe String
-  , error : Maybe ToastContent
-  }
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -161,7 +155,7 @@ update message model =
           | rawMarkup = rawMarkup
           }
 
-        (saveToGist, _, _) =
+        (saveToGist, _) =
           SaveToGist.update
             (SaveToGist.UpdateMarkup <| markup modelWithMarkup)
             model.saveToGist
@@ -172,32 +166,6 @@ update message model =
         }
         ! []
 
-    RequestFileContents ->
-      model
-      ! [ requestFileContents
-          { drawingId = drawingId
-          , variables = variables model.variablesPanel
-          }
-        ]
-
-    ReceiveFileContents {payload, error} ->
-      case (payload, error) of
-        (_, Just failureToast) ->
-          { model
-          | toasts = failureToast :: model.toasts
-          }
-          ! []
-
-        (Just fileContents, Nothing) ->
-          update
-            ( SaveToGistMessage
-              <| SaveToGist.AcceptFileContents model.context fileContents
-            )
-            model
-
-        (Nothing, Nothing) ->
-          model ! []
-
     ReceiveCanvasSize canvasSize ->
       let
         modelWithCanvas =
@@ -205,7 +173,7 @@ update message model =
           | canvasSize = Just canvasSize
           }
 
-        (saveToGist, _, _) =
+        (saveToGist, _) =
           SaveToGist.update
             (SaveToGist.UpdateMarkup <| markup modelWithCanvas)
             model.saveToGist
@@ -221,7 +189,7 @@ update message model =
         variablesPanel =
           VariablesPanel.update message model.variablesPanel
 
-        (saveToGist, _, _) =
+        (saveToGist, _) =
           SaveToGist.update
             (SaveToGist.UpdateVariables (variables variablesPanel))
             model.saveToGist
@@ -261,23 +229,14 @@ update message model =
 
     SaveToGistMessage message ->
       let
-        (saveToGistModel, saveToGistCommand, messageToParent) =
+        (saveToGistModel, saveToGistCommand) =
           SaveToGist.update message model.saveToGist
 
-        (parentModel, parentCommand) =
-          case messageToParent of
-            SaveToGist.FileContentsPlease ->
-              update RequestFileContents model
-
-            SaveToGist.Nada ->
-              model ! []
-
       in
-        { parentModel
+        { model
         | saveToGist = saveToGistModel
         }
         ! [ Cmd.map SaveToGistMessage saveToGistCommand
-          , parentCommand
           ]
 
 
@@ -290,15 +249,15 @@ drawingId =
 
 -- SUBSCRIPTIONS
 
-port fileContents
-  : (FileContentsSerializationOutput -> message)
-  -> Sub message
-
 subscriptions : Model -> Sub Message
 subscriptions model =
   Sub.batch
-    [ Sub.map AuthMessage <| Auth.subscriptions model.auth
-    , fileContents ReceiveFileContents
+    [ Sub.map AuthMessage
+      <| Auth.subscriptions model.auth
+
+    , Sub.map SaveToGistMessage
+      <| SaveToGist.subscriptions model.context model.saveToGist
+
     ]
 
 

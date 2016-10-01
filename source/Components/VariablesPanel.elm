@@ -1,4 +1,4 @@
-module Components.VariablesPanel exposing
+port module Components.VariablesPanel exposing
   ( Model, Message
   , init, update, view
   , variables
@@ -18,6 +18,8 @@ import Styles.VariablesPanel exposing
 
 {class} =
   withNamespace componentNamespace
+
+
 
 
 -- MODEL
@@ -61,6 +63,8 @@ variables { variableFields } =
 emptyVariableField : Id -> (Id, VariableField)
 emptyVariableField id =
   (id, VariableField Nothing Nothing)
+
+
 
 
 -- ACTIONS
@@ -130,6 +134,8 @@ update message model =
 
       UpdateVariableValue id value ->
         updateVariableFields id (updateValue value)
+
+
 
 
 -- VIEW

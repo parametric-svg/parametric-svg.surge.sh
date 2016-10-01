@@ -2,6 +2,8 @@ module Types exposing (..)
 
 type alias Context =
   { githubAuthToken : Maybe String
+  , drawingId : String
+  , variables : List Variable
   }
 
 type alias Variable =

@@ -1,9 +1,6 @@
-module Components.SaveToGist exposing
-  ( Model
-  , Message(UpdateMarkup, UpdateVariables, AcceptFileContents)
-  , MessageToParent(..)
-
-  , init, update, view
+port module Components.SaveToGist exposing
+  ( Model, Message(UpdateMarkup, UpdateVariables)
+  , init, update, subscriptions, view
   )
 
 import Html exposing (Html, node, text, div, span, a)
@@ -17,7 +14,6 @@ import Http exposing
   )
 import Task exposing (Task)
 
-import Helpers exposing ((!!))
 import Types exposing (Variable, ToastContent, Context)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
@@ -74,8 +70,8 @@ init markup =
 -- UPDATE
 
 type Message
-  = AskForFileContents
-  | AcceptFileContents Context String
+  = RequestFileContents Context
+  | ReceiveFileContents Context FileContentsSerializationOutput
 
   | CloseDialog
 
@@ -93,11 +89,12 @@ type GistError
   | NoGithubToken
   | HttpError Http.Error
 
-type MessageToParent
-  = Nada
-  | FileContentsPlease
+type alias FileContentsSerializationOutput =
+  { payload : Maybe String
+  , error : Maybe ToastContent
+  }
 
-update : Message -> Model -> (Model, Cmd Message, MessageToParent)
+update : Message -> Model -> (Model, Cmd Message)
 update message model =
   let
     failWithMessage message =
@@ -105,7 +102,6 @@ update message model =
       | toasts = failureToast message :: model.toasts
       }
       ! []
-      !! Nada
 
     failureToast message =
       { message = message
@@ -174,24 +170,32 @@ update message model =
 
   in
     case message of
-      AskForFileContents ->
+      RequestFileContents context ->
         { model
         | dataSnapshot = Just (DataSnapshot model.markup model.variables)
         }
-        ! []
-        !! FileContentsPlease
+        ! [ requestFileContents
+            { drawingId = context.drawingId
+            , variables = context.variables
+            }
+          ]
 
-      AcceptFileContents context fileContents ->
-        case model.gistId of
-          Nothing ->
+      ReceiveFileContents context {payload, error} ->
+        case (payload, error, model.gistId) of
+          (_, Just failureToast, _) ->
+            { model
+            | toasts = failureToast :: model.toasts
+            }
+            ! []
+
+          (Just fileContents, Nothing, Nothing) ->
             { model
             | fileContents = Just fileContents
             , displayFileNameDialog = True
             }
             ! []
-            !! Nada
 
-          Just _ ->
+          (Just fileContents, Nothing, Just _) ->
             let
               newModel =
                 { model
@@ -201,19 +205,20 @@ update message model =
             in
               update (SaveGist context) newModel
 
+          (Nothing, Nothing, _) ->
+            model ! []
+
       CloseDialog ->
         { model
         | displayFileNameDialog = False
         }
         ! []
-        !! Nada
 
       UpdateFileBasename fileBasename ->
         { model
         | fileBasename = fileBasename
         }
         ! []
-        !! Nada
 
       SaveGist context ->
         { model
@@ -223,7 +228,6 @@ update message model =
         ! [ Task.perform FailToSendGist ReceiveGistId <|
             sendToGist context model
           ]
-        !! Nada
 
       ReceiveGistId gistId ->
         { model
@@ -231,7 +235,6 @@ update message model =
         , status = Void
         }
         ! []
-        !! Nada
 
       FailToSendGist NoFileContents ->
         failWithMessage <|
@@ -262,14 +265,31 @@ update message model =
         | markup = markup
         }
         ! []
-        !! Nada
 
       UpdateVariables variables ->
         { model
         | variables = variables
         }
         ! []
-        !! Nada
+
+
+port requestFileContents
+  : {drawingId : String, variables : List Variable}
+  -> Cmd message
+
+
+
+
+-- SUBSCRIPTIONS
+
+subscriptions : Context -> Model -> Sub Message
+subscriptions context model =
+  fileContents (ReceiveFileContents context)
+
+port fileContents
+  : (FileContentsSerializationOutput -> message)
+  -> Sub message
+
 
 
 
@@ -356,7 +376,7 @@ view context model =
 
             else
               iconButton
-                [ onClick AskForFileContents
+                [ onClick (RequestFileContents context)
                 ]
                 { symbol = "save"
                 , tooltip = "unsaved changes – click to save"
@@ -364,7 +384,7 @@ view context model =
 
         _ ->
           iconButton
-            [ onClick AskForFileContents
+            [ onClick (RequestFileContents context)
             ]
             { symbol = "cloud-upload"
             , tooltip = "save as gist"

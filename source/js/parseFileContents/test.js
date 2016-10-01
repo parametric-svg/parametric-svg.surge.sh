@@ -2,13 +2,10 @@
   // To keep XML markup readable
 const test = require('tape-catch');
 const inNode = require('detect-node');
-const sinon = require('sinon');
 
 /* eslint-disable quote-props, global-require */
-const querySelectorAll = sinon.stub().returns({ length: 0 });
-const parseFromString = sinon.stub().returns({ querySelectorAll });
 const parseFileContents = (inNode ? (() => {
-  const DOMParser = function DOMParser() { return { parseFromString }; };
+  const DOMParser = require('./test/mocks/DOMParser');
   const proxyquire = require('proxyquire');
   return proxyquire('.', {
     'global': { DOMParser },
@@ -21,26 +18,48 @@ const parseFileContents = (inNode ? (() => {
 test((
   'Returns the raw SVG and no variables when there are no <defs>'
 ), (is) => {
-  const { callCount } = parseFromString;
   const input = (
     '<svg>' +
       '<circle r="5"/>' +
     '</svg>'
   );
-  querySelectorAll.returns({ length: 0 });
 
   const { source, variables } = parseFileContents(input);
 
-  is.deepEqual(
-    [parseFromString.callCount, parseFromString.lastCall.args],
-    [callCount + 1, [input, 'image/svg+xml']],
-    'parses the input as SVG'
-  );
   is.equal(source, input,
     'returns the correct `source`'
   );
   is.deepEqual(variables, {},
     'returns no variables'
   );
+  is.end();
+});
+
+test((
+  'Pulls variables out of <defs>'
+), (is) => {
+  const input = (
+    '<svg>' +
+      '<defs>' +
+        '<param name="width" value="100"/>' +
+        '<param name="height" value="200"/>' +
+      '</defs>' +
+      '<rect parametric:width="width" parametric:height="height"/>' +
+    '</svg>'
+  );
+
+  const { source, variables } = parseFileContents(input);
+
+  is.equal(source, input,
+    'returns the correct `source`'
+  );
+
+  is.deepEqual(variables, {
+    width: '100',
+    height: '200',
+  }, (
+    'returns all variables'
+  ));
+
   is.end();
 });

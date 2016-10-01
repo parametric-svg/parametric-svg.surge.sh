@@ -16,27 +16,41 @@ const parseFileContents = (inNode ? (() => {
 /* eslint-enable quote-props, global-require */
 
 test((
-  'Returns the raw SVG and no variables when there are no <defs>'
+  'Returns no variables when there are no <defs>'
 ), (is) => {
-  const input = (
+  const { variables } = parseFileContents(
     '<svg>' +
       '<circle r="5"/>' +
     '</svg>'
   );
 
-  const { source, variables } = parseFileContents(input);
-
-  is.equal(source, input,
-    'returns the correct `source`'
-  );
-  is.deepEqual(variables, {},
-    'returns no variables'
-  );
+  is.deepEqual(variables, {});
   is.end();
 });
 
 test((
   'Pulls variables out of <defs>'
+), (is) => {
+  const { variables } = parseFileContents(
+    '<svg>' +
+      '<defs>' +
+        '<param name="width" value="100"/>' +
+        '<param name="height" value="200"/>' +
+      '</defs>' +
+      '<rect parametric:width="width" parametric:height="height"/>' +
+    '</svg>'
+  );
+
+  is.deepEqual(variables, {
+    width: '100',
+    height: '200',
+  });
+
+  is.end();
+});
+
+test((
+  'Returns the whole source, pretty printed'
 ), (is) => {
   const input = (
     '<svg>' +
@@ -48,18 +62,17 @@ test((
     '</svg>'
   );
 
-  const { source, variables } = parseFileContents(input);
+  const { source } = parseFileContents(input);
 
-  is.equal(source, input,
-    'returns the correct `source`'
-  );
-
-  is.deepEqual(variables, {
-    width: '100',
-    height: '200',
-  }, (
-    'returns all variables'
-  ));
+  is.equal(source, [
+    '<svg>',
+    '  <defs>',
+    '    <param name="width" value="100"/>',
+    '    <param name="height" value="200"/>',
+    '  </defs>',
+    '  <rect parametric:width="width" parametric:height="height"/>',
+    '</svg>',
+  ].join('\n'));
 
   is.end();
 });

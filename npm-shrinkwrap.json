@@ -6082,6 +6082,11 @@
       "from": "preserve@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/preserve/-/preserve-0.2.0.tgz"
     },
+    "prettify-xml": {
+      "version": "1.0.0",
+      "from": "prettify-xml@latest",
+      "resolved": "https://registry.npmjs.org/prettify-xml/-/prettify-xml-1.0.0.tgz"
+    },
     "pretty-bytes": {
       "version": "1.0.4",
       "from": "pretty-bytes@>=1.0.2 <2.0.0",

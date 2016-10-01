@@ -49,8 +49,10 @@ variables { variableFields } =
       case (field.name, field.value) of
         (Just name, Just value) ->
           Just {name = name, value = value}
+
         _ ->
           Nothing
+
   in
     Dict.values variableFields
     |> List.filterMap toVariable

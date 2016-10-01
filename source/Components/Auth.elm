@@ -1,6 +1,6 @@
 module Components.Auth exposing
-  ( Model, Message(ReceiveToken, LoadToken)
-  , init, token, update, subscriptions, view
+  ( Model, Message, MessageToParent(Nada, UpdateToken)
+  , init, update, subscriptions, view
   )
 
 import Html exposing (Html, node, div)
@@ -10,6 +10,8 @@ import Http
 import Task
 import LocalStorage
 
+import Helpers exposing ((!!))
+import Types exposing (Context)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
 import Components.Spinner as Spinner
@@ -18,23 +20,20 @@ import Components.Spinner as Spinner
 -- MODEL
 
 type alias Model =
-  { token : Maybe String
-  , code : Maybe String
+  { code : Maybe String
   , failureMessages : List String
   }
 
 init : (Model, Cmd Message)
 init =
-  { token = Nothing
-  , code = Nothing
+  { code = Nothing
   , failureMessages = []
   }
   ! [ LocalStorage.get storageKey
       |> Task.perform FailToLoadToken LoadToken
     ]
 
-token : Model -> Maybe String
-token = .token
+
 
 
 -- UPDATE
@@ -51,7 +50,11 @@ type Message
 type alias Code =
   Maybe String
 
-update : Message -> Model -> (Model, Cmd Message)
+type MessageToParent
+  = Nada
+  | UpdateToken (Maybe String)
+
+update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   let
     withFailure message model =
@@ -61,24 +64,18 @@ update message model =
 
   in
     case message of
-      LoadToken (Just token) ->
-        { model
-        | token = Just token
-        } ! []
-
-      LoadToken Nothing ->
-        model ! []
+      LoadToken maybeToken ->
+        model ! [] !! UpdateToken maybeToken
 
       FailToLoadToken _ ->
-        model ! []
+        model ! [] !! Nada
 
       ReceiveToken token ->
-        { model
-        | token = Just token
-        }
+        model
         ! [ LocalStorage.set storageKey token
             |> Task.perform FailToSaveToken Noop
           ]
+        !! UpdateToken (Just token)
 
       FailToSaveToken _ ->
         withFailure
@@ -89,6 +86,7 @@ update message model =
           )
           model
         ! []
+        !! Nada
 
       FailToReceiveToken _ ->
         withFailure "Blimey! Failed to get a github authentication token."
@@ -96,6 +94,7 @@ update message model =
           | code = Nothing
           }
         ! []
+        !! Nada
 
       ReceiveCode (Just code) ->
         let
@@ -110,14 +109,16 @@ update message model =
           }
           ! [ Task.perform FailToReceiveToken ReceiveToken fetchToken
             ]
+          !! Nada
 
       ReceiveCode Nothing ->
         withFailure "Yikes! Failed to get an authentication code from github."
           model
         ! []
+        !! Nada
 
       Noop _ ->
-        model ! []
+        model ! [] !! Nada
 
 
 storageKey : String
@@ -130,6 +131,7 @@ componentNamespace =
 
 
 
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Message
@@ -137,10 +139,12 @@ subscriptions model =
   Sub.none
 
 
+
+
 -- VIEW
 
-view : Model -> List (Html Message)
-view model =
+view : Context -> Model -> List (Html Message)
+view context model =
   let
     iconButton =
       IconButton.view componentNamespace
@@ -149,7 +153,7 @@ view model =
       List.map Toast.basic <| List.reverse model.failureMessages
 
     staticContents =
-      case (model.code, model.token) of
+      case (model.code, context.githubAuthToken) of
         (Nothing, Nothing) ->
           [ node "github-auth"
             [ onReceiveCode ReceiveCode

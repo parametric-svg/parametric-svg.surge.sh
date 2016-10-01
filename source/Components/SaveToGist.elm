@@ -1,6 +1,6 @@
 module Components.SaveToGist exposing
   ( Model
-  , Message(UpdateMarkup, UpdateVariables, AcceptToken, AcceptFileContents)
+  , Message(UpdateMarkup, UpdateVariables, AcceptFileContents)
   , MessageToParent(..)
 
   , init, update, view
@@ -17,7 +17,8 @@ import Http exposing
   )
 import Task exposing (Task)
 
-import UniversalTypes exposing (Variable, ToastContent)
+import Helpers exposing ((!!))
+import Types exposing (Variable, ToastContent, Context)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
@@ -40,7 +41,6 @@ type alias Model =
   , displayFileNameDialog : Bool
   , fileBasename : String
   , dataSnapshot : Maybe DataSnapshot
-  , githubToken : Maybe String
   , gistId : Maybe String
   , status : Status
   }
@@ -63,7 +63,6 @@ init markup =
   , displayFileNameDialog = False
   , fileBasename = ""
   , dataSnapshot = Nothing
-  , githubToken = Nothing
   , gistId = Nothing
   , status = Void
   }
@@ -76,19 +75,18 @@ init markup =
 
 type Message
   = AskForFileContents
-  | AcceptFileContents String
+  | AcceptFileContents Context String
 
   | CloseDialog
 
   | UpdateFileBasename String
 
-  | SaveGist
+  | SaveGist Context
   | ReceiveGistId String
   | FailToSendGist GistError
 
   | UpdateMarkup String
   | UpdateVariables (List Variable)
-  | AcceptToken String
 
 type GistError
   = NoFileContents
@@ -116,10 +114,10 @@ update message model =
         "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
       }
 
-    sendToGist model =
-      case (model.fileContents, model.githubToken) of
-        (Just fileContents, Just githubToken) ->
-          Task.mapError HttpError <| saveGist githubToken fileContents
+    sendToGist context model =
+      case (model.fileContents, context.githubAuthToken) of
+        (Just fileContents, Just githubAuthToken) ->
+          Task.mapError HttpError <| saveGist githubAuthToken fileContents
 
         (Nothing, _) ->
           Task.fail NoFileContents
@@ -183,7 +181,7 @@ update message model =
         ! []
         !! FileContentsPlease
 
-      AcceptFileContents fileContents ->
+      AcceptFileContents context fileContents ->
         case model.gistId of
           Nothing ->
             { model
@@ -201,7 +199,7 @@ update message model =
                 }
 
             in
-              update SaveGist newModel
+              update (SaveGist context) newModel
 
       CloseDialog ->
         { model
@@ -217,13 +215,13 @@ update message model =
         ! []
         !! Nada
 
-      SaveGist ->
+      SaveGist context ->
         { model
         | status = Pending
         , displayFileNameDialog = False
         }
         ! [ Task.perform FailToSendGist ReceiveGistId <|
-            sendToGist model
+            sendToGist context model
           ]
         !! Nada
 
@@ -273,25 +271,13 @@ update message model =
         ! []
         !! Nada
 
-      AcceptToken githubToken ->
-        { model
-        | githubToken = Just githubToken
-        }
-        ! []
-        !! Nada
-
-
-(!!) : (a, b) -> MessageToParent -> (a, b, MessageToParent)
-(!!) (model, command) messageToParent =
-  (model, command, messageToParent)
-
 
 
 
 -- VIEW
 
-view : Model -> List (Html Message)
-view model =
+view : Context -> Model -> List (Html Message)
+view context model =
   let
     iconButton =
       IconButton.view componentNamespace
@@ -332,7 +318,7 @@ view model =
                 [ Html.Attributes.class "buttons"
                 ]
                 [ node "paper-button"
-                  [ onTap SaveGist
+                  [ onTap <| SaveGist context
                   , attribute "name" "save to gist"
                   ]
                   [ text "Save to gist"

@@ -3,7 +3,7 @@ module Components.Toast exposing (custom, basic, toasts)
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
 
-import UniversalTypes exposing (ToastContent)
+import Types exposing (ToastContent)
 import Components.Link exposing (link)
 
 

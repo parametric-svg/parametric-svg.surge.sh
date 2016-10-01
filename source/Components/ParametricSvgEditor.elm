@@ -16,7 +16,7 @@ import Regex exposing (regex, HowMany(AtMost))
 import String
 import Maybe exposing (andThen)
 
-import UniversalTypes exposing (ToastContent, Variable)
+import Types exposing (ToastContent, Variable, Context)
 import Styles.ParametricSvgEditor exposing
   ( Classes
     ( Root
@@ -28,7 +28,7 @@ import Styles.ParametricSvgEditor exposing
   , componentNamespace
   )
 import Components.VariablesPanel as VariablesPanel exposing (variables)
-import Components.Auth as Auth exposing (token)
+import Components.Auth as Auth
 import Components.SaveToGist as SaveToGist
 import Components.Toast as Toast
 
@@ -51,6 +51,7 @@ type alias Model =
   , auth : Auth.Model
   , saveToGist : SaveToGist.Model
   , toasts : List ToastContent
+  , context : Context
   }
 
 type alias CanvasSize =
@@ -67,6 +68,10 @@ init =
     (saveToGistModel, saveToGistCommand) =
       SaveToGist.init (svgMarkup "" Nothing)
 
+    context =
+      { githubAuthToken = Nothing
+      }
+
   in
     { rawMarkup = ""
     , canvasSize = Nothing
@@ -74,6 +79,7 @@ init =
     , auth = authModel
     , saveToGist = saveToGistModel
     , toasts = []
+    , context = context
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -184,7 +190,9 @@ update message model =
 
         (Just fileContents, Nothing) ->
           update
-            (SaveToGistMessage <| SaveToGist.AcceptFileContents fileContents)
+            ( SaveToGistMessage
+              <| SaveToGist.AcceptFileContents model.context fileContents
+            )
             model
 
         (Nothing, Nothing) ->
@@ -227,37 +235,27 @@ update message model =
 
     AuthMessage message ->
       let
-        (authModel, authCommand) =
+        (authModel, authCommand, messageToParent) =
           Auth.update message model.auth
 
-        updatedModel =
-          case message of
-            Auth.ReceiveToken token ->
-              modelWithToken token
+        newContext =
+          case messageToParent of
+            Auth.Nada ->
+              context
 
-            Auth.LoadToken (Just token) ->
-              modelWithToken token
-
-            _ ->
-              { model
-              | auth = authModel
+            Auth.UpdateToken maybeToken ->
+              { context
+              | githubAuthToken = maybeToken
               }
 
-        modelWithToken token =
-          let
-            (saveToGist, _, _) =
-              SaveToGist.update
-                (SaveToGist.AcceptToken token)
-                model.saveToGist
-
-          in
-            { model
-            | auth = authModel
-            , saveToGist = saveToGist
-            }
+        context =
+          model.context
 
       in
-        updatedModel
+        { model
+        | auth = authModel
+        , context = newContext
+        }
         ! [ Cmd.map AuthMessage authCommand
           ]
 
@@ -399,12 +397,14 @@ view model =
       ]
 
     toolbarButtons =
-      case token model.auth of
+      case model.context.githubAuthToken of
         Just _ ->
-          List.map (App.map SaveToGistMessage) (SaveToGist.view model.saveToGist)
+          SaveToGist.view model.context model.saveToGist
+          |> List.map (App.map SaveToGistMessage)
 
         Nothing ->
-          List.map (App.map AuthMessage) (Auth.view model.auth)
+          Auth.view model.context model.auth
+          |> List.map (App.map AuthMessage)
 
   in
     node "paper-header-panel"

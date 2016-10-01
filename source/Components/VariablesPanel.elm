@@ -10,7 +10,7 @@ import Html.Attributes exposing (attribute)
 import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 
-import UniversalTypes exposing (Variable)
+import Types exposing (Variable)
 import Styles.VariablesPanel exposing
   ( Classes(Root, Input, InputField, Parameter, Value)
   , componentNamespace

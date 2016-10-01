@@ -1,4 +1,8 @@
-module UniversalTypes exposing (..)
+module Types exposing (..)
+
+type alias Context =
+  { githubAuthToken : Maybe String
+  }
 
 type alias Variable =
   { name : String

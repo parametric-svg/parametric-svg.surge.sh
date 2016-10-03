@@ -45,7 +45,7 @@ type alias DataSnapshot =
   }
 
 type Status
-  = Void
+  = Idle
   | Pending
 
 init : (Model, Cmd Message)
@@ -56,7 +56,7 @@ init =
   , fileBasename = ""
   , dataSnapshot = Nothing
   , gistId = Nothing
-  , status = Void
+  , status = Idle
   }
   ! []
 
@@ -225,7 +225,7 @@ update message model =
       ReceiveGistId gistId ->
         { model
         | gistId = Just gistId
-        , status = Void
+        , status = Idle
         }
         ! []
 
@@ -340,7 +340,7 @@ view context model =
         (Pending, Just _, _) ->
           Spinner.view "updating gist…"
 
-        (Void, Just gistId, Just snapshot) ->
+        (Idle, Just gistId, Just snapshot) ->
           if (context.markup == snapshot.markup)
           && (context.variables == snapshot.variables)
             then

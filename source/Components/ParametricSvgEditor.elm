@@ -51,7 +51,7 @@ type alias Model =
   , auth : Auth.Model
   , saveToGist : SaveToGist.Model
   , toasts : List ToastContent
-  , context : Context
+  , githubAuthToken : Maybe String
   }
 
 type alias CanvasSize =
@@ -66,25 +66,16 @@ init =
       Auth.init
 
     (saveToGistModel, saveToGistCommand) =
-      SaveToGist.init (svgMarkup "" Nothing)
-
-    context =
-      { githubAuthToken = Nothing
-      , drawingId = drawingId
-      , variables = variables variablesPanel
-      }
-
-    variablesPanel =
-      VariablesPanel.init
+      SaveToGist.init
 
   in
     { rawMarkup = ""
     , canvasSize = Nothing
-    , variablesPanel = variablesPanel
+    , variablesPanel = VariablesPanel.init
     , auth = authModel
     , saveToGist = saveToGistModel
     , toasts = []
-    , context = context
+    , githubAuthToken = Nothing
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -134,6 +125,15 @@ markup model =
   svgMarkup model.rawMarkup model.canvasSize
 
 
+context : Model -> Context
+context model =
+  { githubAuthToken = model.githubAuthToken
+  , drawingId = drawingId
+  , variables = variables model.variablesPanel
+  , markup = markup model
+  }
+
+
 
 
 -- UPDATE
@@ -149,81 +149,43 @@ update : Message -> Model -> (Model, Cmd Message)
 update message model =
   case message of
     UpdateRawMarkup rawMarkup ->
-      let
-        modelWithMarkup =
-          { model
-          | rawMarkup = rawMarkup
-          }
-
-        (saveToGist, _) =
-          SaveToGist.update
-            (SaveToGist.UpdateMarkup <| markup modelWithMarkup)
-            model.saveToGist
-
-      in
-        { modelWithMarkup
-        | saveToGist = saveToGist
-        }
-        ! []
+      { model
+      | rawMarkup = rawMarkup
+      }
+      ! []
 
     ReceiveCanvasSize canvasSize ->
-      let
-        modelWithCanvas =
-          { model
-          | canvasSize = Just canvasSize
-          }
-
-        (saveToGist, _) =
-          SaveToGist.update
-            (SaveToGist.UpdateMarkup <| markup modelWithCanvas)
-            model.saveToGist
-
-      in
-        { modelWithCanvas
-        | saveToGist = saveToGist
-        }
-        ! []
+      { model
+      | canvasSize = Just canvasSize
+      }
+      ! []
 
     VariablesPanelMessage message ->
-      let
-        variablesPanel =
-          VariablesPanel.update message model.variablesPanel
-
-        (saveToGist, _) =
-          SaveToGist.update
-            (SaveToGist.UpdateVariables (variables variablesPanel))
-            model.saveToGist
-
-      in
-        { model
-        | variablesPanel = variablesPanel
-        , saveToGist = saveToGist
-        }
-        ! []
+      { model
+      | variablesPanel = VariablesPanel.update message model.variablesPanel
+      }
+      ! []
 
     AuthMessage message ->
       let
         (authModel, authCommand, messageToParent) =
           Auth.update message model.auth
 
-        newContext =
+        newModel =
           case messageToParent of
             Auth.Nada ->
-              context
-
-            Auth.UpdateToken maybeToken ->
-              { context
-              | githubAuthToken = maybeToken
+              { model
+              | auth = authModel
               }
 
-        context =
-          model.context
+            Auth.UpdateToken maybeToken ->
+              { model
+              | auth = authModel
+              , githubAuthToken = maybeToken
+              }
 
       in
-        { model
-        | auth = authModel
-        , context = newContext
-        }
+        newModel
         ! [ Cmd.map AuthMessage authCommand
           ]
 
@@ -256,7 +218,7 @@ subscriptions model =
       <| Auth.subscriptions model.auth
 
     , Sub.map SaveToGistMessage
-      <| SaveToGist.subscriptions model.context model.saveToGist
+      <| SaveToGist.subscriptions (context model) model.saveToGist
 
     ]
 
@@ -356,13 +318,13 @@ view model =
       ]
 
     toolbarButtons =
-      case model.context.githubAuthToken of
+      case model.githubAuthToken of
         Just _ ->
-          SaveToGist.view model.context model.saveToGist
+          SaveToGist.view (context model) model.saveToGist
           |> List.map (App.map SaveToGistMessage)
 
         Nothing ->
-          Auth.view model.context model.auth
+          Auth.view (context model) model.auth
           |> List.map (App.map AuthMessage)
 
   in

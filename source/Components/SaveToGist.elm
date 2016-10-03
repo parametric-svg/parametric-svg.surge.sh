@@ -1,5 +1,5 @@
 port module Components.SaveToGist exposing
-  ( Model, Message(UpdateMarkup, UpdateVariables)
+  ( Model, Message
   , init, update, subscriptions, view
   )
 
@@ -31,8 +31,6 @@ import Components.Spinner as Spinner
 
 type alias Model =
   { fileContents : Maybe String
-  , markup : String
-  , variables : List Variable
   , toasts : List ToastContent
   , displayFileNameDialog : Bool
   , fileBasename : String
@@ -50,11 +48,9 @@ type Status
   = Void
   | Pending
 
-init : String -> (Model, Cmd Message)
-init markup =
+init : (Model, Cmd Message)
+init =
   { fileContents = Nothing
-  , markup = markup
-  , variables = []
   , toasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
@@ -80,9 +76,6 @@ type Message
   | SaveGist Context
   | ReceiveGistId String
   | FailToSendGist GistError
-
-  | UpdateMarkup String
-  | UpdateVariables (List Variable)
 
 type GistError
   = NoFileContents
@@ -172,7 +165,7 @@ update message model =
     case message of
       RequestFileContents context ->
         { model
-        | dataSnapshot = Just (DataSnapshot model.markup model.variables)
+        | dataSnapshot = Just (DataSnapshot context.markup context.variables)
         }
         ! [ requestFileContents
             { drawingId = context.drawingId
@@ -259,18 +252,6 @@ update message model =
           "Yikes! The github API responded " ++
           "with a " ++ toString number ++ " error. " ++
           "Here’s what they say: “" ++ message ++ "”."
-
-      UpdateMarkup markup ->
-        { model
-        | markup = markup
-        }
-        ! []
-
-      UpdateVariables variables ->
-        { model
-        | variables = variables
-        }
-        ! []
 
 
 port requestFileContents
@@ -360,8 +341,8 @@ view context model =
           Spinner.view "updating gist…"
 
         (Void, Just gistId, Just snapshot) ->
-          if (model.markup == snapshot.markup)
-          && (model.variables == snapshot.variables)
+          if (context.markup == snapshot.markup)
+          && (context.variables == snapshot.variables)
             then
               [ link
                 [ href <| "https://gist.github.com/" ++ gistId

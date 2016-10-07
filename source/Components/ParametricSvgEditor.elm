@@ -52,6 +52,7 @@ type alias Model =
   , saveToGist : SaveToGist.Model
   , toasts : List ToastContent
   , githubAuthToken : Maybe String
+  , gistId : Maybe String
   }
 
 type alias CanvasSize =
@@ -76,6 +77,7 @@ init =
     , saveToGist = saveToGistModel
     , toasts = []
     , githubAuthToken = Nothing
+    , gistId = Nothing
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -131,6 +133,7 @@ context model =
   , drawingId = drawingId
   , variables = variables model.variablesPanel
   , markup = markup model
+  , gistId = model.gistId
   }
 
 
@@ -191,11 +194,24 @@ update message model =
 
     SaveToGistMessage message ->
       let
-        (saveToGistModel, saveToGistCommand) =
+        (saveToGistModel, saveToGistCommand, messageToParent) =
           SaveToGist.update message model.saveToGist
 
+        newModel =
+          case messageToParent of
+            SaveToGist.Nada ->
+              { model
+              | saveToGist = saveToGistModel
+              }
+
+            SaveToGist.SetGistId maybeGistId ->
+              { model
+              | saveToGist = saveToGistModel
+              , gistId = maybeGistId
+              }
+
       in
-        { model
+        { newModel
         | saveToGist = saveToGistModel
         }
         ! [ Cmd.map SaveToGistMessage saveToGistCommand

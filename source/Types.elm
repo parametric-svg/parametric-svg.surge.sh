@@ -5,6 +5,7 @@ type alias Context =
   , drawingId : String
   , variables : List Variable
   , markup : String
+  , gistId : Maybe String
   }
 
 type alias Variable =

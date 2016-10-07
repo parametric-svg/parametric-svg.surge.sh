@@ -1,5 +1,5 @@
 port module Components.SaveToGist exposing
-  ( Model, Message
+  ( Model, MessageToParent(..), Message
   , init, update, subscriptions, view
   )
 
@@ -14,6 +14,7 @@ import Http exposing
   )
 import Task exposing (Task)
 
+import Helpers exposing ((!!))
 import Types exposing (Variable, ToastContent, Context)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
@@ -35,7 +36,6 @@ type alias Model =
   , displayFileNameDialog : Bool
   , fileBasename : String
   , dataSnapshot : Maybe DataSnapshot
-  , gistId : Maybe String
   , status : Status
   }
 
@@ -55,7 +55,6 @@ init =
   , displayFileNameDialog = False
   , fileBasename = ""
   , dataSnapshot = Nothing
-  , gistId = Nothing
   , status = Idle
   }
   ! []
@@ -64,6 +63,10 @@ init =
 
 
 -- UPDATE
+
+type MessageToParent
+  = Nada
+  | SetGistId (Maybe String)
 
 type Message
   = RequestFileContents Context
@@ -87,7 +90,7 @@ type alias FileContentsSerializationOutput =
   , error : Maybe ToastContent
   }
 
-update : Message -> Model -> (Model, Cmd Message)
+update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   let
     failWithMessage message =
@@ -95,6 +98,7 @@ update message model =
       | toasts = failureToast message :: model.toasts
       }
       ! []
+      !! Nada
 
     failureToast message =
       { message = message
@@ -106,7 +110,8 @@ update message model =
     sendToGist context model =
       case (model.fileContents, context.githubAuthToken) of
         (Just fileContents, Just githubAuthToken) ->
-          Task.mapError HttpError <| saveGist githubAuthToken fileContents
+          Task.mapError HttpError
+            <| saveGist context.gistId githubAuthToken fileContents
 
         (Nothing, _) ->
           Task.fail NoFileContents
@@ -114,12 +119,12 @@ update message model =
         (_, Nothing) ->
           Task.fail NoGithubToken
 
-    saveGist token fileContents =
-      case model.gistId of
-        Just gistId ->
+    saveGist gistId token fileContents =
+      case gistId of
+        Just id ->
           patch
             decodeGistResponse
-            (githubUrl token <| "/gists/" ++ gistId)
+            (githubUrl token <| "/gists/" ++ id)
             (payload fileContents [])
 
         Nothing ->
@@ -172,14 +177,16 @@ update message model =
             , variables = context.variables
             }
           ]
+        !! Nada
 
       ReceiveFileContents context {payload, error} ->
-        case (payload, error, model.gistId) of
+        case (payload, error, context.gistId) of
           (_, Just failureToast, _) ->
             { model
             | toasts = failureToast :: model.toasts
             }
             ! []
+            !! Nada
 
           (Just fileContents, Nothing, Nothing) ->
             { model
@@ -187,6 +194,7 @@ update message model =
             , displayFileNameDialog = True
             }
             ! []
+            !! Nada
 
           (Just fileContents, Nothing, Just _) ->
             let
@@ -199,19 +207,21 @@ update message model =
               update (SaveGist context) newModel
 
           (Nothing, Nothing, _) ->
-            model ! []
+            model ! [] !! Nada
 
       CloseDialog ->
         { model
         | displayFileNameDialog = False
         }
         ! []
+        !! Nada
 
       UpdateFileBasename fileBasename ->
         { model
         | fileBasename = fileBasename
         }
         ! []
+        !! Nada
 
       SaveGist context ->
         { model
@@ -221,13 +231,14 @@ update message model =
         ! [ Task.perform FailToSendGist ReceiveGistId <|
             sendToGist context model
           ]
+        !! Nada
 
       ReceiveGistId gistId ->
         { model
-        | gistId = Just gistId
-        , status = Idle
+        | status = Idle
         }
         ! []
+        !! SetGistId (Just gistId)
 
       FailToSendGist NoFileContents ->
         failWithMessage <|
@@ -333,7 +344,7 @@ view context model =
           []
 
     button =
-      case (model.status, model.gistId, model.dataSnapshot) of
+      case (model.status, context.gistId, model.dataSnapshot) of
         (Pending, Nothing, _) ->
           Spinner.view "creating gist…"
 

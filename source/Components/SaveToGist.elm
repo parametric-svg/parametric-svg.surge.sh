@@ -72,6 +72,7 @@ type Message
   = RequestFileContents Context
   | ReceiveFileContents Context FileContentsSerializationOutput
 
+  | OpenDialog
   | CloseDialog
 
   | UpdateFileBasename String
@@ -180,23 +181,15 @@ update message model =
         !! Nada
 
       ReceiveFileContents context {payload, error} ->
-        case (payload, error, context.gistId) of
-          (_, Just failureToast, _) ->
+        case (payload, error) of
+          (_, Just failureToast) ->
             { model
             | toasts = failureToast :: model.toasts
             }
             ! []
             !! Nada
 
-          (Just fileContents, Nothing, Nothing) ->
-            { model
-            | fileContents = Just fileContents
-            , displayFileNameDialog = True
-            }
-            ! []
-            !! Nada
-
-          (Just fileContents, Nothing, Just _) ->
+          (Just fileContents, Nothing) ->
             let
               newModel =
                 { model
@@ -204,10 +197,22 @@ update message model =
                 }
 
             in
-              update (SaveGist context) newModel
+              case context.gistId of
+                Nothing ->
+                  update OpenDialog newModel
 
-          (Nothing, Nothing, _) ->
+                Just _ ->
+                  update (SaveGist context) newModel
+
+          (Nothing, Nothing) ->
             model ! [] !! Nada
+
+      OpenDialog ->
+        { model
+        | displayFileNameDialog = True
+        }
+        ! []
+        !! Nada
 
       CloseDialog ->
         { model

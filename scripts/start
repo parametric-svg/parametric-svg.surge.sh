@@ -18,4 +18,5 @@ set -x
   --host=0.0.0.0 \
   --content-base=public/ \
   --inline \
+  --history-api-fallback \
   $@

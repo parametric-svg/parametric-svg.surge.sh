@@ -1,6 +1,7 @@
 module Components.ParametricSvgEditor exposing
-  ( Model, Message
+  ( Model, Message(ChangeLocation), Location
   , init, update, subscriptions, view
+  , urlToLocation
   , markup
   )
 

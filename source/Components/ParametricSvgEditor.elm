@@ -17,7 +17,7 @@ import Regex exposing (regex, HowMany(AtMost))
 import String
 import Maybe exposing (andThen)
 
-import Types exposing (ToastContent, Variable, Context)
+import Types exposing (ToastContent, Variable, Context, FileSnapshot)
 import Styles.ParametricSvgEditor exposing
   ( Classes
     ( Root
@@ -54,6 +54,7 @@ type alias Model =
   , toasts : List ToastContent
   , githubAuthToken : Maybe String
   , gistId : Maybe String
+  , gistFileSnapshot : Maybe FileSnapshot
   }
 
 type alias CanvasSize =
@@ -79,6 +80,7 @@ init =
     , toasts = []
     , githubAuthToken = Nothing
     , gistId = Nothing
+    , gistFileSnapshot = Nothing
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -135,6 +137,7 @@ context model =
   , variables = variables model.variablesPanel
   , markup = markup model
   , gistId = model.gistId
+  , gistFileSnapshot = model.gistFileSnapshot
   }
 
 
@@ -274,6 +277,12 @@ update message model =
               { model
               | saveToGist = saveToGistModel
               , gistId = maybeGistId
+              }
+
+            SaveToGist.SetGistFileSnapshot maybeFileSnapshot ->
+              { model
+              | saveToGist = saveToGistModel
+              , gistFileSnapshot = maybeFileSnapshot
               }
 
       in

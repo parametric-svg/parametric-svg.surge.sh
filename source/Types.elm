@@ -6,11 +6,17 @@ type alias Context =
   , variables : List Variable
   , markup : String
   , gistId : Maybe String
+  , gistFileSnapshot : Maybe FileSnapshot
   }
 
 type alias Variable =
   { name : String
   , value : String
+  }
+
+type alias FileSnapshot =
+  { markup : String
+  , variables : List Variable
   }
 
 type alias ToastContent =

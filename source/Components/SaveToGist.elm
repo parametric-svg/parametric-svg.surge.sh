@@ -15,7 +15,7 @@ import Http exposing
 import Task exposing (Task)
 
 import Helpers exposing ((!!))
-import Types exposing (Variable, ToastContent, Context)
+import Types exposing (Variable, ToastContent, Context, FileSnapshot)
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
@@ -35,13 +35,7 @@ type alias Model =
   , toasts : List ToastContent
   , displayFileNameDialog : Bool
   , fileBasename : String
-  , dataSnapshot : Maybe DataSnapshot
   , status : Status
-  }
-
-type alias DataSnapshot =
-  { markup : String
-  , variables : List Variable
   }
 
 type Status
@@ -54,7 +48,6 @@ init =
   , toasts = []
   , displayFileNameDialog = False
   , fileBasename = ""
-  , dataSnapshot = Nothing
   , status = Idle
   }
   ! []
@@ -67,6 +60,7 @@ init =
 type MessageToParent
   = Nada
   | SetGistId (Maybe String)
+  | SetGistFileSnapshot (Maybe FileSnapshot)
 
 type Message
   = RequestFileContents Context
@@ -170,15 +164,15 @@ update message model =
   in
     case message of
       RequestFileContents context ->
-        { model
-        | dataSnapshot = Just (DataSnapshot context.markup context.variables)
-        }
+        model
         ! [ requestFileContents
             { drawingId = context.drawingId
             , variables = context.variables
             }
           ]
-        !! Nada
+        !! SetGistFileSnapshot
+          ( Just (FileSnapshot context.markup context.variables)
+          )
 
       ReceiveFileContents context {payload, error} ->
         case (payload, error) of
@@ -349,7 +343,7 @@ view context model =
           []
 
     button =
-      case (model.status, context.gistId, model.dataSnapshot) of
+      case (model.status, context.gistId, context.gistFileSnapshot) of
         (Pending, Nothing, _) ->
           Spinner.view "creating gist…"
 

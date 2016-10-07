@@ -17,9 +17,20 @@ main = program urlParser
 
 initWithRoute : Location -> (Model, Cmd Message)
 initWithRoute location =
-  update
-    (ChangeLocation location)
-    (fst init)
+  let
+    (initModel, initCommands) =
+      init
+
+    (model, updateCommands) =
+      update
+        (ChangeLocation location)
+        initModel
+
+  in
+    model
+    ! [ initCommands
+      , updateCommands
+      ]
 
 
 urlParser : Parser Location

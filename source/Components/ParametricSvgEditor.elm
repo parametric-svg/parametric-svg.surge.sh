@@ -139,11 +139,76 @@ context model =
 
 
 
+-- NAVIGATION
+
+type Location
+  = BlankCanvas
+  | Gist
+    { id : String
+    }
+  | Lost
+
+
+urlToLocation : String -> Location
+urlToLocation url =
+  let
+    pattern =
+      regex
+        -- /
+        ( "^/"
+        ++ ( "(?:"
+          -- …gist-<gist id>
+          ++ "gist-([^/]+)"
+          ++ ( "(?:"
+            -- …/<gist filename>
+            ++ "/([^/]+)"
+            ++ ")?"
+            )
+          ++ ")?"
+          )
+        ++ "$"
+        )
+
+    matches =
+      Regex.find (AtMost 1) pattern url
+
+  in case matches of
+    [match] ->
+      case match.submatches of
+        [Nothing, Nothing] ->
+          BlankCanvas
+
+        [Just gistId, _] ->
+          Gist {id = gistId}
+
+        _ ->
+          Lost
+
+    _ ->
+      Lost
+
+
+locationToUrl : Location -> String
+locationToUrl location =
+  case location of
+    BlankCanvas ->
+      "/"
+
+    Gist {id} ->
+      "/gist-" ++ id
+
+    Lost ->
+      Debug.crash "No such URL"
+
+
+
+
 -- UPDATE
 
 type Message
   = UpdateRawMarkup String
   | ReceiveCanvasSize CanvasSize
+  | ChangeLocation Location
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
@@ -216,6 +281,27 @@ update message model =
         }
         ! [ Cmd.map SaveToGistMessage saveToGistCommand
           ]
+
+    ChangeLocation location ->
+      let
+        newModel =
+          case location of
+            BlankCanvas ->
+              { model
+              | gistId = Nothing
+              }
+
+            Gist {id} ->
+              { model
+              | gistId = Just id
+              }
+
+            Lost ->
+              Debug.crash "TODO"
+
+      in
+        newModel ! []
+
 
 
 drawingId : String

@@ -240,28 +240,28 @@ update message model =
         !! SetGistId (Just gistId)
 
       FailToSendGist NoFileContents ->
-        failWithMessage <|
-          "Oops! This should never happen. No file contents to send."
+        failWithMessage
+          <| "Oops! This should never happen. No file contents to send."
       FailToSendGist NoGithubToken ->
-        failWithMessage <|
-          "Aw, snap! You’re not logged into gist."
+        failWithMessage
+          <| "Aw, snap! You’re not logged into gist."
       FailToSendGist (HttpError Timeout) ->
-        failWithMessage <|
-          "Uh-oh! The github API request timed out. Trying again should help. " ++
-          "Really."
+        failWithMessage
+          <| "Uh-oh! The github API request timed out. Trying again "
+          ++ "should help. Not kidding!"
       FailToSendGist (HttpError NetworkError) ->
-        failWithMessage <|
-          "Aw, shucks! The network failed us this time. Try again in a few " ++
-          "moments."
+        failWithMessage
+          <| "Aw, shucks! The network failed us this time. Try again in a few "
+          ++ "moments."
       FailToSendGist (HttpError (UnexpectedPayload message)) ->
-        failWithMessage <|
-          "Huh? We don’t understand the response from the github API. " ++
-          "Here’s what our decoder says: “" ++ message ++ "”."
+        failWithMessage
+          <| "Huh? We don’t understand the response from the github API. "
+          ++ "Here’s what our decoder says: “" ++ message ++ "”."
       FailToSendGist (HttpError (BadResponse number message)) ->
-        failWithMessage <|
-          "Yikes! The github API responded " ++
-          "with a " ++ toString number ++ " error. " ++
-          "Here’s what they say: “" ++ message ++ "”."
+        failWithMessage
+          <| "Yikes! The github API responded "
+          ++ "with a " ++ toString number ++ " error. "
+          ++ "Here’s what they say: “" ++ message ++ "”."
 
 
 port requestFileContents

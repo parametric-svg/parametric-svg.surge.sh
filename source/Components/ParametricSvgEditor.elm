@@ -18,7 +18,8 @@ import String
 import Maybe exposing (andThen)
 
 import Types exposing
-  ( ToastContent, Variable, Context, FileSnapshot, GistState(NotConnected)
+  ( ToastContent, Variable, Context, FileSnapshot, GistId
+  , GistState(NotConnected)
   )
 import Styles.ParametricSvgEditor exposing
   ( Classes
@@ -147,7 +148,7 @@ context model =
 type Location
   = BlankCanvas
   | Gist
-    { id : String
+    { id : GistId
     }
   | Lost
 

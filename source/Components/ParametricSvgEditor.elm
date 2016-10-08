@@ -34,6 +34,7 @@ import Styles.ParametricSvgEditor exposing
 import Components.VariablesPanel as VariablesPanel exposing (variables)
 import Components.Auth as Auth
 import Components.SaveToGist as SaveToGist
+import Components.OpenGist as OpenGist
 import Components.Toast as Toast
 
 {class} =
@@ -54,6 +55,7 @@ type alias Model =
   , variablesPanel : VariablesPanel.Model
   , auth : Auth.Model
   , saveToGist : SaveToGist.Model
+  , openGist : OpenGist.Model
   , toasts : List ToastContent
   , githubAuthToken : Maybe String
   , gistState : GistState
@@ -73,18 +75,23 @@ init =
     (saveToGistModel, saveToGistCommand) =
       SaveToGist.init
 
+    (openGistModel, openGistCommand) =
+      OpenGist.init
+
   in
     { rawMarkup = ""
     , canvasSize = Nothing
     , variablesPanel = VariablesPanel.init
     , auth = authModel
     , saveToGist = saveToGistModel
+    , openGist = openGistModel
     , toasts = []
     , githubAuthToken = Nothing
     , gistState = NotConnected
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
+      , Cmd.map OpenGistMessage openGistCommand
       ]
 
 
@@ -216,6 +223,7 @@ type Message
   | VariablesPanelMessage VariablesPanel.Message
   | AuthMessage Auth.Message
   | SaveToGistMessage SaveToGist.Message
+  | OpenGistMessage OpenGist.Message
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -280,23 +288,41 @@ update message model =
         ! [ Cmd.map SaveToGistMessage saveToGistCommand
           ]
 
-    ChangeLocation location ->
+    OpenGistMessage message ->
       let
+        (openGistModel, openGistCommand, messageToParent) =
+          OpenGist.update message model.openGist
+
         newModel =
-          case location of
-            BlankCanvas ->
+          case messageToParent of
+            OpenGist.Nada ->
+              model
+
+            OpenGist.SetGistState gistState ->
               { model
-              | gistState = NotConnected
+              | gistState = gistState
               }
 
-            Gist {id} ->
-              Debug.crash "TODO"
-
-            Lost ->
-              Debug.crash "TODO"
-
       in
-        newModel ! []
+        { newModel
+        | openGist = openGistModel
+        }
+        ! [ Cmd.map OpenGistMessage openGistCommand
+          ]
+
+    ChangeLocation location ->
+      case location of
+        BlankCanvas ->
+          { model
+          | gistState = NotConnected
+          }
+          ! []
+
+        Gist {id} ->
+          update (OpenGistMessage <| OpenGist.SetGistId id) model
+
+        Lost ->
+          Debug.crash "TODO"
 
 
 

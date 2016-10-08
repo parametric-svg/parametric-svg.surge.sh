@@ -17,6 +17,7 @@ type GistState
   = NotConnected
   | Uploading FileSnapshot
   | Synced GistId FileSnapshot
+  | Downloading GistId
 
 type alias GistId
   = String

@@ -93,7 +93,7 @@ update message model =
       | toasts = failureToast message :: model.toasts
       }
       ! []
-      !! Nada
+      !! SetGistFileSnapshot Nothing
 
     failureToast message =
       { message = message

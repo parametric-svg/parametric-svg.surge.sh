@@ -245,14 +245,11 @@ update message model =
         newModel =
           case messageToParent of
             Auth.Nada ->
-              { model
-              | auth = authModel
-              }
+              model
 
             Auth.UpdateToken maybeToken ->
               { model
-              | auth = authModel
-              , githubAuthToken = maybeToken
+              | githubAuthToken = maybeToken
               }
 
       in
@@ -268,14 +265,11 @@ update message model =
         newModel =
           case messageToParent of
             SaveToGist.Nada ->
-              { model
-              | saveToGist = saveToGistModel
-              }
+              model
 
             SaveToGist.SetGistState gistState ->
               { model
-              | saveToGist = saveToGistModel
-              , gistState = gistState
+              | gistState = gistState
               }
 
       in

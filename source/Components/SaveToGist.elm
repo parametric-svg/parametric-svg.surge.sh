@@ -238,8 +238,8 @@ update message model =
         | status = Pending
         , displayFileNameDialog = False
         }
-        ! [ Task.perform FailToSendGist (ReceiveGistId context) <|
-            saveGist context model
+        ! [ Task.perform FailToSendGist (ReceiveGistId context)
+            <| saveGist context model
           ]
         !! Nada
 

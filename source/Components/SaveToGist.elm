@@ -8,10 +8,7 @@ import Html.Events exposing (onClick, on, onInput)
 import Html.Attributes exposing (attribute, tabindex, value, href, target)
 import Json.Decode as Decode exposing ((:=))
 import Json.Encode as Encode exposing (encode)
-import Http exposing
-  ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
-  , url
-  )
+import Http exposing (url)
 import Task exposing (Task)
 
 import Helpers exposing ((!!))
@@ -63,6 +60,7 @@ init =
 type MessageToParent
   = Nada
   | SetGistState GistState
+  | HandleHttpError Http.Error
 
 type Message
   = RequestFileContents Context
@@ -267,23 +265,10 @@ update message model =
       FailToSendGist NoGithubToken ->
         failWithMessage
           <| "Aw, snap! You’re not logged into gist."
-      FailToSendGist (HttpError Timeout) ->
-        failWithMessage
-          <| "Uh-oh! The github API request timed out. Trying again "
-          ++ "should help. Not kidding!"
-      FailToSendGist (HttpError NetworkError) ->
-        failWithMessage
-          <| "Aw, shucks! The network failed us this time. Try again in a few "
-          ++ "moments."
-      FailToSendGist (HttpError (UnexpectedPayload message)) ->
-        failWithMessage
-          <| "Huh? We don’t understand the response from the github API. "
-          ++ "Here’s what our decoder says: “" ++ message ++ "”."
-      FailToSendGist (HttpError (BadResponse number message)) ->
-        failWithMessage
-          <| "Yikes! The github API responded "
-          ++ "with a " ++ toString number ++ " error. "
-          ++ "Here’s what they say: “" ++ message ++ "”."
+      FailToSendGist (HttpError error) ->
+        model
+        ! []
+        !! HandleHttpError error
 
 
 port requestFileContents

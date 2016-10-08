@@ -1,10 +1,28 @@
-module Components.Toast exposing (custom, basic, toasts)
+module Components.Toast exposing
+  ( basicContent
+  , custom, basic, toasts
+  )
 
 import Html exposing (Html, node, a, text)
 import Html.Attributes exposing (attribute, href, target)
 
 import Types exposing (ToastContent)
 import Components.Link exposing (link)
+
+
+
+
+-- UTILS
+
+basicContent : String -> ToastContent
+basicContent message =
+  { message = message
+  , buttonText = "Get help"
+  , buttonUrl =
+    "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+  }
+
+
 
 
 -- VIEW
@@ -32,10 +50,4 @@ custom {message, buttonText, buttonUrl} =
     ]
 
 basic : String -> Html a
-basic message =
-  custom
-    { message = message
-    , buttonText = "Get help"
-    , buttonUrl =
-      "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
-    }
+basic = custom << basicContent

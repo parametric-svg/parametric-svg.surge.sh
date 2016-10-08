@@ -16,6 +16,9 @@ import Json.Decode as Decode exposing ((:=), Decoder)
 import Regex exposing (regex, HowMany(AtMost))
 import String
 import Maybe exposing (andThen)
+import Http exposing
+  ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
+  )
 
 import Types exposing
   ( ToastContent, Variable, Context, FileSnapshot, GistData
@@ -278,6 +281,30 @@ update message model =
               { model
               | gistState = gistState
               }
+
+            SaveToGist.HandleHttpError (Timeout) ->
+              failure
+                <| "Uh-oh! The github API request timed out. Trying again "
+                ++ "should help. Not kidding!"
+            SaveToGist.HandleHttpError (NetworkError) ->
+              failure
+                <| "Aw, shucks! The network failed us this time. Try again "
+                ++ "in a few moments."
+            SaveToGist.HandleHttpError (UnexpectedPayload message) ->
+              failure
+                <| "Huh? We don’t understand the response from the github API. "
+                ++ "Here’s what our decoder says: “" ++ message ++ "”."
+            SaveToGist.HandleHttpError (BadResponse number message) ->
+              failure
+                <| "Yikes! The github API responded "
+                ++ "with a " ++ toString number ++ " error. "
+                ++ "Here’s what they say: “" ++ message ++ "”."
+
+        failure message =
+          { model
+          | gistState = NotConnected
+          , toasts = Toast.basicContent message :: model.toasts
+          }
 
       in
         { newModel

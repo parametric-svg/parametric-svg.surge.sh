@@ -5,14 +5,21 @@ type alias Context =
   , drawingId : String
   , variables : List Variable
   , markup : String
-  , gistId : Maybe String
-  , gistFileSnapshot : Maybe FileSnapshot
+  , gistState : GistState
   }
 
 type alias Variable =
   { name : String
   , value : String
   }
+
+type GistState
+  = NotConnected
+  | Uploading FileSnapshot
+  | Synced GistId FileSnapshot
+
+type alias GistId
+  = String
 
 type alias FileSnapshot =
   { markup : String

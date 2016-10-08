@@ -17,7 +17,9 @@ import Regex exposing (regex, HowMany(AtMost))
 import String
 import Maybe exposing (andThen)
 
-import Types exposing (ToastContent, Variable, Context, FileSnapshot)
+import Types exposing
+  ( ToastContent, Variable, Context, FileSnapshot, GistState(NotConnected)
+  )
 import Styles.ParametricSvgEditor exposing
   ( Classes
     ( Root
@@ -53,8 +55,7 @@ type alias Model =
   , saveToGist : SaveToGist.Model
   , toasts : List ToastContent
   , githubAuthToken : Maybe String
-  , gistId : Maybe String
-  , gistFileSnapshot : Maybe FileSnapshot
+  , gistState : GistState
   }
 
 type alias CanvasSize =
@@ -79,8 +80,7 @@ init =
     , saveToGist = saveToGistModel
     , toasts = []
     , githubAuthToken = Nothing
-    , gistId = Nothing
-    , gistFileSnapshot = Nothing
+    , gistState = NotConnected
     }
     ! [ Cmd.map AuthMessage authCommand
       , Cmd.map SaveToGistMessage saveToGistCommand
@@ -136,8 +136,7 @@ context model =
   , drawingId = drawingId
   , variables = variables model.variablesPanel
   , markup = markup model
-  , gistId = model.gistId
-  , gistFileSnapshot = model.gistFileSnapshot
+  , gistState = model.gistState
   }
 
 
@@ -273,16 +272,10 @@ update message model =
               | saveToGist = saveToGistModel
               }
 
-            SaveToGist.SetGistId maybeGistId ->
+            SaveToGist.SetGistState gistState ->
               { model
               | saveToGist = saveToGistModel
-              , gistId = maybeGistId
-              }
-
-            SaveToGist.SetGistFileSnapshot maybeFileSnapshot ->
-              { model
-              | saveToGist = saveToGistModel
-              , gistFileSnapshot = maybeFileSnapshot
+              , gistState = gistState
               }
 
       in
@@ -298,13 +291,11 @@ update message model =
           case location of
             BlankCanvas ->
               { model
-              | gistId = Nothing
+              | gistState = NotConnected
               }
 
             Gist {id} ->
-              { model
-              | gistId = Just id
-              }
+              Debug.crash "TODO"
 
             Lost ->
               Debug.crash "TODO"

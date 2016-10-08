@@ -15,7 +15,10 @@ import Http exposing
 import Task exposing (Task)
 
 import Helpers exposing ((!!))
-import Types exposing (Variable, ToastContent, Context, FileSnapshot)
+import Types exposing
+  ( Variable, ToastContent, Context, FileSnapshot
+  , GistState(NotConnected, Uploading, Synced), GistId
+  )
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
@@ -59,8 +62,7 @@ init =
 
 type MessageToParent
   = Nada
-  | SetGistId (Maybe String)
-  | SetGistFileSnapshot (Maybe FileSnapshot)
+  | SetGistState GistState
 
 type Message
   = RequestFileContents Context
@@ -72,7 +74,7 @@ type Message
   | UpdateFileBasename String
 
   | SaveGist Context
-  | ReceiveGistId String
+  | ReceiveGistId Context GistId
   | FailToSendGist GistError
 
 type GistError
@@ -90,47 +92,56 @@ update message model =
   let
     failWithMessage message =
       { model
-      | toasts = failureToast message :: model.toasts
+      | toasts = failureToast message "Get help" :: model.toasts
       }
       ! []
-      !! SetGistFileSnapshot Nothing
+      !! SetGistState NotConnected
 
-    failureToast message =
+    failWithMessageAndButtonText message buttonText =
+      { model
+      | toasts = failureToast message buttonText :: model.toasts
+      }
+      ! []
+      !! SetGistState NotConnected
+
+    failureToast message buttonText =
       { message = message
-      , buttonText = "Get help"
+      , buttonText = buttonText
       , buttonUrl =
         "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
       }
 
-    sendToGist context model =
-      case (model.fileContents, context.githubAuthToken) of
-        (Just fileContents, Just githubAuthToken) ->
+    saveGist context model =
+      case (model.fileContents, context.githubAuthToken, context.gistState) of
+        (Just fileContents, Just githubAuthToken, Synced gistId _) ->
           Task.mapError HttpError
-            <| saveGist context.gistId githubAuthToken fileContents
+            <| updateGist gistId githubAuthToken fileContents
 
-        (Nothing, _) ->
+        (Just fileContents, Just githubAuthToken, _) ->
+          Task.mapError HttpError
+            <| createGist githubAuthToken fileContents
+
+        (Nothing, _, _) ->
           Task.fail NoFileContents
 
-        (_, Nothing) ->
+        (_, Nothing, _) ->
           Task.fail NoGithubToken
 
-    saveGist gistId token fileContents =
-      case gistId of
-        Just id ->
-          patch
-            decodeGistResponse
-            (githubUrl token <| "/gists/" ++ id)
-            (payload fileContents [])
+    updateGist token gistId fileContents =
+      patch
+        decodeGistResponse
+        (githubUrl token <| "/gists/" ++ gistId)
+        (payload fileContents [])
 
-        Nothing ->
-          Http.post
-            decodeGistResponse
-            (githubUrl token "/gists")
-            ( payload fileContents
-              [ "description" =>
-                Encode.string "Created with parametric-svg.surge.sh"
-              ]
-            )
+    createGist token fileContents =
+      Http.post
+        decodeGistResponse
+        (githubUrl token "/gists")
+        ( payload fileContents
+          [ "description" =>
+            Encode.string "Created with parametric-svg.surge.sh"
+          ]
+        )
 
     patch decoder url body =
       Http.fromJson decoder <| Http.send Http.defaultSettings
@@ -170,8 +181,8 @@ update message model =
             , variables = context.variables
             }
           ]
-        !! SetGistFileSnapshot
-          ( Just (FileSnapshot context.markup context.variables)
+        !! SetGistState
+          ( Uploading <| FileSnapshot context.markup context.variables
           )
 
       ReceiveFileContents context {payload, error} ->
@@ -191,12 +202,12 @@ update message model =
                 }
 
             in
-              case context.gistId of
-                Nothing ->
-                  update OpenDialog newModel
-
-                Just _ ->
+              case context.gistState of
+                Synced _ _ ->
                   update (SaveGist context) newModel
+
+                _ ->
+                  update OpenDialog newModel
 
           (Nothing, Nothing) ->
             model ! [] !! Nada
@@ -227,17 +238,27 @@ update message model =
         | status = Pending
         , displayFileNameDialog = False
         }
-        ! [ Task.perform FailToSendGist ReceiveGistId <|
-            sendToGist context model
+        ! [ Task.perform FailToSendGist (ReceiveGistId context) <|
+            saveGist context model
           ]
         !! Nada
 
-      ReceiveGistId gistId ->
-        { model
-        | status = Idle
-        }
-        ! []
-        !! SetGistId (Just gistId)
+      ReceiveGistId context gistId ->
+        case context.gistState of
+          Uploading fileSnapshot ->
+            { model
+            | status = Idle
+            }
+            ! []
+            !! SetGistState (Synced gistId fileSnapshot)
+
+          _ ->
+            failWithMessageAndButtonText
+              ( "Booo, things ended up in a weird state. We haven’t expected "
+              ++ "this to happen. Please help us resolve this problem "
+              ++ "by opening a github issue."
+              )
+              "Browse issues"
 
       FailToSendGist NoFileContents ->
         failWithMessage
@@ -343,16 +364,16 @@ view context model =
           []
 
     button =
-      case (model.status, context.gistId, context.gistFileSnapshot) of
-        (Pending, Nothing, _) ->
+      case (model.status, context.gistState) of
+        (Pending, Uploading _) ->
           Spinner.view "creating gist…"
 
-        (Pending, Just _, _) ->
+        (Pending, Synced _ _) ->
           Spinner.view "updating gist…"
 
-        (Idle, Just gistId, Just snapshot) ->
-          if (context.markup == snapshot.markup)
-          && (context.variables == snapshot.variables)
+        (Idle, Synced gistId fileSnapshot) ->
+          if (context.markup == fileSnapshot.markup)
+          && (context.variables == fileSnapshot.variables)
             then
               [ link
                 [ href <| "https://gist.github.com/" ++ gistId

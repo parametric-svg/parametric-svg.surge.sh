@@ -18,7 +18,7 @@ import String
 import Maybe exposing (andThen)
 
 import Types exposing
-  ( ToastContent, Variable, Context, FileSnapshot, GistId
+  ( ToastContent, Variable, Context, FileSnapshot, GistData
   , GistState(NotConnected)
   )
 import Styles.ParametricSvgEditor exposing
@@ -154,9 +154,7 @@ context model =
 
 type Location
   = BlankCanvas
-  | Gist
-    { id : GistId
-    }
+  | Gist GistData
   | Lost
 
 
@@ -171,7 +169,7 @@ urlToLocation url =
           -- …gist-<gist id>
           ++ "gist-([^/]+)"
           ++ ( "(?:"
-            -- …/<gist filename>
+            -- …/<gist basename>
             ++ "/([^/]+)"
             ++ ")?"
             )
@@ -189,8 +187,8 @@ urlToLocation url =
         [Nothing, Nothing] ->
           BlankCanvas
 
-        [Just gistId, _] ->
-          Gist {id = gistId}
+        [Just id, Just basename] ->
+          Gist {id = id, basename = basename}
 
         _ ->
           Lost
@@ -205,8 +203,8 @@ locationToUrl location =
     BlankCanvas ->
       "/"
 
-    Gist {id} ->
-      "/gist-" ++ id
+    Gist {id, basename} ->
+      "/gist-" ++ id ++ "/" ++ basename
 
     Lost ->
       Debug.crash "No such URL"
@@ -318,8 +316,8 @@ update message model =
           }
           ! []
 
-        Gist {id} ->
-          update (OpenGistMessage <| OpenGist.SetGistId id) model
+        Gist gistData ->
+          update (OpenGistMessage <| OpenGist.SetGistData gistData) model
 
         Lost ->
           Debug.crash "TODO"

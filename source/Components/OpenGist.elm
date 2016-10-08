@@ -1,6 +1,6 @@
 -- port module Components.OpenGist exposing
 module Components.OpenGist exposing
-  ( Model, MessageToParent(..), Message(SetGistId)
+  ( Model, MessageToParent(..), Message(SetGistData)
   , init, update
   )
 
@@ -16,7 +16,7 @@ module Components.OpenGist exposing
 -- import Task exposing (Task)
 
 import Helpers exposing ((!!))
-import Types exposing (GistId, GistState(Downloading))
+import Types exposing (GistData, GistState(Downloading))
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
 -- import Components.Toast as Toast
@@ -49,15 +49,15 @@ type MessageToParent
   | SetGistState GistState
 
 type Message
-  = SetGistId GistId
+  = SetGistData GistData
 
 update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   case message of
-    SetGistId gistId ->
+    SetGistData gistData ->
       model
       ! []
-      !! SetGistState (Downloading gistId)
+      !! SetGistState (Downloading gistData)
 
 
 

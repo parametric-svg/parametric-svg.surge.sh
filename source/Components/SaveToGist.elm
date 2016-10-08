@@ -17,7 +17,7 @@ import Task exposing (Task)
 import Helpers exposing ((!!))
 import Types exposing
   ( Variable, ToastContent, Context, FileSnapshot
-  , GistState(NotConnected, Uploading, Synced), GistId
+  , GistState(NotConnected, Uploading, Synced), GistData
   )
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
@@ -37,7 +37,7 @@ type alias Model =
   { fileContents : Maybe String
   , toasts : List ToastContent
   , displayFileNameDialog : Bool
-  , fileBasename : String
+  , basename : String
   , status : Status
   }
 
@@ -50,7 +50,7 @@ init =
   { fileContents = Nothing
   , toasts = []
   , displayFileNameDialog = False
-  , fileBasename = ""
+  , basename = ""
   , status = Idle
   }
   ! []
@@ -74,7 +74,7 @@ type Message
   | UpdateFileBasename String
 
   | SaveGist Context
-  | ReceiveGistId Context GistId
+  | ReceiveGistId Context String
   | FailToSendGist GistError
 
 type GistError
@@ -113,9 +113,9 @@ update message model =
 
     saveGist context model =
       case (model.fileContents, context.githubAuthToken, context.gistState) of
-        (Just fileContents, Just githubAuthToken, Synced gistId _) ->
+        (Just fileContents, Just githubAuthToken, Synced {id} _) ->
           Task.mapError HttpError
-            <| updateGist gistId githubAuthToken fileContents
+            <| updateGist id githubAuthToken fileContents
 
         (Just fileContents, Just githubAuthToken, _) ->
           Task.mapError HttpError
@@ -127,10 +127,10 @@ update message model =
         (_, Nothing, _) ->
           Task.fail NoGithubToken
 
-    updateGist token gistId fileContents =
+    updateGist token id fileContents =
       patch
         decodeGistResponse
-        (githubUrl token <| "/gists/" ++ gistId)
+        (githubUrl token <| "/gists/" ++ id)
         (payload fileContents [])
 
     createGist token fileContents =
@@ -170,7 +170,7 @@ update message model =
       |> Http.string
 
     fileName =
-      model.fileBasename ++ ".parametric.svg"
+      model.basename ++ ".parametric.svg"
 
   in
     case message of
@@ -226,9 +226,9 @@ update message model =
         ! []
         !! Nada
 
-      UpdateFileBasename fileBasename ->
+      UpdateFileBasename basename ->
         { model
-        | fileBasename = fileBasename
+        | basename = basename
         }
         ! []
         !! Nada
@@ -243,14 +243,15 @@ update message model =
           ]
         !! Nada
 
-      ReceiveGistId context gistId ->
+      ReceiveGistId context id ->
         case context.gistState of
           Uploading fileSnapshot ->
             { model
             | status = Idle
             }
             ! []
-            !! SetGistState (Synced gistId fileSnapshot)
+            !! SetGistState
+              (Synced {id = id, basename = model.basename} fileSnapshot)
 
           _ ->
             failWithMessageAndButtonText
@@ -337,7 +338,7 @@ view context model =
                   , attribute "name" "file name"
                   , tabindex 0
                   , onInput UpdateFileBasename
-                  , value model.fileBasename
+                  , value model.basename
                   ]
                   [ div
                     [ attribute "suffix" ""
@@ -371,12 +372,13 @@ view context model =
         (Pending, Synced _ _) ->
           Spinner.view "updating gist…"
 
-        (Idle, Synced gistId fileSnapshot) ->
+        (Idle, Synced {id, basename} fileSnapshot) ->
           if (context.markup == fileSnapshot.markup)
           && (context.variables == fileSnapshot.variables)
             then
               [ link
-                [ href <| "https://gist.github.com/" ++ gistId
+                [ href
+                  <| "https://gist.github.com/" ++ id ++ "#file-" ++ basename
                 , target "_blank"
                 , tabindex -1
                 ]

@@ -16,11 +16,13 @@ type alias Variable =
 type GistState
   = NotConnected
   | Uploading FileSnapshot
-  | Synced GistId FileSnapshot
-  | Downloading GistId
+  | Synced GistData FileSnapshot
+  | Downloading GistData
 
-type alias GistId
-  = String
+type alias GistData =
+  { id : String
+  , basename : String
+  }
 
 type alias FileSnapshot =
   { markup : String

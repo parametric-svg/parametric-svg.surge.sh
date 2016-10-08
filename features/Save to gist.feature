@@ -12,7 +12,6 @@ Feature: Save to gist
     And I type 'passw0rd' into the 'password' input
     And I click the 'commit' button
     Then the newly-opened tab should close
-    And eventually I should see a 'signing in with github…' spinner
     And eventually I should see a 'save as gist' icon button
 
   Scenario: Authentication with cached token

@@ -3,11 +3,11 @@ const elementName = 'github-auth';
 const click = (event) => {
   window.open(
     `https://github.com/login/oauth/authorize?${[
-      'client_id=04c6b0feda77ed221fdd',
+      'client_id=5acb6b2bcf82fe08240f',
       'scope=gist',
     ].join('&')}`
   );
-  // Will redirect to /oauth, which will post the auth code back here.
+  // Will redirect to /oauth.html, which will post the auth code back here.
 
   const element = event.currentTarget;
 

@@ -7,7 +7,7 @@
 !/public/polymer
 !/public/polymer.html
 !/public/fonts/
-!/public/oauth/
+!/public/oauth.html
 
 /scripts/.build-artifacts/
 

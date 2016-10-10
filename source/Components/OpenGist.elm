@@ -7,13 +7,13 @@ module Components.OpenGist exposing
 -- import Html exposing (Html)
 -- import Html.Events exposing (onClick, on, onInput)
 -- import Html.Attributes exposing (attribute, tabindex, value, href, target)
--- import Json.Decode as Decode exposing ((:=))
--- import Json.Encode as Encode exposing (encode)
--- import Http exposing
---   ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
---   , url
---   )
--- import Task exposing (Task)
+import Json.Decode as Decode exposing (at, string, bool)
+import Json.Decode.Pipeline exposing (decode, required)
+import Http exposing
+  ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
+  , url
+  )
+import Task exposing (andThen)
 
 import Helpers exposing ((!!))
 import Types exposing (GistData, GistState(Downloading))
@@ -50,14 +50,57 @@ type MessageToParent
 
 type Message
   = SetGistData GistData
+  | FailToFetchGist FetchError
+  | ReceiveGist GistContent
+
+type FetchError
+  = HttpError Http.Error
+  | GistTruncated
+
+type alias GistContent
+  = String
+
+type alias GistFileContents =
+  { content : GistContent
+  , truncated : Bool
+  }
 
 update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
-  case message of
-    SetGistData gistData ->
-      model
-      ! []
-      !! SetGistState (Downloading gistData)
+  let
+    fetchGist gistData =
+      Task.mapError HttpError (getGist gistData)
+      `andThen`
+      ensureNotTruncated
+
+    getGist {id, basename} =
+      Http.get
+        (decodeGistFile basename)
+        ("https://api.github.com/gists/" ++ id)
+
+    decodeGistFile basename =
+      at ["files", basename]
+        ( decode GistFileContents
+          |> required "content" string
+          |> required "truncated" bool
+        )
+
+    ensureNotTruncated {content, truncated} =
+      if truncated
+        then Task.fail GistTruncated
+        else Task.succeed content
+
+  in
+    case message of
+      SetGistData gistData ->
+        model
+        ! [ Task.perform FailToFetchGist ReceiveGist
+            <| fetchGist gistData
+          ]
+        !! SetGistState (Downloading gistData)
+
+      _ ->
+        Debug.crash <| "TODO" ++ toString message
 
 
 

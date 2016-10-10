@@ -303,7 +303,7 @@ update message model =
         failure message =
           { model
           | gistState = NotConnected
-          , toasts = Toast.basicContent message :: model.toasts
+          , toasts = Toast.getHelp message :: model.toasts
           }
 
       in

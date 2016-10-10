@@ -1,5 +1,5 @@
 module Components.Toast exposing
-  ( basicContent
+  ( getHelp
   , custom, basic, toasts
   )
 
@@ -14,8 +14,8 @@ import Components.Link exposing (link)
 
 -- UTILS
 
-basicContent : String -> ToastContent
-basicContent message =
+getHelp : String -> ToastContent
+getHelp message =
   { message = message
   , buttonText = "Get help"
   , buttonUrl =
@@ -50,4 +50,4 @@ custom {message, buttonText, buttonUrl} =
     ]
 
 basic : String -> Html a
-basic = custom << basicContent
+basic = custom << getHelp

@@ -417,6 +417,7 @@ view model =
             , styles
               [ maxHeight (px drawingHeight)
               ]
+            , id drawingId
             ]
             [ div
               [ class [DisplaySizer]

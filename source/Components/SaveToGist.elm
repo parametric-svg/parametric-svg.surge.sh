@@ -167,7 +167,9 @@ update message model =
   in
     case message of
       RequestFileContents context ->
-        model
+        { model
+        | status = Pending
+        }
         ! [ requestFileContents
             { drawingId = context.drawingId
             , variables = context.variables
@@ -182,6 +184,7 @@ update message model =
           (_, Just failureToast) ->
             { model
             | toasts = failureToast :: model.toasts
+            , status = Idle
             }
             ! []
             !! Nada
@@ -191,6 +194,7 @@ update message model =
               newModel =
                 { model
                 | fileContents = Just fileContents
+                , status = Idle
                 }
 
             in

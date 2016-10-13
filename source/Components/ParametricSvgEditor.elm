@@ -344,6 +344,7 @@ update message model =
               OpenGist.ReceiveGistData gistData {source, variables} ->
                 { model
                 | gistState = Synced gistData (FileSnapshot source variables)
+                , rawMarkup = source
                 }
 
         in
@@ -524,6 +525,7 @@ view model =
 
         , node "codemirror-editor"
           [ class [Editor]
+          , attribute "value" model.rawMarkup
           ]
           [ textarea
             [ onInput UpdateRawMarkup

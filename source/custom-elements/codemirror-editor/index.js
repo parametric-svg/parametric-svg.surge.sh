@@ -8,7 +8,7 @@ const privateParts = require('private-parts');
 require('codemirror/mode/xml/xml');
 require('codemirror/keymap/sublime');
 
-const _ = privateParts.createKey();
+const $ = privateParts.createKey();
 
 const baseCss = require('codemirror/lib/codemirror.css');
 const themeCss = require('codemirror/theme/material.css');
@@ -22,6 +22,8 @@ const styleOverrides = jssLite({
 });
 
 
+// TODO TODO TODO!!!!
+// Ditch the textarea crap, wire things up with pure attributes.
 const prototype = Object.assign(Object.create(HTMLElement.prototype), {
   createdCallback() {
     const shadow = this.createShadowRoot();
@@ -30,7 +32,7 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
     style.textContent = baseCss + themeCss + styleOverrides;
     shadow.appendChild(style);
 
-    const editor = _(this).editor = codemirror(shadow, {
+    const editor = $(this).editor = codemirror(shadow, {
       mode: 'xml',
       theme: 'material',
       keyMap: 'sublime',
@@ -92,8 +94,13 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
   },
 
   attachedCallback() {
-    _(this).editor.focus();
+    $(this).editor.focus();
   },
+
+  attributeChangedCallback(attribute, _, newValue) {
+    if (attribute !== 'value') return;
+    $(this).editor.setValue(newValue);
+  }
 });
 
 document.registerElement('codemirror-editor', { prototype });

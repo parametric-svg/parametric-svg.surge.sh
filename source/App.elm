@@ -1,4 +1,4 @@
-import Navigation exposing (Parser, program, makeParser)
+import Navigation exposing (Parser, program, makeParser, modifyUrl)
 import Components.ParametricSvgEditor as ParametricSvgEditor exposing
   ( Location, Model, Message(ChangeLocation)
   , init, view, update, subscriptions
@@ -9,7 +9,7 @@ main : Program Never
 main = program urlParser
   { init = initWithRoute
   , view = view
-  , update = update
+  , update = update modifyUrl
   , subscriptions = subscriptions
   , urlUpdate = urlUpdate
   }
@@ -23,6 +23,7 @@ initWithRoute location =
 
     (model, updateCommands) =
       update
+        modifyUrl
         (ChangeLocation location)
         initModel
 
@@ -46,5 +47,6 @@ urlParser =
 urlUpdate : Location -> Model -> (Model, Cmd Message)
 urlUpdate location model =
   update
+    modifyUrl
     (ChangeLocation location)
     model

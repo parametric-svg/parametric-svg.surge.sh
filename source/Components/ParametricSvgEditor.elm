@@ -227,33 +227,37 @@ type Message
   | SaveToGistMessage SaveToGist.Message
   | OpenGistMessage OpenGist.Message
 
-update : Message -> Model -> (Model, Cmd Message)
-update message model =
+update
+  : (String -> Cmd Message)
+  -> Message
+  -> Model
+  -> (Model, Cmd Message)
+update modifyUrl message model =
   let
-    httpFailure error =
+    httpFailure intermediateModel error =
       case error of
         Timeout ->
-          failure
+          failure intermediateModel
             <| "Uh-oh! The github API request timed out. Trying again "
             ++ "should help. Not kidding!"
 
         NetworkError ->
-          failure
+          failure intermediateModel
             <| "Aw, shucks! The network failed us this time. Try again "
             ++ "in a few moments."
 
         UnexpectedPayload message ->
-          failure
+          failure intermediateModel
             <| "Huh? We don’t understand the response from the github API. "
             ++ "Here’s what our decoder says: “" ++ message ++ "”."
 
         BadResponse number message ->
-          failure
+          failure intermediateModel
             <| "Yikes! The github API responded "
             ++ "with a " ++ toString number ++ " error. "
             ++ "Here’s what they say: “" ++ message ++ "”."
 
-    failure message =
+    failure intermediateModel message =
       { model
       | gistState = NotConnected
       , toasts = Toast.getHelp message :: model.toasts
@@ -305,24 +309,41 @@ update message model =
             SaveToGist.update message model.saveToGist
 
           newModel =
-            case messageToParent of
-              SaveToGist.Nada ->
-                model
-
-              SaveToGist.SetGistState gistState ->
-                { model
-                | gistState = gistState
-                }
-
-              SaveToGist.HandleHttpError error ->
-                httpFailure error
+            { model
+            | saveToGist = saveToGistModel
+            }
 
         in
-          { newModel
-          | saveToGist = saveToGistModel
-          }
-          ! [ Cmd.map SaveToGistMessage saveToGistCommand
-            ]
+          case messageToParent of
+            SaveToGist.Nada ->
+              newModel
+              ! [ Cmd.map SaveToGistMessage saveToGistCommand
+                ]
+
+            SaveToGist.SetGistState gistState ->
+              let navigationCommands =
+                case gistState of
+                  Synced gistData _ ->
+                    [ modifyUrl (locationToUrl <| Gist gistData)
+                    ]
+
+                  _ ->
+                    []
+
+              in
+                { newModel
+                | gistState = gistState
+                }
+                ! ( [ Cmd.map SaveToGistMessage saveToGistCommand
+                    ]
+                  ++ navigationCommands
+                  )
+
+            SaveToGist.HandleHttpError error ->
+              httpFailure newModel error
+              ! [ Cmd.map SaveToGistMessage saveToGistCommand
+                ]
+
 
       OpenGistMessage message ->
         let
@@ -340,7 +361,7 @@ update message model =
                 }
 
               OpenGist.HandleHttpError error ->
-                httpFailure error
+                httpFailure model error
 
               OpenGist.ReceiveGistData gistData {source, variables} ->
                 { model
@@ -367,7 +388,10 @@ update message model =
             ! []
 
           Gist gistData ->
-            update (OpenGistMessage <| OpenGist.SetGistData gistData) model
+            update
+              modifyUrl
+              (OpenGistMessage <| OpenGist.SetGistData gistData)
+              model
 
           Lost ->
             { model

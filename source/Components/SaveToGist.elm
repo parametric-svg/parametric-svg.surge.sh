@@ -95,13 +95,6 @@ update message model =
       ! []
       !! SetGistState NotConnected
 
-    failWithMessageAndButtonText message buttonText =
-      { model
-      | toasts = failureToast message buttonText :: model.toasts
-      }
-      ! []
-      !! SetGistState NotConnected
-
     failureToast message buttonText =
       { message = message
       , buttonText = buttonText
@@ -253,12 +246,11 @@ update message model =
               (Synced {id = id, basename = model.basename} fileSnapshot)
 
           _ ->
-            failWithMessageAndButtonText
-              ( "Booo, things ended up in a weird state. We haven’t expected "
-              ++ "this to happen. Please help us resolve this problem "
-              ++ "by opening a github issue."
-              )
-              "Browse issues"
+            { model
+            | toasts = Toast.pleaseReportThis :: model.toasts
+            }
+            ! []
+            !! SetGistState NotConnected
 
       FailToSendGist NoFileContents ->
         failWithMessage

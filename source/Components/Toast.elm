@@ -1,5 +1,5 @@
 module Components.Toast exposing
-  ( getHelp, takeMeHome
+  ( getHelp, takeMeHome, pleaseReportThis
   , custom, basic, toasts
   )
 
@@ -29,6 +29,19 @@ takeMeHome message =
   , buttonText = "take me home"
   , buttonUrl = "/"
   , openInNewTab = False
+  }
+
+pleaseReportThis : ToastContent
+pleaseReportThis =
+  { message =
+    ( "Booo, our bad. Things ended up in a weird state. If you have "
+    ++ "a spare five minutes, please help us resolve this problem "
+    ++ "by reporting it in a github issue."
+    )
+  , buttonText = "see issues"
+  , buttonUrl =
+    "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+  , openInNewTab = True
   }
 
 

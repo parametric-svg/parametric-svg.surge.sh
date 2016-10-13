@@ -22,7 +22,7 @@ import Http exposing
 
 import Types exposing
   ( ToastContent, Variable, Context, FileSnapshot, GistData
-  , GistState(NotConnected)
+  , GistState(NotConnected, Synced)
   )
 import Styles.ParametricSvgEditor exposing
   ( Classes
@@ -326,7 +326,7 @@ update message model =
       OpenGistMessage message ->
         let
           (openGistModel, openGistCommand, messageToParent) =
-            OpenGist.update message model.openGist
+            OpenGist.update (context model) message model.openGist
 
           newModel =
             case messageToParent of
@@ -340,6 +340,11 @@ update message model =
 
               OpenGist.HandleHttpError error ->
                 httpFailure error
+
+              OpenGist.ReceiveGistData gistData {source, variables} ->
+                { model
+                | gistState = Synced gistData (FileSnapshot source variables)
+                }
 
         in
           { newModel

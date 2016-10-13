@@ -11,7 +11,8 @@ import Task exposing (andThen)
 
 import Helpers exposing ((!!))
 import Types exposing
-  ( Context, GistData, GistState(Downloading, NotFound), ToastContent, Variable
+  ( Context, GistData, GistState(Downloading, NotFound, Synced), ToastContent
+  , Variable
   )
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
@@ -42,6 +43,11 @@ type MessageToParent
   = Nada
   | SetGistState GistState
   | HandleHttpError Http.Error
+  | ReceiveGistData
+    GistData
+    { source : String
+    , variables : List Variable
+    }
 
 type Message
   = SetGistData GistData
@@ -66,8 +72,8 @@ type alias GistFileContents =
   , truncated : Bool
   }
 
-update : Message -> Model -> (Model, Cmd Message, MessageToParent)
-update message model =
+update : Context -> Message -> Model -> (Model, Cmd Message, MessageToParent)
+update context message model =
   let
     fetchGist gistData =
       Task.mapError (HttpError gistData) (getGist gistData)
@@ -91,16 +97,28 @@ update message model =
         then Task.fail GistTruncated
         else Task.succeed content
 
+    hint toast =
+      { model
+      | toasts = toast :: model.toasts
+      }
+      ! []
+      !! Nada
+
+    receiveGistData gistData {source, variables} =
+      model
+      ! []
+      !! ReceiveGistData gistData {source = source, variables = variables}
+
   in
-    case message of
-      SetGistData gistData ->
+    case (context.gistState, message) of
+      (_, SetGistData gistData) ->
         model
         ! [ Task.perform FailToFetchGist ReceiveGist
             <| fetchGist gistData
           ]
         !! SetGistState (Downloading gistData)
 
-      FailToFetchGist (HttpError {id} (BadResponse 404 _)) ->
+      (_, FailToFetchGist (HttpError {id} (BadResponse 404 _))) ->
         { model
         | toasts =
           { message =
@@ -116,30 +134,32 @@ update message model =
         ! []
         !! SetGistState NotFound
 
-      FailToFetchGist GistTruncated ->
-        { model
-        | toasts = Toast.getHelp
+      (_, FailToFetchGist GistTruncated) ->
+        hint <| Toast.getHelp
           ( "Yikes! This looks like a really long gist. At the moment "
           ++ "we only support gists up to 1 MB in size. If you need support "
           ++ "for larger files, let us know."
-          ) :: model.toasts
-        }
-        ! []
-        !! Nada
+          )
 
-      FailToFetchGist (HttpError _ error) ->
+      (_, FailToFetchGist (HttpError _ error)) ->
         model
         ! []
         !! HandleHttpError error
 
-      ReceiveGist content ->
+      (_, ReceiveGist content) ->
         model
         ! [ requestParsedFile content
           ]
         !! Nada
 
-      ReceiveParsedFile _ ->
-        Debug.crash <| "TODO " ++ toString message
+      (Downloading gistData, ReceiveParsedFile parsedFile) ->
+        receiveGistData gistData parsedFile
+
+      (Synced gistData _, ReceiveParsedFile parsedFile) ->
+        receiveGistData gistData parsedFile
+
+      _ ->
+        hint Toast.pleaseReportThis
 
 
 port requestParsedFile

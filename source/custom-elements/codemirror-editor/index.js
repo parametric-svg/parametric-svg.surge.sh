@@ -99,6 +99,7 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
 
   attributeChangedCallback(attribute, _, newValue) {
     if (attribute !== 'value') return;
+    if ($(this).editor.getValue() === newValue) return;
     $(this).editor.setValue(newValue);
   }
 });

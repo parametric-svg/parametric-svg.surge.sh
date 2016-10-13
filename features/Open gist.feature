@@ -1,4 +1,8 @@
 Feature: Open gist
+  Scenario: Opening non-existent gist
+    When I visit '/gist-fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/this-gist-does-not-exist'
+    Then I should see 'we can’t find the gist you’ve asked for' in a toast
+
   Scenario: Visiting by URL
     When I visit '/gist-4b459504bd36fbbd9cbf73d694eff47b/circle-with-params'
     Then I should see a 'saved – click to view' icon button

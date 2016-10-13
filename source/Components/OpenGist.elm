@@ -9,14 +9,11 @@ module Components.OpenGist exposing
 -- import Html.Attributes exposing (attribute, tabindex, value, href, target)
 import Json.Decode as Decode exposing (at, string, bool)
 import Json.Decode.Pipeline exposing (decode, required)
-import Http exposing
-  ( Error(Timeout, BadResponse, UnexpectedPayload, NetworkError)
-  , url
-  )
+import Http exposing (Error(BadResponse))
 import Task exposing (andThen)
 
 import Helpers exposing ((!!))
-import Types exposing (GistData, GistState(Downloading))
+import Types exposing (GistData, GistState(Downloading), ToastContent)
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
 -- import Components.Toast as Toast
@@ -32,11 +29,13 @@ import Types exposing (GistData, GistState(Downloading))
 -- MODEL
 
 type alias Model =
-  {}
+  { toasts : List ToastContent
+  }
 
 init : (Model, Cmd Message)
 init =
-  {}
+  { toasts = []
+  }
   ! []
 
 
@@ -54,7 +53,7 @@ type Message
   | ReceiveGist GistContent
 
 type FetchError
-  = HttpError Http.Error
+  = HttpError GistData Http.Error
   | GistTruncated
 
 type alias GistContent
@@ -69,7 +68,7 @@ update : Message -> Model -> (Model, Cmd Message, MessageToParent)
 update message model =
   let
     fetchGist gistData =
-      Task.mapError HttpError (getGist gistData)
+      Task.mapError (HttpError gistData) (getGist gistData)
       `andThen`
       ensureNotTruncated
 
@@ -98,6 +97,21 @@ update message model =
             <| fetchGist gistData
           ]
         !! SetGistState (Downloading gistData)
+
+      FailToFetchGist (HttpError {id} (BadResponse 404 _)) ->
+        { model
+        | toasts =
+          { message =
+            ( "Sir, we’ve searched the whole place! We can’t find the gist "
+            ++ "you’ve asked for though. Make sure the gist ID "
+            ++ "in the current URL (" ++ id ++ ") matches an actual gist."
+            )
+          , buttonText = "help me check"
+          , buttonUrl = "https://gist.github.com/" ++ id
+          } :: model.toasts
+        }
+        ! []
+        !! Nada
 
       _ ->
         Debug.crash <| "TODO" ++ toString message

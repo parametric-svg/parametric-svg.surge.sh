@@ -46,6 +46,7 @@ init =
 type MessageToParent
   = Nada
   | SetGistState GistState
+  | HandleHttpError Http.Error
 
 type Message
   = SetGistData GistData
@@ -113,6 +114,11 @@ update message model =
         }
         ! []
         !! SetGistState NotFound
+
+      FailToFetchGist (HttpError _ error) ->
+        model
+        ! []
+        !! HandleHttpError error
 
       _ ->
         Debug.crash <| "TODO" ++ toString message

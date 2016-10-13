@@ -228,131 +228,144 @@ type Message
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
-  case message of
-    UpdateRawMarkup rawMarkup ->
+  let
+    httpFailure error =
+      case error of
+        Timeout ->
+          failure
+            <| "Uh-oh! The github API request timed out. Trying again "
+            ++ "should help. Not kidding!"
+
+        NetworkError ->
+          failure
+            <| "Aw, shucks! The network failed us this time. Try again "
+            ++ "in a few moments."
+
+        UnexpectedPayload message ->
+          failure
+            <| "Huh? We don’t understand the response from the github API. "
+            ++ "Here’s what our decoder says: “" ++ message ++ "”."
+
+        BadResponse number message ->
+          failure
+            <| "Yikes! The github API responded "
+            ++ "with a " ++ toString number ++ " error. "
+            ++ "Here’s what they say: “" ++ message ++ "”."
+
+    failure message =
       { model
-      | rawMarkup = rawMarkup
+      | gistState = NotConnected
+      , toasts = Toast.getHelp message :: model.toasts
       }
-      ! []
 
-    ReceiveCanvasSize canvasSize ->
-      { model
-      | canvasSize = Just canvasSize
-      }
-      ! []
-
-    VariablesPanelMessage message ->
-      { model
-      | variablesPanel = VariablesPanel.update message model.variablesPanel
-      }
-      ! []
-
-    AuthMessage message ->
-      let
-        (authModel, authCommand, messageToParent) =
-          Auth.update message model.auth
-
-        newModel =
-          case messageToParent of
-            Auth.Nada ->
-              model
-
-            Auth.UpdateToken maybeToken ->
-              { model
-              | githubAuthToken = maybeToken
-              }
-
-      in
-        newModel
-        ! [ Cmd.map AuthMessage authCommand
-          ]
-
-    SaveToGistMessage message ->
-      let
-        (saveToGistModel, saveToGistCommand, messageToParent) =
-          SaveToGist.update message model.saveToGist
-
-        newModel =
-          case messageToParent of
-            SaveToGist.Nada ->
-              model
-
-            SaveToGist.SetGistState gistState ->
-              { model
-              | gistState = gistState
-              }
-
-            SaveToGist.HandleHttpError (Timeout) ->
-              failure
-                <| "Uh-oh! The github API request timed out. Trying again "
-                ++ "should help. Not kidding!"
-            SaveToGist.HandleHttpError (NetworkError) ->
-              failure
-                <| "Aw, shucks! The network failed us this time. Try again "
-                ++ "in a few moments."
-            SaveToGist.HandleHttpError (UnexpectedPayload message) ->
-              failure
-                <| "Huh? We don’t understand the response from the github API. "
-                ++ "Here’s what our decoder says: “" ++ message ++ "”."
-            SaveToGist.HandleHttpError (BadResponse number message) ->
-              failure
-                <| "Yikes! The github API responded "
-                ++ "with a " ++ toString number ++ " error. "
-                ++ "Here’s what they say: “" ++ message ++ "”."
-
-        failure message =
-          { model
-          | gistState = NotConnected
-          , toasts = Toast.getHelp message :: model.toasts
-          }
-
-      in
-        { newModel
-        | saveToGist = saveToGistModel
+  in
+    case message of
+      UpdateRawMarkup rawMarkup ->
+        { model
+        | rawMarkup = rawMarkup
         }
-        ! [ Cmd.map SaveToGistMessage saveToGistCommand
-          ]
+        ! []
 
-    OpenGistMessage message ->
-      let
-        (openGistModel, openGistCommand, messageToParent) =
-          OpenGist.update message model.openGist
-
-        newModel =
-          case messageToParent of
-            OpenGist.Nada ->
-              model
-
-            OpenGist.SetGistState gistState ->
-              { model
-              | gistState = gistState
-              }
-
-      in
-        { newModel
-        | openGist = openGistModel
+      ReceiveCanvasSize canvasSize ->
+        { model
+        | canvasSize = Just canvasSize
         }
-        ! [ Cmd.map OpenGistMessage openGistCommand
-          ]
+        ! []
 
-    ChangeLocation location ->
-      case location of
-        BlankCanvas ->
-          { model
-          | gistState = NotConnected
+      VariablesPanelMessage message ->
+        { model
+        | variablesPanel = VariablesPanel.update message model.variablesPanel
+        }
+        ! []
+
+      AuthMessage message ->
+        let
+          (authModel, authCommand, messageToParent) =
+            Auth.update message model.auth
+
+          newModel =
+            case messageToParent of
+              Auth.Nada ->
+                model
+
+              Auth.UpdateToken maybeToken ->
+                { model
+                | githubAuthToken = maybeToken
+                }
+
+        in
+          newModel
+          ! [ Cmd.map AuthMessage authCommand
+            ]
+
+      SaveToGistMessage message ->
+        let
+          (saveToGistModel, saveToGistCommand, messageToParent) =
+            SaveToGist.update message model.saveToGist
+
+          newModel =
+            case messageToParent of
+              SaveToGist.Nada ->
+                model
+
+              SaveToGist.SetGistState gistState ->
+                { model
+                | gistState = gistState
+                }
+
+              SaveToGist.HandleHttpError error ->
+                httpFailure error
+
+        in
+          { newModel
+          | saveToGist = saveToGistModel
           }
-          ! []
+          ! [ Cmd.map SaveToGistMessage saveToGistCommand
+            ]
 
-        Gist gistData ->
-          update (OpenGistMessage <| OpenGist.SetGistData gistData) model
+      OpenGistMessage message ->
+        let
+          (openGistModel, openGistCommand, messageToParent) =
+            OpenGist.update message model.openGist
 
-        Lost ->
-          { model
-          | toasts = Toast.takeMeHome
-            ( "Errr, we can’t find anything at that URL."
-            ) :: model.toasts
+          newModel =
+            case messageToParent of
+              OpenGist.Nada ->
+                model
+
+              OpenGist.SetGistState gistState ->
+                { model
+                | gistState = gistState
+                }
+
+              OpenGist.HandleHttpError error ->
+                httpFailure error
+
+        in
+          { newModel
+          | openGist = openGistModel
           }
-          ! []
+          ! [ Cmd.map OpenGistMessage openGistCommand
+            ]
+
+      ChangeLocation location ->
+        case location of
+          BlankCanvas ->
+            { model
+            | gistState = NotConnected
+            }
+            ! []
+
+          Gist gistData ->
+            update (OpenGistMessage <| OpenGist.SetGistData gistData) model
+
+          Lost ->
+            { model
+            | toasts = Toast.takeMeHome
+              ( "Errr, we can’t find anything at that URL."
+              ) :: model.toasts
+            }
+            ! []
 
 
 

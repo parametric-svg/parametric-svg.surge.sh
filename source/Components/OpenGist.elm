@@ -75,7 +75,7 @@ update message model =
 
     getGist {id, basename} =
       Http.get
-        (decodeGistFile basename)
+        (decodeGistFile <| basename ++ ".parametric.svg")
         ("https://api.github.com/gists/" ++ id)
 
     decodeGistFile basename =

@@ -1,5 +1,5 @@
 module Components.Toast exposing
-  ( getHelp
+  ( getHelp, takeMeHome
   , custom, basic, toasts
   )
 
@@ -17,9 +17,18 @@ import Components.Link exposing (link)
 getHelp : String -> ToastContent
 getHelp message =
   { message = message
-  , buttonText = "Get help"
+  , buttonText = "get help"
   , buttonUrl =
     "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+  , openInNewTab = True
+  }
+
+takeMeHome : String -> ToastContent
+takeMeHome message =
+  { message = message
+  , buttonText = "take me home"
+  , buttonUrl = "/"
+  , openInNewTab = False
   }
 
 
@@ -33,18 +42,21 @@ toasts componentModel =
   |> List.map custom
 
 custom : ToastContent -> Html a
-custom {message, buttonText, buttonUrl} =
+custom toast =
   node "paper-toast"
     [ attribute "duration" "10000"
     , attribute "opened" ""
-    , attribute "text" message
+    , attribute "text" toast.message
     ]
     [ link
-      [ href buttonUrl
-      , target "_blank"
-      ]
+      ( [ href toast.buttonUrl
+        ]
+        ++ if toast.openInNewTab
+          then [target "_blank"]
+          else []
+      )
       [ node "paper-button" []
-        [ text buttonText
+        [ text toast.buttonText
         ]
       ]
     ]

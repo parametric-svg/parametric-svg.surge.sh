@@ -107,6 +107,7 @@ update message model =
       , buttonText = buttonText
       , buttonUrl =
         "https://github.com/parametric-svg/parametric-svg.surge.sh/issues"
+      , openInNewTab = True
       }
 
     saveGist context model =

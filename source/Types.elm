@@ -33,4 +33,5 @@ type alias ToastContent =
   { message : String
   , buttonText : String
   , buttonUrl : String
+  , openInNewTab : Bool
   }

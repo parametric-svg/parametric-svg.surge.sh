@@ -347,7 +347,12 @@ update message model =
           update (OpenGistMessage <| OpenGist.SetGistData gistData) model
 
         Lost ->
-          Debug.crash "TODO"
+          { model
+          | toasts = Toast.takeMeHome
+            ( "Errr, we can’t find anything at that URL."
+            ) :: model.toasts
+          }
+          ! []
 
 
 

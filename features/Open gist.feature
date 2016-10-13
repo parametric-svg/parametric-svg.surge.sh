@@ -3,7 +3,11 @@ Feature: Open gist
     When I visit '/gist-fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff/this-gist-does-not-exist'
     Then I should see 'we can’t find the gist you’ve asked for' in a toast
 
-  Scenario: Visiting by URL
+  Scenario: Mistyping URL
+    When I visit '/a-weird-url'
+    Then I should see 'we can’t find anything at that URL' in a toast
+
+  Scenario: Opening gist by URL
     When I visit '/gist-4b459504bd36fbbd9cbf73d694eff47b/circle-with-params'
     Then I should see a 'saved – click to view' icon button
     And the source should be '<svg xmlns="http://www.w3.org/2000/svg" xmlns:parametric="//parametric-svg.js.org/v1">\n  <defs>\n    <param name="a" value="10"/>\n  </defs>\n  <circle parametric:r="a * 10" r="300"/>\n</svg>'

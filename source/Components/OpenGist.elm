@@ -108,6 +108,7 @@ update message model =
             )
           , buttonText = "help me check"
           , buttonUrl = "https://gist.github.com/" ++ id
+          , openInNewTab = False
           } :: model.toasts
         }
         ! []

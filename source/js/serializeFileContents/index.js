@@ -82,6 +82,7 @@ module.exports = ({ listener }) => {
         ),
         buttonText: 'Validate your markup',
         buttonUrl: 'https://xmlvalidation.com/',
+        openInNewTab: true,
       } });
     } else {
       listener({ payload, error: null });

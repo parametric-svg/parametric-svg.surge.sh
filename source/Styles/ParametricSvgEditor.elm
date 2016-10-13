@@ -6,7 +6,7 @@ import Css exposing
   , stylesheet, (.), selector, children
 
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
-  , minHeight, maxHeight, paddingTop, top, property
+  , minHeight, maxHeight, paddingTop, top, property, marginLeft
 
   , pct, block, hex, relative, px, int, absolute, zero
   )
@@ -18,6 +18,7 @@ type Classes
   | DisplaySizer
   | Editor
   | Toolbar
+  | ToolbarButton
 
 css : Stylesheet
 css = stylesheet <| namespace componentNamespace <|
@@ -50,6 +51,10 @@ css = stylesheet <| namespace componentNamespace <|
         ++ "margin-left: 0; "
         ++ "line-height: 1.5; "
         ++ "}"
+      ]
+
+    , (.) ToolbarButton
+      [ marginLeft (px 10)
       ]
 
     , (.) Display

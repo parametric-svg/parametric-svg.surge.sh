@@ -31,6 +31,7 @@ import Styles.ParametricSvgEditor exposing
     , DisplaySizer
     , Editor
     , Toolbar
+    , ToolbarButton
     )
   , componentNamespace
   )
@@ -511,6 +512,13 @@ view model =
           Auth.view (context model) model.auth
           |> List.map (App.map AuthMessage)
 
+    button markup =
+      [ div
+        [ class [ToolbarButton]
+        ]
+        markup
+      ]
+
   in
     node "paper-header-panel"
       [ class [Root]
@@ -520,8 +528,8 @@ view model =
           [ class [Toolbar]
           ]
           <| title "parametric-svg"
-          ++ openGistButton
-          ++ saveToGistOrAuthButton
+          ++ button openGistButton
+          ++ button saveToGistOrAuthButton
 
         , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
 

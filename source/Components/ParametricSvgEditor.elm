@@ -345,6 +345,9 @@ update message model =
                 { model
                 | gistState = Synced gistData (FileSnapshot source variables)
                 , rawMarkup = source
+                , variablesPanel = VariablesPanel.update
+                    (VariablesPanel.SetVariables variables)
+                    model.variablesPanel
                 }
 
         in

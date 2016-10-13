@@ -1,5 +1,5 @@
 port module Components.VariablesPanel exposing
-  ( Model, Message
+  ( Model, Message(SetVariables)
   , init, update, view
   , variables
   )
@@ -72,6 +72,7 @@ emptyVariableField id =
 type Message
   = UpdateVariableName Id String
   | UpdateVariableValue Id String
+  | SetVariables (List Variable)
 
 update : Message -> Model -> Model
 update message model =
@@ -118,7 +119,7 @@ update message model =
         then False
         else True
 
-    updateVariableFields id updater =
+    updateVariableField id updater =
       { model
       | variableFields =
         normalizeVariableFields
@@ -130,10 +131,26 @@ update message model =
   in
     case message of
       UpdateVariableName id name ->
-        updateVariableFields id (updateName name)
+        updateVariableField id (updateName name)
 
       UpdateVariableValue id value ->
-        updateVariableFields id (updateValue value)
+        updateVariableField id (updateValue value)
+
+      SetVariables variables ->
+        let
+          variableFields =
+            List.indexedMap indexedVariableToField variables
+            |> Dict.fromList
+
+          indexedVariableToField index {name, value} =
+            ( index
+            , VariableField (Just name) (Just value)
+            )
+
+        in
+          { model
+          | variableFields = normalizeVariableFields variableFields
+          }
 
 
 

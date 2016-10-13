@@ -18,6 +18,7 @@ type GistState
   | Uploading FileSnapshot
   | Synced GistData FileSnapshot
   | Downloading GistData
+  | NotFound
 
 type alias GistData =
   { id : String

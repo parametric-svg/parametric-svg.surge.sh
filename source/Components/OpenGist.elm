@@ -11,11 +11,13 @@ import Http exposing (Error(BadResponse))
 import Task exposing (andThen)
 
 import Helpers exposing ((!!))
-import Types exposing (GistData, GistState(Downloading), ToastContent)
+import Types exposing
+  ( Context, GistData, GistState(Downloading, NotFound), ToastContent
+  )
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
 import Components.Toast as Toast
--- import Components.Spinner as Spinner
+import Components.Spinner as Spinner
 
 -- (=>) : a -> b -> (a, b)
 -- (=>) =
@@ -110,7 +112,7 @@ update message model =
           } :: model.toasts
         }
         ! []
-        !! Nada
+        !! SetGistState NotFound
 
       _ ->
         Debug.crash <| "TODO" ++ toString message
@@ -134,6 +136,17 @@ update message model =
 
 -- VIEW
 
-view : Model -> List (Html Message)
-view model =
-  Toast.toasts model
+view : Context -> Model -> List (Html Message)
+view context model =
+  let
+    button =
+      case context.gistState of
+        Downloading _ ->
+          Spinner.view "downloading gist…"
+
+        _ ->
+          []
+
+  in
+    button
+    ++ Toast.toasts model

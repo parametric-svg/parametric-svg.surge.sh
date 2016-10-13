@@ -472,7 +472,7 @@ view model =
       ]
 
     openGistButton =
-      OpenGist.view model.openGist
+      OpenGist.view (context model) model.openGist
       |> List.map (App.map OpenGistMessage)
 
     saveToGistOrAuthButton =

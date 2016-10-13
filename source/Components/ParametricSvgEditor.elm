@@ -471,7 +471,11 @@ view model =
         ]
       ]
 
-    toolbarButtons =
+    openGistButton =
+      OpenGist.view model.openGist
+      |> List.map (App.map OpenGistMessage)
+
+    saveToGistOrAuthButton =
       case model.githubAuthToken of
         Just _ ->
           SaveToGist.view (context model) model.saveToGist
@@ -490,7 +494,8 @@ view model =
           [ class [Toolbar]
           ]
           <| title "parametric-svg"
-          ++ toolbarButtons
+          ++ openGistButton
+          ++ saveToGistOrAuthButton
 
         , App.map VariablesPanelMessage (VariablesPanel.view model.variablesPanel)
 

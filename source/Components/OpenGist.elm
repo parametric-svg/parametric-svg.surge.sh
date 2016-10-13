@@ -1,12 +1,10 @@
 -- port module Components.OpenGist exposing
 module Components.OpenGist exposing
   ( Model, MessageToParent(..), Message(SetGistData)
-  , init, update
+  , init, update, view
   )
 
--- import Html exposing (Html)
--- import Html.Events exposing (onClick, on, onInput)
--- import Html.Attributes exposing (attribute, tabindex, value, href, target)
+import Html exposing (Html)
 import Json.Decode as Decode exposing (at, string, bool)
 import Json.Decode.Pipeline exposing (decode, required)
 import Http exposing (Error(BadResponse))
@@ -16,7 +14,7 @@ import Helpers exposing ((!!))
 import Types exposing (GistData, GistState(Downloading), ToastContent)
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
--- import Components.Toast as Toast
+import Components.Toast as Toast
 -- import Components.Spinner as Spinner
 
 -- (=>) : a -> b -> (a, b)
@@ -106,9 +104,9 @@ update message model =
             ++ "you’ve asked for though. Make sure the gist ID "
             ++ "in the current URL (" ++ id ++ ") matches an actual gist."
             )
-          , buttonText = "help me check"
+          , buttonText = "see on github"
           , buttonUrl = "https://gist.github.com/" ++ id
-          , openInNewTab = False
+          , openInNewTab = True
           } :: model.toasts
         }
         ! []
@@ -136,5 +134,6 @@ update message model =
 
 -- VIEW
 
--- view : Context -> Model -> List (Html Message)
--- view context model =
+view : Model -> List (Html Message)
+view model =
+  Toast.toasts model

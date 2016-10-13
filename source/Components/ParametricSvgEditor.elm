@@ -387,6 +387,9 @@ subscriptions model =
     , Sub.map SaveToGistMessage
       <| SaveToGist.subscriptions (context model) model.saveToGist
 
+    , Sub.map OpenGistMessage
+      <| OpenGist.subscriptions model.openGist
+
     ]
 
 

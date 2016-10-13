@@ -1,7 +1,6 @@
--- port module Components.OpenGist exposing
-module Components.OpenGist exposing
+port module Components.OpenGist exposing
   ( Model, MessageToParent(..), Message(SetGistData)
-  , init, update, view
+  , init, update, subscriptions, view
   )
 
 import Html exposing (Html)
@@ -12,16 +11,12 @@ import Task exposing (andThen)
 
 import Helpers exposing ((!!))
 import Types exposing
-  ( Context, GistData, GistState(Downloading, NotFound), ToastContent
+  ( Context, GistData, GistState(Downloading, NotFound), ToastContent, Variable
   )
 -- import Components.Link exposing (link)
 -- import Components.IconButton as IconButton
 import Components.Toast as Toast
 import Components.Spinner as Spinner
-
--- (=>) : a -> b -> (a, b)
--- (=>) =
---   (,)
 
 
 
@@ -52,6 +47,7 @@ type Message
   = SetGistData GistData
   | FailToFetchGist FetchError
   | ReceiveGist GistContent
+  | ReceiveParsedFile ParsedFile
 
 type FetchError
   = HttpError GistData Http.Error
@@ -59,6 +55,11 @@ type FetchError
 
 type alias GistContent
   = String
+
+type alias ParsedFile =
+  { source : String
+  , variables : List Variable
+  }
 
 type alias GistFileContents =
   { content : GistContent
@@ -115,26 +116,48 @@ update message model =
         ! []
         !! SetGistState NotFound
 
+      FailToFetchGist GistTruncated ->
+        { model
+        | toasts = Toast.getHelp
+          ( "Yikes! This looks like a really long gist. At the moment "
+          ++ "we only support gists up to 1 MB in size. If you need support "
+          ++ "for larger files, let us know."
+          ) :: model.toasts
+        }
+        ! []
+        !! Nada
+
       FailToFetchGist (HttpError _ error) ->
         model
         ! []
         !! HandleHttpError error
 
-      _ ->
-        Debug.crash <| "TODO" ++ toString message
+      ReceiveGist content ->
+        model
+        ! [ requestParsedFile content
+          ]
+        !! Nada
+
+      ReceiveParsedFile _ ->
+        Debug.crash <| "TODO " ++ toString message
+
+
+port requestParsedFile
+  : GistContent
+  -> Cmd message
 
 
 
 
 -- SUBSCRIPTIONS
 
--- subscriptions : Context -> Model -> Sub Message
--- subscriptions context model =
---   fileContents (ReceiveFileContents context)
---
--- port fileContents
---   : (FileContentsSerializationOutput -> message)
---   -> Sub message
+subscriptions : Model -> Sub Message
+subscriptions model =
+  receiveParsedFile ReceiveParsedFile
+
+port receiveParsedFile
+  : (ParsedFile -> message)
+  -> Sub message
 
 
 

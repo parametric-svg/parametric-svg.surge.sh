@@ -8,14 +8,14 @@ module.exports = (input) => {
     inputDoc.querySelectorAll('defs param')
   );
   const variables = params.reduce((result, param) => {
-    const key = param.getAttribute('name');
+    const name = param.getAttribute('name');
     const value = param.getAttribute('value');
-    return ((key && value) ? (
-      Object.assign({}, result, { [key]: value })
+    return (name && value) ? (
+      result.concat([{ name, value }])
     ) : (
       result
-    ));
-  }, {});
+    );
+  }, []);
 
   return {
     source: prettifyXml(input),

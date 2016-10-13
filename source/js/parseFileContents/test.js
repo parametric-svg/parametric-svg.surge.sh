@@ -24,7 +24,7 @@ test((
     '</svg>'
   );
 
-  is.deepEqual(variables, {});
+  is.deepEqual(variables, []);
   is.end();
 });
 
@@ -41,10 +41,10 @@ test((
     '</svg>'
   );
 
-  is.deepEqual(variables, {
-    width: '100',
-    height: '200',
-  });
+  is.deepEqual(variables, [
+    { name: 'width', value: '100' },
+    { name: 'height', value: '200' },
+  ]);
 
   is.end();
 });

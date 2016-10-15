@@ -5867,6 +5867,11 @@
       "from": "osenv@>=0.1.0 <0.2.0",
       "resolved": "https://registry.npmjs.org/osenv/-/osenv-0.1.3.tgz"
     },
+    "outdent": {
+      "version": "0.3.0",
+      "from": "outdent@latest",
+      "resolved": "https://registry.npmjs.org/outdent/-/outdent-0.3.0.tgz"
+    },
     "package-hash": {
       "version": "1.2.0",
       "from": "package-hash@>=1.1.0 <2.0.0",

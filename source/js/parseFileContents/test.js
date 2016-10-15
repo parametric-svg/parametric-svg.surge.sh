@@ -2,6 +2,9 @@
   // To keep XML markup readable
 const test = require('tape-catch');
 const inNode = require('detect-node');
+const outdent = require('outdent');
+
+const multiline = outdent({ trimTrailingNewline: false });
 
 /* eslint-disable quote-props, global-require */
 const parseFileContents = (inNode ? (() => {
@@ -52,27 +55,27 @@ test((
 test((
   'Returns the whole source, pretty printed'
 ), (is) => {
-  const input = (
-    '<svg>' +
-      '<defs>' +
-        '<param name="width" value="100"/>' +
-        '<param name="height" value="200"/>' +
-      '</defs>' +
-      '<rect parametric:width="width" parametric:height="height"/>' +
-    '</svg>'
-  );
+  const input = multiline`
+    <svg>
+      <defs>
+        <param name="width" value="100"/>
+        <param name="height" value="200"/>
+      </defs>
+      <rect parametric:width="width" parametric:height="height"/>
+    </svg>
+  `;
 
   const { source } = parseFileContents(input);
 
-  is.equal(source, [
-    '<svg>',
-    '  <defs>',
-    '    <param name="width" value="100"/>',
-    '    <param name="height" value="200"/>',
-    '  </defs>',
-    '  <rect parametric:width="width" parametric:height="height"/>',
-    '</svg>',
-  ].join('\n'));
+  is.equal(source, multiline`
+    <svg>
+      <defs>
+        <param name="width" value="100"/>
+        <param name="height" value="200"/>
+      </defs>
+      <rect parametric:width="width" parametric:height="height"/>
+    </svg>
+  `);
 
   is.end();
 });

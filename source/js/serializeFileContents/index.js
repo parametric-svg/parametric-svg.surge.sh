@@ -1,4 +1,5 @@
 const { DOMParser, XMLSerializer, document } = require('global');
+const prettifyXml = require('prettify-xml');
 
 const PARAMETRIC_NAMESPACE = '//parametric-svg.js.org/v1';
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
@@ -66,7 +67,11 @@ module.exports = ({ listener }) => {
       svg.documentElement.insertBefore(defs, firstChild);
     }
 
-    const payload = serializer.serializeToString(svg);
+    const payload = `${
+      prettifyXml(
+        serializer.serializeToString(svg)
+      )
+    }\n`;
 
     if (/<parsererror\b/.test(payload)) {
       // This seems to be the most portable way to check for a parser error

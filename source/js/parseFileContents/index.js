@@ -1,6 +1,5 @@
 const { DOMParser } = require('global');
 const parser = new DOMParser();
-const prettifyXml = require('prettify-xml');
 
 module.exports = (input) => {
   const inputDoc = parser.parseFromString(input, 'image/svg+xml');
@@ -18,7 +17,7 @@ module.exports = (input) => {
   }, []);
 
   return {
-    source: prettifyXml(input),
+    source: input,
     variables,
   };
 };

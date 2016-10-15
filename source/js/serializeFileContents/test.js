@@ -4,6 +4,9 @@ const test = require('tape-catch');
 const sinon = require('sinon');
 const inNode = require('detect-node');
 const randomString = require('random-string');
+const outdent = require('outdent');
+
+const multiline = outdent({ trimTrailingNewline: false });
 
 const svgElementMocks = {};
 const addElement = ({ drawingId, markup }) => {
@@ -96,40 +99,40 @@ test((
   'Adds <defs>'
 ), withInput(
   { markup: '<svg></svg>', variables: [{ name: 'a', value: '2' }] }
-).expectPayload(
-  svgOpeningTag +
-    '<defs>' +
-      '<param name="a" value="2"/>' +
-    '</defs>' +
-  '</svg>'
-));
+).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs>
+      <param name="a" value="2"/>
+    </defs>
+  </svg>
+`));
 
 test((
   'Adds <defs> at the beginning of the <svg>'
 ), withInput(
   { markup: '<svg><circle/></svg>', variables: [{ name: 'a', value: '2' }] }
-).expectPayload(
-  svgOpeningTag +
-    '<defs>' +
-      '<param name="a" value="2"/>' +
-    '</defs>' +
-    '<circle/>' +
-  '</svg>'
-));
+).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs>
+      <param name="a" value="2"/>
+    </defs>
+    <circle/>
+  </svg>
+`));
 
 test((
   'Adds variables at the end of existing <defs>'
 ), withInput({
   markup: '<svg><defs><whatever/></defs></svg>',
   variables: [{ name: 'a', value: '2' }],
-}).expectPayload(
-  svgOpeningTag +
-    '<defs>' +
-      '<whatever/>' +
-      '<param name="a" value="2"/>' +
-    '</defs>' +
-  '</svg>'
-));
+}).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs>
+      <whatever/>
+      <param name="a" value="2"/>
+    </defs>
+  </svg>
+`));
 
 test((
   'Updates the values of existing variables'
@@ -143,25 +146,25 @@ test((
     '</svg>'
   ),
   variables: [{ name: 'a', value: '2' }],
-}).expectPayload(
-  svgOpeningTag +
-    '<defs>' +
-      '<param name="b" value="5"/>' +
-      '<param name="a" value="2"/>' +
-    '</defs>' +
-  '</svg>'
-));
+}).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs>
+      <param name="b" value="5"/>
+      <param name="a" value="2"/>
+    </defs>
+  </svg>
+`));
 
 test((
   'Works with attributes and namespaced attributes'
 ), withInput(
   { markup: '<svg><circle r="5" parametric:r="5"/></svg>', variables: [] }
-).expectPayload(
-  svgOpeningTag +
-    '<defs/>' +
-    '<circle r="5" parametric:r="5"/>' +
-  '</svg>'
-));
+).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs/>
+    <circle r="5" parametric:r="5"/>
+  </svg>
+`));
 
 test((
   'Adds the `parametric` namespace and the SVG namespace ' +
@@ -171,11 +174,11 @@ test((
     `${svgOpeningTag}</svg>`
   ),
   variables: [],
-}).expectPayload(
-  svgOpeningTag +
-    '<defs/>' +
-  '</svg>'
-));
+}).expectPayload(multiline`
+  ${svgOpeningTag}
+    <defs/>
+  </svg>
+`));
 
 test((
   'Passes an error when given an SVG with invalid contents'

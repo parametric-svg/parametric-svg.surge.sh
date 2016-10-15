@@ -3,13 +3,27 @@ const expect = require('expect');
 const fetch = require('node-fetch');
 
 
-// UTILITY FUNCTIONS
+// COMPONENT CLASSES
 
 const component = (name, classes) => (
   classes.reduce((result, className) => Object.assign({}, result, {
     [className]: `${name}-${className}`,
   }), {})
 );
+
+const ParametricSvgEditor = component('ParametricSvgEditor', [
+  'Display',
+  'Editor',
+]);
+
+const VariablesPanel = component('VariablesPanel', [
+  'Input',
+  'Parameter',
+  'Value',
+]);
+
+
+// UTILITY FUNCTIONS
 
 const elmSelectors = ({
   className,
@@ -22,6 +36,19 @@ const elmSelectors = ({
 const elmSelector = (options) => (
   elmSelectors(options).join(', ')
 );
+
+const elmChildOfSelector = (parent) => (child) => {
+  const parentSelectors = elmSelectors(parent);
+
+  const combinations =
+    elmSelectors(child).map(childSelector => (
+      parentSelectors.map(inputSelector => (
+        `${inputSelector} ${childSelector}`
+      ))
+    ));
+
+  return flatten(combinations).join(', ');
+};
 
 const xmlParameterRegExp = (element, parameterRegExp) => (
   new RegExp(`<${element}\\b[^>]*\\b${parameterRegExp}`)
@@ -44,20 +71,6 @@ const spinner = name => nameSelector(name, [
 ]);
 
 const elementId = element => element.value.ELEMENT;
-
-
-// COMPONENT CLASSES
-
-const ParametricSvgEditor = component('ParametricSvgEditor', [
-  'Display',
-  'Editor',
-]);
-
-const VariablesPanel = component('VariablesPanel', [
-  'Input',
-  'Parameter',
-  'Value',
-]);
 
 
 // CUSTOM COMMANDS
@@ -142,28 +155,22 @@ module.exports = function stepDefinitions() {
   this.When((
     /^I add a parameter named '([^']*)' with a value of '([^']*)'$/
   ), (name, value) => {
-    const lastInputSelectors = elmSelectors({
+    const lastInputSelector = elmChildOfSelector({
       className: VariablesPanel.Input,
       suffix: ':last-child',
     });
 
-    const childOfLastInput = (className) => {
-      const combinations =
-        elmSelectors({ className }).map(childSelector => (
-          lastInputSelectors.map(inputSelector => (
-            `${inputSelector} ${childSelector}`
-          ))
-        ));
-
-      return flatten(combinations).join(', ');
-    };
-
     browser.typeIntoInput(
-      childOfLastInput(VariablesPanel.Parameter),
+      lastInputSelector({
+        className: VariablesPanel.Parameter,
+      }),
       name
     );
+
     browser.typeIntoInput(
-      childOfLastInput(VariablesPanel.Value),
+      lastInputSelector({
+        className: VariablesPanel.Value,
+      }),
       value
     );
   });
@@ -390,14 +397,18 @@ module.exports = function stepDefinitions() {
     this.lastSeenIconButtonId = browser.elementId(iconButton(name));
   });
 
-  this.Then((
-    /^eventually I should see an? '([^']*)' icon button$/
-  ), (name) => {
+  const waitForIconButton = (name) => {
     browser.waitUntil(() => browser.elementDisplayed(
       iconButton(name)
     ));
     this.lastSeenIconButtonId = browser.elementId(iconButton(name));
-  });
+  };
+  this.Then((
+    /^eventually I should see an? '([^']*)' icon button$/
+  ), waitForIconButton);
+  this.When((
+    /^I wait until I see an? '([^']*)' icon button$/
+  ), waitForIconButton);
 
   this.Then((
     /^the icon button should be a link to '([^']*<gist id>)' opening in a new tab$/
@@ -474,12 +485,55 @@ module.exports = function stepDefinitions() {
   });
 
   this.Then((
-    /^the source should be '([^']*)'$/
+    /^the source should be$/
   ), (source) => {
-    const selector = browser.element(elmSelector({
+    const content = browser.getAttribute(elmSelector({
       className: ParametricSvgEditor.Editor,
-      suffix: ' textarea',
-    }));
-    expect(browser.getValue(selector)).toBe(source);
+    }), 'value');
+    expect(content).toBe(source);
+  });
+
+  this.Then((
+    /^the first parameter should be named '([^']*)' and be set to '([^']*)'$/
+  ), (parameter, value) => {
+    const firstInputSelector = elmChildOfSelector({
+      className: VariablesPanel.Input,
+      suffix: ':first-child',
+    });
+
+    const actualParameter = browser.getAttribute(firstInputSelector({
+      className: VariablesPanel.Parameter,
+    }), 'value');
+    expect(actualParameter).toBe(parameter);
+
+    const actualValue = browser.getAttribute(firstInputSelector({
+      className: VariablesPanel.Value,
+    }), 'value');
+    expect(actualValue).toBe(value);
+  });
+
+  this.When((
+    /^I change the value of the first parameter to '([^']*)'$/
+  ), (value) => {
+    const firstInputSelector = elmChildOfSelector({
+      className: VariablesPanel.Input,
+      suffix: ':first-child',
+    });
+
+    browser.typeIntoInput(firstInputSelector({
+      className: VariablesPanel.Value,
+    }), value);
+  });
+
+  this.Then((
+    /^I should see '([^']*)' in a toast$/
+  ), (snippet) => {
+    browser.waitForVisible('paper-toast');
+    const toastContent = browser.getAttribute('paper-toast', 'text');
+    expect(
+      toastContent.toLocaleLowerCase()
+    ).toContain(
+      snippet.toLocaleLowerCase()
+    );
   });
 };

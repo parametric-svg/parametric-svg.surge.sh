@@ -13,7 +13,7 @@
 
 * [x] Minimal mobile-first UI
 * [x] Customizable controls
-* [ ] E2E test suite
+* [x] E2E test suite
 * [ ] Gist integration
   * [x] Authentication
   * [x] Create gist
@@ -28,6 +28,7 @@
 * [ ] Offline support
 * [ ] Import / export
 * [ ] Tweak editor focus UX
+* [ ] Better branding
 
 
 ## License

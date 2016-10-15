@@ -11,6 +11,7 @@ Usage:
 set -x
 
 mkdir -p "$build_artifacts"/npm
+rm -f node_modules/@polymer/.DS_Store
 if test -e node_modules/@polymer/web-animations-js; then
   mv node_modules/@polymer/web-animations-js "$build_artifacts"/npm/
 fi

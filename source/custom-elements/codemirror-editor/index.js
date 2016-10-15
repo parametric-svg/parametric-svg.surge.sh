@@ -22,17 +22,15 @@ const styleOverrides = jssLite({
 });
 
 
-// TODO TODO TODO!!!!
-// Ditch the textarea crap, wire things up with pure attributes.
 const prototype = Object.assign(Object.create(HTMLElement.prototype), {
   createdCallback() {
-    const shadow = this.createShadowRoot();
-
+    // Apply styles
     const style = document.createElement('style');
     style.textContent = baseCss + themeCss + styleOverrides;
-    shadow.appendChild(style);
+    this.appendChild(style);
 
-    const editor = $(this).editor = codemirror(shadow, {
+    // Configure editor
+    const editor = $(this).editor = codemirror(this, {
       mode: 'xml',
       theme: 'material',
       keyMap: 'sublime',
@@ -49,59 +47,34 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
       },
     });
 
-    const content = document.createElement('content');
-    shadow.appendChild(content);
+    // Wire up `value` property
+    let valueSnapshot = '';
+    Object.defineProperty(this, 'value', {
+      __proto__: null,
+      enumerable: true,
+      get: () => editor.getValue(),
+      set: (value) => {
+        if (value === valueSnapshot) return;
+        editor.setValue(value);
+      },
+    });
 
-    let textarea;
-    const updateTextareaValue = () => {
-      if (!textarea) return;
-      textarea.value = editor.getValue();
+    // Wire up `input` event
+    editor.on('change', () => {
+      const value = editor.getValue();
+      valueSnapshot = value;
+      this.value = value;
 
-      // Dispatch “input” event
+      // Dispatch `input` event
       const event = document.createEvent('Events');
       event.initEvent('input', true, true);
-      textarea.dispatchEvent(event);
-    };
-    editor.on('change', updateTextareaValue);
-
-    const updateEditorValue = (event) => {
-      if (event.target.value === editor.getValue()) return;
-      editor.setValue(event.target.value);
-    };
-
-    const rewireTextarea = () => {
-      const nextTextarea = Array.from(this.children)
-        .find(child => child.tagName === 'TEXTAREA');
-
-      if (nextTextarea !== textarea) {
-        if (textarea !== undefined) {
-          textarea.removeEventListener('input', updateEditorValue);
-        }
-
-        textarea = nextTextarea;
-        if (textarea === undefined) return;
-
-        textarea.style.display = 'none';
-        updateTextareaValue();
-        textarea.addEventListener('input', updateEditorValue);
-      }
-    };
-    rewireTextarea();
-
-    // Always keep the first <textarea> wired up
-    const observer = new MutationObserver(rewireTextarea);
-    observer.observe(this, { childList: true });
+      this.dispatchEvent(event);
+    });
   },
 
   attachedCallback() {
     $(this).editor.focus();
   },
-
-  attributeChangedCallback(attribute, _, newValue) {
-    if (attribute !== 'value') return;
-    if ($(this).editor.getValue() === newValue) return;
-    $(this).editor.setValue(newValue);
-  }
 });
 
 document.registerElement('codemirror-editor', { prototype });

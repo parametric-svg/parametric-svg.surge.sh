@@ -6,7 +6,7 @@ module Components.ParametricSvgEditor exposing
   )
 
 import Html exposing (node, div, text, textarea, span, Html)
-import Html.Attributes exposing (attribute, id)
+import Html.Attributes exposing (attribute, id, value)
 import Html.Events exposing (onInput, on)
 import Html.CssHelpers exposing (withNamespace)
 import Html.App as App
@@ -561,12 +561,9 @@ view model =
 
         , node "codemirror-editor"
           [ class [Editor]
-          , attribute "value" model.rawMarkup
-          ]
-          [ textarea
-            [ onInput UpdateRawMarkup
-            ] []
-          ]
+          , value model.rawMarkup
+          , onInput UpdateRawMarkup
+          ] []
         ]
       ++ Toast.toasts model
 

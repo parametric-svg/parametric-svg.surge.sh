@@ -24,4 +24,4 @@ Feature: Open gist
 
     When I change the value of the first parameter to '50'
     Then I should see a circle with a radius of '500' on the canvas
-    And I should see an 'enable gist integration' icon button
+    And I should see a 'log into gist to save' icon button

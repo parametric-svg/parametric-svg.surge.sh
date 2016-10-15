@@ -47,33 +47,56 @@ const prototype = Object.assign(Object.create(HTMLElement.prototype), {
       },
     });
 
-    // Wire up `value` property
+    // `value` attribute
+    this.setAttribute('value', '');
+
+    // `value` property
     let valueSnapshot = '';
     Object.defineProperty(this, 'value', {
       __proto__: null,
       enumerable: true,
-      get: () => editor.getValue(),
+
+      get: () => (
+        editor.getValue()
+      ),
+
       set: (value) => {
-        if (value === valueSnapshot) return;
-        editor.setValue(value);
+        if (value !== valueSnapshot) {
+          editor.setValue(value);
+        }
+
+        // `value` attribute
+        this.setAttribute('value', value);
+
+        // `input` event
+        const event = document.createEvent('Events');
+        event.initEvent('input', true, true);
+        this.dispatchEvent(event);
       },
     });
 
-    // Wire up `input` event
     editor.on('change', () => {
+      // `value` property
       const value = editor.getValue();
       valueSnapshot = value;
       this.value = value;
-
-      // Dispatch `input` event
-      const event = document.createEvent('Events');
-      event.initEvent('input', true, true);
-      this.dispatchEvent(event);
     });
   },
 
   attachedCallback() {
     $(this).editor.focus();
+  },
+
+  attributeChangedCallback(attribute, _, newValue) {
+    switch (attribute) {
+      // `value` attribute
+      case 'value':
+        this.value = newValue;
+        return;
+
+      default:
+        return;
+    }
   },
 });
 

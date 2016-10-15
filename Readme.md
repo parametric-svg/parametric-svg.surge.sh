@@ -17,12 +17,13 @@
 * [ ] Gist integration
   * [x] Authentication
   * [x] Create gist
-  * [x] Update gist
+  * [ ] Update gist
   * [x] Display info about serialization errors
   * [x] Improve export quality
-  * [ ] Persist gist ID in route
-  * [ ] Make sure you’re only asked for the file name once
-  * [ ] Open gist
+  * [x] Persist gist ID in route
+  * [x] Make sure you’re only asked for the file name once
+  * [x] Open gist
+  * [ ] Choose gist to open
 * [ ] Welcome screen
 * [ ] Offline support
 * [ ] Import / export

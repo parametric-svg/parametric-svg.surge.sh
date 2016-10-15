@@ -195,6 +195,7 @@ test((
       ),
       buttonText: 'Validate your markup',
       buttonUrl: 'https://xmlvalidation.com/',
+      openInNewTab: true,
     },
     'passes a descriptive `error`'
   );

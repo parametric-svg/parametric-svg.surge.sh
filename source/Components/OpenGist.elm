@@ -111,6 +111,11 @@ update context message model =
 
   in
     case (context.gistState, message) of
+      (Synced _ _, SetGistData gistData) ->
+        model
+        ! []
+        !! Nada
+
       (_, SetGistData gistData) ->
         model
         ! [ Task.perform FailToFetchGist ReceiveGist

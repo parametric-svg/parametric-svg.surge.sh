@@ -259,7 +259,7 @@ update message model =
           ! [ Task.perform FailToSendGist (ReceiveGistId gistState)
               <| saveGist context model
             ]
-        !! SetGistStateAndMarkup gistState markup
+          !! SetGistStateAndMarkup gistState markup
 
       ReceiveGistId gistState id ->
         case gistState of

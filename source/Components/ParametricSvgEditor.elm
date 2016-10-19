@@ -102,17 +102,53 @@ init =
 svgMarkup : String -> Maybe CanvasSize -> String
 svgMarkup rawMarkup canvasSize =
   let
-    markupWithoutSize =
-      if Regex.contains (regex "^\\s*<svg\\b") rawMarkup
+    markupWithSvgTags =
+      if Regex.contains (regex svgTagFromBeginning) rawMarkup
         then rawMarkup
         else "<svg>" ++ rawMarkup ++ "</svg>"
 
+    svgTagFromBeginning =
+      "^\\s*<svg\\b[^>]*"
+
+    hasSize =
+      containsAttribute "viewBox"
+      && containsAttribute "width"
+      && containsAttribute "height"
+
+    containsAttribute attribute =
+      Regex.contains (attributeRegex attribute) rawMarkup
+
+    attributeRegex attribute =
+      regex
+        ( "(" ++ svgTagFromBeginning ++ ")"
+        ++ "\\s*" ++ attribute ++ "=\"[^>\"]*\""
+        )
+
+    markupWithoutSize =
+      markupWithSvgTags
+      |> removeAttribute "viewBox"
+      |> removeAttribute "width"
+      |> removeAttribute "height"
+
+    removeAttribute attribute =
+      Regex.replace (AtMost 1) (attributeRegex attribute) leaveFirstGroup
+
+    leaveFirstGroup {submatches} =
+      Maybe.withDefault ""
+        ( List.head submatches
+          `andThen`
+          identity
+        )
+
   in
-    case canvasSize of
-      Just size ->
+    case (hasSize, canvasSize) of
+      (True, _) ->
+        rawMarkup
+
+      (False, Just size) ->
         Regex.replace
           (AtMost 1)
-          (regex "(^\\s*<svg\\b.*?)(>)")
+          (regex <| "(" ++ svgTagFromBeginning ++ ")(>)")
           (\{match, submatches} ->
             case submatches of
               [Just beginning, Just end] ->
@@ -130,11 +166,9 @@ svgMarkup rawMarkup canvasSize =
                 match
           )
           markupWithoutSize
-          -- We rely on the fact that the browser ignores repeating attributes
-          -- and only takes its first occurence in an element into account.
 
-      Nothing ->
-        markupWithoutSize
+      (False, Nothing) ->
+        markupWithSvgTags
 
 
 markup : Model -> String

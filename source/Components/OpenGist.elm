@@ -110,20 +110,21 @@ update context message model =
       !! ReceiveGistData gistData {source = source, variables = variables}
 
   in
-    case (context.gistState, message) of
-      (Synced _ _, SetGistData gistData) ->
+    case (message, context.gistState) of
+      (SetGistData gistData, Synced _ _) ->
         model
         ! []
         !! Nada
 
-      (_, SetGistData gistData) ->
+      (SetGistData gistData, _) ->
         model
         ! [ Task.perform FailToFetchGist ReceiveGist
             <| fetchGist gistData
           ]
         !! SetGistState (Downloading gistData)
 
-      (_, FailToFetchGist (HttpError {id} (BadResponse 404 _))) ->
+
+      (FailToFetchGist (HttpError {id} (BadResponse 404 _)), _) ->
         { model
         | toasts =
           { message =
@@ -139,31 +140,33 @@ update context message model =
         ! []
         !! SetGistState NotFound
 
-      (_, FailToFetchGist GistTruncated) ->
+      (FailToFetchGist GistTruncated, _) ->
         hint <| Toast.getHelp
           ( "Yikes! This looks like a really long gist. At the moment "
           ++ "we only support gists up to 1 MB in size. If you need support "
           ++ "for larger files, let us know."
           )
 
-      (_, FailToFetchGist (HttpError _ error)) ->
+      (FailToFetchGist (HttpError _ error), _) ->
         model
         ! []
         !! HandleHttpError error
 
-      (_, ReceiveGist content) ->
+
+      (ReceiveGist content, _) ->
         model
         ! [ requestParsedFile content
           ]
         !! Nada
 
-      (Downloading gistData, ReceiveParsedFile parsedFile) ->
+
+      (ReceiveParsedFile parsedFile, Downloading gistData) ->
         receiveGistData gistData parsedFile
 
-      (Synced gistData _, ReceiveParsedFile parsedFile) ->
+      (ReceiveParsedFile parsedFile, Synced gistData _) ->
         receiveGistData gistData parsedFile
 
-      _ ->
+      (ReceiveParsedFile _, _) ->
         hint Toast.pleaseReportThis
 
 

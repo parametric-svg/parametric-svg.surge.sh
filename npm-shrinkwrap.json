@@ -3950,6 +3950,11 @@
       "from": "lodash.memoize@>=3.0.3 <3.1.0",
       "resolved": "https://registry.npmjs.org/lodash.memoize/-/lodash.memoize-3.0.4.tgz"
     },
+    "lodash.random": {
+      "version": "3.2.0",
+      "from": "lodash.random@latest",
+      "resolved": "https://registry.npmjs.org/lodash.random/-/lodash.random-3.2.0.tgz"
+    },
     "lodash.restparam": {
       "version": "3.6.1",
       "from": "lodash.restparam@>=3.0.0 <4.0.0",

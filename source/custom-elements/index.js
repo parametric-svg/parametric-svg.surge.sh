@@ -4,3 +4,4 @@ require('./dimensions-watch');
 require('./github-auth');
 require('./focus-on-mount');
 require('./submit-on-enter');
+require('./mock-text');

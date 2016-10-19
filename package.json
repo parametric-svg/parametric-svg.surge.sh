@@ -21,7 +21,8 @@
     "codemirror": "^5.16.0",
     "jss-lite": "^1.2.0",
     "prettify-xml": "^1.0.0",
-    "private-parts": "^0.4.1"
+    "private-parts": "^0.4.1",
+    "strip-newlines": "^1.0.1"
   },
   "devDependencies": {
     "ava": "^0.16.0",

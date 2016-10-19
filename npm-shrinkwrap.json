@@ -7013,6 +7013,11 @@
       "from": "strip-json-comments@>=1.0.1 <1.1.0",
       "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
     },
+    "strip-newlines": {
+      "version": "1.0.1",
+      "from": "strip-newlines@latest",
+      "resolved": "https://registry.npmjs.org/strip-newlines/-/strip-newlines-1.0.1.tgz"
+    },
     "subarg": {
       "version": "1.0.0",
       "from": "subarg@>=1.0.0 <2.0.0",

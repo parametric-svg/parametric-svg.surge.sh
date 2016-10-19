@@ -109,7 +109,7 @@ update message model =
       case (context.githubAuthToken, context.gistState) of
         (Just githubAuthToken, Synced {id} _) ->
           Task.mapError HttpError
-            <| updateGist id githubAuthToken context.markup
+            <| updateGist githubAuthToken id context.markup
 
         (Just githubAuthToken, _) ->
           Task.mapError HttpError

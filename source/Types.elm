@@ -17,6 +17,7 @@ type GistState
   = NotConnected
   | Uploading FileSnapshot
   | Synced GistData FileSnapshot
+  | Syncing GistData FileSnapshot
   | Downloading GistData
   | NotFound
 

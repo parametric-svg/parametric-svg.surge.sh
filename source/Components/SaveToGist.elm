@@ -14,7 +14,7 @@ import Task exposing (Task)
 import Helpers exposing ((!!))
 import Types exposing
   ( Variable, ToastContent, Context, FileSnapshot
-  , GistState(NotConnected, Uploading, Synced), GistData
+  , GistState(NotConnected, Uploading, Syncing, Synced), GistData
   )
 import Components.Link exposing (link)
 import Components.IconButton as IconButton
@@ -109,26 +109,26 @@ update message model =
       case (context.githubAuthToken, context.gistState) of
         (Just githubAuthToken, Synced {id} _) ->
           Task.mapError HttpError
-            <| updateGist githubAuthToken id context.markup
+            <| updateGist context githubAuthToken id context.markup
 
         (Just githubAuthToken, _) ->
           Task.mapError HttpError
-            <| createGist githubAuthToken context.markup
+            <| createGist context githubAuthToken context.markup
 
         (Nothing, _) ->
           Task.fail NoGithubToken
 
-    updateGist token id fileContents =
+    updateGist context token id fileContents =
       patch
         decodeGistResponse
         (githubUrl token <| "/gists/" ++ id)
-        (payload fileContents [])
+        (payload context fileContents [])
 
-    createGist token fileContents =
+    createGist context token fileContents =
       Http.post
         decodeGistResponse
         (githubUrl token "/gists")
-        ( payload fileContents
+        ( payload context fileContents
           [ "description" =>
             Encode.string "Created with parametric-svg.surge.sh"
           ]
@@ -148,10 +148,10 @@ update message model =
     decodeGistResponse =
       ("id" := Decode.string)
 
-    payload fileContents extraFields =
+    payload context fileContents extraFields =
       Encode.object
         [ "files" => Encode.object
-          [ fileName => Encode.object
+          [ fileName context => Encode.object
             ( ["content" => Encode.string fileContents]
             ++ extraFields
             )
@@ -160,8 +160,20 @@ update message model =
       |> encode 0
       |> Http.string
 
-    fileName =
-      model.basename ++ ".parametric.svg"
+    fileName context =
+      let fileBasename =
+        case context.gistState of
+          Synced {basename} _ ->
+            basename
+
+          Syncing {basename} _ ->
+            basename
+
+          _ ->
+            model.basename
+
+      in
+        fileBasename ++ ".parametric.svg"
 
   in
     case message of
@@ -228,7 +240,16 @@ update message model =
       SaveGist context markup ->
         let
           gistState =
-            Uploading (FileSnapshot markup context.variables)
+            case context.gistState of
+              Synced gistData _ ->
+                Syncing gistData fileSnapshot
+
+              _ ->
+                Uploading fileSnapshot
+
+          fileSnapshot =
+            (FileSnapshot markup context.variables)
+
 
         in
           { model
@@ -249,6 +270,14 @@ update message model =
             ! []
             !! SetGistState
               (Synced {id = id, basename = model.basename} fileSnapshot)
+
+          Syncing gistData fileSnapshot ->
+            { model
+            | status = Idle
+            }
+            ! []
+            !! SetGistState
+              (Synced gistData fileSnapshot)
 
           _ ->
             { model

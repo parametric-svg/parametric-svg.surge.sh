@@ -34,19 +34,13 @@ type alias Model =
   { toasts : List ToastContent
   , displayFileNameDialog : Bool
   , basename : String
-  , status : Status
   }
-
-type Status
-  = Idle
-  | Pending
 
 init : (Model, Cmd Message)
 init =
   { toasts = []
   , displayFileNameDialog = False
   , basename = ""
-  , status = Idle
   }
   ! []
 
@@ -178,9 +172,7 @@ update message model =
   in
     case message of
       RequestFileContents context ->
-        { model
-        | status = Pending
-        }
+        model
         ! [ requestFileContents
             { drawingId = context.drawingId
             , variables = context.variables
@@ -193,25 +185,17 @@ update message model =
           (_, Just failureToast) ->
             { model
             | toasts = failureToast :: model.toasts
-            , status = Idle
             }
             ! []
             !! Nada
 
           (Just fileContents, Nothing) ->
-            let
-              newModel =
-                { model
-                | status = Idle
-                }
+            case context.gistState of
+              Synced _ _ ->
+                update (SaveGist context fileContents) model
 
-            in
-              case context.gistState of
-                Synced _ _ ->
-                  update (SaveGist context fileContents) newModel
-
-                _ ->
-                  update (OpenDialog fileContents) newModel
+              _ ->
+                update (OpenDialog fileContents) model
 
           (Nothing, Nothing) ->
             model ! [] !! Nada
@@ -253,8 +237,7 @@ update message model =
 
         in
           { model
-          | status = Pending
-          , displayFileNameDialog = False
+          | displayFileNameDialog = False
           }
           ! [ Task.perform FailToSendGist (ReceiveGistId gistState)
               <| saveGist context model
@@ -264,17 +247,13 @@ update message model =
       ReceiveGistId gistState id ->
         case gistState of
           Uploading fileSnapshot ->
-            { model
-            | status = Idle
-            }
+            model
             ! []
             !! SetGistState
               (Synced {id = id, basename = model.basename} fileSnapshot)
 
           Syncing gistData fileSnapshot ->
-            { model
-            | status = Idle
-            }
+            model
             ! []
             !! SetGistState
               (Synced gistData fileSnapshot)
@@ -374,14 +353,14 @@ view context model =
           []
 
     button =
-      case (model.status, context.gistState) of
-        (Pending, Uploading _) ->
+      case context.gistState of
+        Uploading _ ->
           Spinner.view "creating gist…"
 
-        (Pending, Synced _ _) ->
+        Syncing _ _ ->
           Spinner.view "updating gist…"
 
-        (Idle, Synced {id, basename} fileSnapshot) ->
+        Synced {id, basename} fileSnapshot ->
           if (context.markup == fileSnapshot.markup)
           && (context.variables == fileSnapshot.variables)
             then

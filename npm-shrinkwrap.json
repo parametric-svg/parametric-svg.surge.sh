@@ -149,6 +149,11 @@
       "from": "@polymer/paper-dialog-behavior@>=0.0.3 <0.0.4",
       "resolved": "https://registry.npmjs.org/@polymer/paper-dialog-behavior/-/paper-dialog-behavior-0.0.3.tgz"
     },
+    "@polymer/paper-dialog-scrollable": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-dialog-scrollable@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-dialog-scrollable/-/paper-dialog-scrollable-0.0.3.tgz"
+    },
     "@polymer/paper-fab": {
       "version": "0.0.3",
       "from": "@polymer/paper-fab@0.0.3",
@@ -168,6 +173,11 @@
       "version": "0.0.3",
       "from": "@polymer/paper-input@0.0.3",
       "resolved": "https://registry.npmjs.org/@polymer/paper-input/-/paper-input-0.0.3.tgz"
+    },
+    "@polymer/paper-item": {
+      "version": "0.0.3",
+      "from": "@polymer/paper-item@latest",
+      "resolved": "https://registry.npmjs.org/@polymer/paper-item/-/paper-item-0.0.3.tgz"
     },
     "@polymer/paper-material": {
       "version": "0.0.3",

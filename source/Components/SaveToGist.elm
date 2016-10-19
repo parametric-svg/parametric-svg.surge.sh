@@ -20,6 +20,10 @@ import Components.Link exposing (link)
 import Components.IconButton as IconButton
 import Components.Toast as Toast
 import Components.Spinner as Spinner
+import Components.Dialog as Dialog exposing
+  ( onCloseOverlay
+  , dialog
+  )
 
 (=>) : a -> b -> (a, b)
 (=>) =
@@ -306,44 +310,38 @@ view context model =
     componentNamespace =
       "d34616d-SaveToGist-"
 
-    onCloseOverlay message =
-      on "iron-overlay-closed" (Decode.succeed message)
-
     onTap message =
       on "tap" (Decode.succeed message)
 
     dialogs =
       if model.displayFileNameDialog
         then
-          [ node "submit-on-enter" []
-            [ node "paper-dialog"
-              [ attribute "opened" ""
-              , onCloseOverlay CloseDialog
+          [ dialog
+            [ onCloseOverlay CloseDialog
+            ]
+            [ node "focus-on-mount" []
+              [ node "paper-input"
+                [ attribute "label" "enter a file name"
+                , attribute "name" "file name"
+                , tabindex 0
+                , onInput UpdateFileBasename
+                , value model.basename
+                ]
+                [ div
+                  [ attribute "suffix" ""
+                  ]
+                  [ text ".parametric.svg"
+                  ]
+                ]
               ]
-              [ node "focus-on-mount" []
-                [ node "paper-input"
-                  [ attribute "label" "enter a file name"
-                  , attribute "name" "file name"
-                  , tabindex 0
-                  , onInput UpdateFileBasename
-                  , value model.basename
-                  ]
-                  [ div
-                    [ attribute "suffix" ""
-                    ]
-                    [ text ".parametric.svg"
-                    ]
-                  ]
+            , div
+              [ Html.Attributes.class "buttons"
+              ]
+              [ node "paper-button"
+                [ onTap <| SaveGist context context.markup
+                , attribute "name" "save to gist"
                 ]
-              , div
-                [ Html.Attributes.class "buttons"
-                ]
-                [ node "paper-button"
-                  [ onTap <| SaveGist context context.markup
-                  , attribute "name" "save to gist"
-                  ]
-                  [ text "Save to gist"
-                  ]
+                [ text "Save to gist"
                 ]
               ]
             ]

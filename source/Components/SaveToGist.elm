@@ -31,8 +31,7 @@ import Components.Spinner as Spinner
 -- MODEL
 
 type alias Model =
-  { fileContents : Maybe String
-  , toasts : List ToastContent
+  { toasts : List ToastContent
   , displayFileNameDialog : Bool
   , basename : String
   , status : Status
@@ -44,8 +43,7 @@ type Status
 
 init : (Model, Cmd Message)
 init =
-  { fileContents = Nothing
-  , toasts = []
+  { toasts = []
   , displayFileNameDialog = False
   , basename = ""
   , status = Idle
@@ -60,24 +58,28 @@ init =
 type MessageToParent
   = Nada
   | SetGistState GistState
+  | SetGistStateAndMarkup GistState String
+  | SetMarkup String
   | HandleHttpError Http.Error
 
 type Message
   = RequestFileContents Context
   | ReceiveFileContents Context FileContentsSerializationOutput
 
-  | OpenDialog
+  | OpenDialog Markup
   | CloseDialog
 
   | UpdateFileBasename String
 
-  | SaveGist Context
-  | ReceiveGistId Context String
+  | SaveGist Context Markup
+  | ReceiveGistId GistState String
   | FailToSendGist GistError
 
+type alias Markup =
+  String
+
 type GistError
-  = NoFileContents
-  | NoGithubToken
+  = NoGithubToken
   | HttpError Http.Error
 
 type alias FileContentsSerializationOutput =
@@ -104,19 +106,16 @@ update message model =
       }
 
     saveGist context model =
-      case (model.fileContents, context.githubAuthToken, context.gistState) of
-        (Just fileContents, Just githubAuthToken, Synced {id} _) ->
+      case (context.githubAuthToken, context.gistState) of
+        (Just githubAuthToken, Synced {id} _) ->
           Task.mapError HttpError
-            <| updateGist id githubAuthToken fileContents
+            <| updateGist id githubAuthToken context.markup
 
-        (Just fileContents, Just githubAuthToken, _) ->
+        (Just githubAuthToken, _) ->
           Task.mapError HttpError
-            <| createGist githubAuthToken fileContents
+            <| createGist githubAuthToken context.markup
 
-        (Nothing, _, _) ->
-          Task.fail NoFileContents
-
-        (_, Nothing, _) ->
+        (Nothing, _) ->
           Task.fail NoGithubToken
 
     updateGist token id fileContents =
@@ -175,9 +174,7 @@ update message model =
             , variables = context.variables
             }
           ]
-        !! SetGistState
-          ( Uploading <| FileSnapshot context.markup context.variables
-          )
+        !! Nada
 
       ReceiveFileContents context {payload, error} ->
         case (payload, error) of
@@ -193,27 +190,26 @@ update message model =
             let
               newModel =
                 { model
-                | fileContents = Just fileContents
-                , status = Idle
+                | status = Idle
                 }
 
             in
               case context.gistState of
                 Synced _ _ ->
-                  update (SaveGist context) newModel
+                  update (SaveGist context fileContents) newModel
 
                 _ ->
-                  update OpenDialog newModel
+                  update (OpenDialog fileContents) newModel
 
           (Nothing, Nothing) ->
             model ! [] !! Nada
 
-      OpenDialog ->
+      OpenDialog markup ->
         { model
         | displayFileNameDialog = True
         }
         ! []
-        !! Nada
+        !! SetMarkup markup
 
       CloseDialog ->
         { model
@@ -229,18 +225,23 @@ update message model =
         ! []
         !! Nada
 
-      SaveGist context ->
-        { model
-        | status = Pending
-        , displayFileNameDialog = False
-        }
-        ! [ Task.perform FailToSendGist (ReceiveGistId context)
-            <| saveGist context model
-          ]
-        !! Nada
+      SaveGist context markup ->
+        let
+          gistState =
+            Uploading (FileSnapshot markup context.variables)
 
-      ReceiveGistId context id ->
-        case context.gistState of
+        in
+          { model
+          | status = Pending
+          , displayFileNameDialog = False
+          }
+          ! [ Task.perform FailToSendGist (ReceiveGistId gistState)
+              <| saveGist context model
+            ]
+        !! SetGistStateAndMarkup gistState markup
+
+      ReceiveGistId gistState id ->
+        case gistState of
           Uploading fileSnapshot ->
             { model
             | status = Idle
@@ -256,9 +257,6 @@ update message model =
             ! []
             !! SetGistState NotConnected
 
-      FailToSendGist NoFileContents ->
-        failWithMessage
-          <| "Oops! This should never happen. No file contents to send."
       FailToSendGist NoGithubToken ->
         failWithMessage
           <| "Aw, snap! You’re not logged into gist."
@@ -333,7 +331,7 @@ view context model =
                 [ Html.Attributes.class "buttons"
                 ]
                 [ node "paper-button"
-                  [ onTap <| SaveGist context
+                  [ onTap <| SaveGist context context.markup
                   , attribute "name" "save to gist"
                   ]
                   [ text "Save to gist"

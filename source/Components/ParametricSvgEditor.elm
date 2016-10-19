@@ -313,6 +313,25 @@ update modifyUrl message model =
             | saveToGist = saveToGistModel
             }
 
+          setGistState gistState =
+            { newModel
+            | gistState = gistState
+            }
+            ! ( [ Cmd.map SaveToGistMessage saveToGistCommand
+                ]
+              ++ gistStateNavigationCommands gistState
+              )
+
+          gistStateNavigationCommands gistState =
+            case gistState of
+              Synced gistData _ ->
+                [ modifyUrl (locationToUrl <| Gist gistData)
+                ]
+
+              _ ->
+                []
+
+
         in
           case messageToParent of
             SaveToGist.Nada ->
@@ -321,23 +340,26 @@ update modifyUrl message model =
                 ]
 
             SaveToGist.SetGistState gistState ->
-              let navigationCommands =
-                case gistState of
-                  Synced gistData _ ->
-                    [ modifyUrl (locationToUrl <| Gist gistData)
-                    ]
+              setGistState gistState
 
-                  _ ->
-                    []
+            SaveToGist.SetGistStateAndMarkup gistState markup ->
+              let
+                (newerModel, commands) =
+                  setGistState gistState
 
               in
-                { newModel
-                | gistState = gistState
-                }
-                ! ( [ Cmd.map SaveToGistMessage saveToGistCommand
-                    ]
-                  ++ navigationCommands
-                  )
+                ( { newerModel
+                  | rawMarkup = markup
+                  }
+                , commands
+                )
+
+            SaveToGist.SetMarkup markup ->
+              { newModel
+              | rawMarkup = markup
+              }
+              ! [ Cmd.map SaveToGistMessage saveToGistCommand
+                ]
 
             SaveToGist.HandleHttpError error ->
               httpFailure newModel error

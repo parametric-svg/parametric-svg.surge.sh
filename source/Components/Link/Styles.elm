@@ -1,4 +1,4 @@
-module Styles.Link exposing (Classes(..), css, componentNamespace)
+module Components.Link.Styles exposing (Classes(..), css, componentNamespace)
 
 import Css.Namespace exposing (namespace)
 import Css exposing

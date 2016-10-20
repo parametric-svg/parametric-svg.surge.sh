@@ -1,4 +1,4 @@
-module Styles.ParametricSvgEditor exposing (Classes(..), css, componentNamespace)
+module Components.ParametricSvgEditor.Styles exposing (Classes(..), css, componentNamespace)
 
 import Css.Namespace exposing (namespace)
 import Css exposing

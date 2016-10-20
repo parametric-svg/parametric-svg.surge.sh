@@ -8,10 +8,10 @@ import Html exposing (div)
 import Html.App as App
 import String
 
-import Styles.ParametricSvgEditor as ParametricSvgEditor
-import Styles.VariablesPanel as VariablesPanel
-import Styles.Link as Link
-import Styles.Spinner as Spinner
+import Components.ParametricSvgEditor.Styles as ParametricSvgEditor
+import Components.VariablesPanel.Styles as VariablesPanel
+import Components.Link.Styles as Link
+import Components.Spinner.Styles as Spinner
 
 
 port files : CssFileStructure -> Cmd msg

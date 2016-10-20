@@ -3,7 +3,7 @@ module Components.Link exposing (link)
 import Html exposing (Html, Attribute, a)
 import Html.CssHelpers exposing (withNamespace)
 
-import Styles.Link exposing
+import Components.Link.Styles exposing
   ( Classes(Link)
   , componentNamespace
   )

@@ -1,4 +1,6 @@
-module Styles.VariablesPanel exposing (Classes(..), css, componentNamespace)
+module Components.VariablesPanel.Styles exposing
+  ( Classes(..), css, componentNamespace
+  )
 
 import Css.Namespace exposing (namespace)
 import Css exposing

@@ -4,7 +4,7 @@ import Html exposing (Html, node, text)
 import Html.Attributes exposing (attribute, id)
 import Html.CssHelpers exposing (withNamespace)
 
-import Styles.Spinner exposing
+import Components.Spinner.Styles exposing
   ( Classes(Spinner)
   , componentNamespace
   )

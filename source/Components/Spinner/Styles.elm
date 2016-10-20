@@ -1,4 +1,4 @@
-module Styles.Spinner exposing (Classes(..), css, componentNamespace)
+module Components.Spinner.Styles exposing (Classes(..), css, componentNamespace)
 
 import Css.Namespace exposing (namespace)
 import Css exposing

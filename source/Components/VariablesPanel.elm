@@ -11,7 +11,7 @@ import Html.Events exposing (onInput)
 import Html.CssHelpers exposing (withNamespace)
 
 import Types exposing (Variable)
-import Styles.VariablesPanel exposing
+import Components.VariablesPanel.Styles exposing
   ( Classes(Root, Input, InputField, Parameter, Value)
   , componentNamespace
   )

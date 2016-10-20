@@ -24,7 +24,7 @@ import Types exposing
   ( ToastContent, Variable, Context, FileSnapshot, GistData
   , GistState(NotConnected, Synced)
   )
-import Styles.ParametricSvgEditor exposing
+import Components.ParametricSvgEditor.Styles exposing
   ( Classes
     ( Root
     , Display, Display_ImplicitSize

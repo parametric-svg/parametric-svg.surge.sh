@@ -10,16 +10,8 @@ Usage:
 "; exit; fi
 set -x
 
-mkdir -p "$build_artifacts"/npm
-rm -f node_modules/@polymer/.DS_Store
-if test -e node_modules/@polymer/web-animations-js; then
-  mv node_modules/@polymer/web-animations-js "$build_artifacts"/npm/
-fi
-
 "$local"/npm $@
 "$local"/npm shrinkwrap --dev
-
-mv "$build_artifacts"/npm/web-animations-js node_modules/@polymer/
 
 set +x
 read \

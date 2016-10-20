@@ -1,7 +1,4 @@
-/node_modules/*
-!/node_modules/@polymer
-/node_modules/@polymer/*
-!/node_modules/@polymer/web-animations-js
+/node_modules/
 
 /public/*
 !/public/polymer

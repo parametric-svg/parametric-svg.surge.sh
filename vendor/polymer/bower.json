@@ -1,0 +1,20 @@
+{
+  "name": "parametric-svg.surge.sh",
+  "private": true,
+  "dependencies": {
+    "iron-icons": "^1.1.3",
+    "paper-button": "^1.0.13",
+    "paper-dialog": "^1.1.0",
+    "paper-dialog-scrollable": "^1.1.5",
+    "paper-fab": "^1.2.1",
+    "paper-header-panel": "^1.1.7",
+    "paper-icon-button": "^1.1.3",
+    "paper-input": "^1.1.20",
+    "paper-item": "^1.2.1",
+    "paper-spinner": "^1.2.1",
+    "paper-toast": "^1.3.0",
+    "paper-toolbar": "^1.1.7",
+    "paper-tooltip": "^1.1.3",
+    "web-animations-js": "^2.2.2"
+  }
+}

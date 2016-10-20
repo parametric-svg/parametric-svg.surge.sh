@@ -13,9 +13,10 @@ registerElement({
         vertical-align: baseline;
         height: 1ex;
         background-color: currentColor;
-        opacity: 0.5;
+        opacity: 0.3;
         border-radius: 0.5ex;
-        width: ${random(20, 40)}ch;
+        width: ${random(15, 30)}ch;
+        max-width: 100%;
       `;
       this.appendChild(mockText);
 

@@ -3,7 +3,9 @@ port module Components.OpenGist exposing
   , init, update, subscriptions, view
   )
 
-import Html exposing (Html)
+import Html exposing (Html, h2, node, div, text)
+import Html.Events exposing (onClick)
+import Html.Attributes exposing (attribute)
 import Json.Decode as Decode exposing (at, string, bool)
 import Json.Decode.Pipeline exposing (decode, required)
 import Http exposing (Error(BadResponse))
@@ -11,13 +13,16 @@ import Task exposing (andThen)
 
 import Helpers exposing ((!!))
 import Types exposing
-  ( Context, GistData, GistState(Downloading, NotFound, Synced), ToastContent
-  , Variable
+  ( Context, GistData, GistState(Downloading, NotFound, Synced, NotConnected)
+  , ToastContent, Variable
   )
--- import Components.Link exposing (link)
--- import Components.IconButton as IconButton
+import Components.IconButton as IconButton
 import Components.Toast as Toast
 import Components.Spinner as Spinner
+import Components.Dialog as Dialog exposing
+  ( onCloseOverlay
+  , dialog
+  )
 
 
 
@@ -26,11 +31,17 @@ import Components.Spinner as Spinner
 
 type alias Model =
   { toasts : List ToastContent
+  , dialogState : DialogState
   }
+
+type DialogState
+  = Hidden
+  | LoadingData
 
 init : (Model, Cmd Message)
 init =
   { toasts = []
+  , dialogState = Hidden
   }
   ! []
 
@@ -54,6 +65,10 @@ type Message
   | FailToFetchGist FetchError
   | ReceiveGist GistContent
   | ReceiveParsedFile ParsedFile
+
+  | OpenDialog
+  | CloseDialog
+  | ReceiveListOfGists (List GistData)
 
 type FetchError
   = HttpError GistData Http.Error
@@ -170,6 +185,26 @@ update context message model =
         hint Toast.pleaseReportThis
 
 
+      (OpenDialog, _) ->
+        { model
+        | dialogState = LoadingData
+        }
+        ! []
+        !! Nada
+
+
+      (CloseDialog, _) ->
+        { model
+        | dialogState = Hidden
+        }
+        ! []
+        !! Nada
+
+
+      (ReceiveListOfGists _, _) ->
+        Debug.crash "not implemented"
+
+
 port requestParsedFile
   : GistContent
   -> Cmd message
@@ -201,9 +236,54 @@ view context model =
         Downloading _ ->
           Spinner.view "downloading gist…"
 
+        NotConnected ->
+          iconButton
+            [ onClick OpenDialog
+            ]
+            { symbol = "folder"
+            , tooltip = "open gist"
+            }
+
         _ ->
           []
 
+    iconButton =
+      IconButton.view componentNamespace
+
+    componentNamespace =
+      "c7a7bd2-OpenGist-"
+
+    dialogs =
+      case model.dialogState of
+        Hidden ->
+          []
+
+        LoadingData ->
+          [ dialog
+            [ onCloseOverlay CloseDialog
+            ]
+            [ h2 []
+              [ text "open gist"
+              ]
+            , node "paper-dialog-scrollable" []
+              ( List.repeat 20
+                <| node "paper-item" []
+                  [ node "paper-item-body"
+                    [ attribute "two-line" ""
+                    ]
+                    [ node "mock-text" [] []
+                    , div
+                      [ attribute "secondary" ""
+                      ]
+                      [ node "mock-text" [] []
+                      ]
+                    ]
+                  ]
+              )
+            ]
+          ]
+
   in
     button
+    ++ dialogs
     ++ Toast.toasts model

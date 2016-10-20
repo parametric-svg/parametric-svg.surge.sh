@@ -22,6 +22,7 @@
     "detect-node": "^2.0.3",
     "elm": "^0.17.1",
     "elm-css": "^0.5.1",
+    "elm-test": "^0.17.3",
     "elm-webpack-loader": "^3.0.3",
     "eslint": "^2.13.1",
     "eslint-config-airbnb-base": "^3.0.1",

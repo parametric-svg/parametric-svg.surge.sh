@@ -333,7 +333,9 @@ update modifyUrl message model =
                 }
 
         in
-          newModel
+          { newModel
+          | auth = authModel
+          }
           ! [ Cmd.map AuthMessage authCommand
             ]
 

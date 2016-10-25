@@ -167,9 +167,7 @@ view context model =
           ]
 
         (Just _, Nothing) ->
-          [ div []
-            <| Spinner.view "signing in with github…"
-          ]
+          Spinner.view "signing in with github…"
 
         _ ->
           []

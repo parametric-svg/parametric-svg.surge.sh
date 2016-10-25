@@ -54,7 +54,10 @@ css = stylesheet <| namespace componentNamespace <|
       ]
 
     , (.) ToolbarButton
-      [ marginLeft (px 10)
+      [ displayFlex
+      , property "justify-content" "center"
+      , marginLeft (px 5)
+      , width (px 40)
       ]
 
     , (.) Display

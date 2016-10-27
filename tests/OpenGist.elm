@@ -5,6 +5,7 @@ import Fuzz exposing (tuple3, string, map, Fuzzer)
 import Test exposing (describe, fuzz, Test)
 import Json.Decode exposing (decodeString)
 import Regex exposing (replace, regex, HowMany(All))
+import Set
 
 import Components.OpenGist.Decoders exposing (userGists)
 
@@ -58,8 +59,9 @@ all =
           ]
           """
             |> decodeString userGists
+            |> Result.map (List.map Set.fromList)
             |> Expect.equal
-              (Ok [[basename2, basename1]])
+              (Ok [Set.fromList [basename1, basename2]])
 
       ]
     ]

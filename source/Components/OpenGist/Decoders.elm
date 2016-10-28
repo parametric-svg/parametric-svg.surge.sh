@@ -1,38 +1,35 @@
 module Components.OpenGist.Decoders exposing (userGists)
 
-import Json.Decode exposing (..)
-  -- ( string, object2, andThen
-  -- , Decoder
-  -- )
+import Json.Decode as Decode exposing
+  ( string, keyValuePairs, (:=), list, object2
+  , Decoder
+  )
 import Regex exposing (replace, escape, regex, HowMany(All))
 
 import Types exposing (GistData)
 
 
--- userGists : Decoder (List GistData)
+userGists : Decoder (List GistData)
 userGists =
-  -- let
-  --   gistFile =
-  --     object2 GistData
-  --       ("id" := string)
-  --       ("files" := filename)
-  --
-  --   filename =
   let
-    gistFiles =
-      map extractBasenames rawFilenames
+    gistObject =
+      Decode.map toListOfGistData parseGistObject
 
-    extractBasenames =
-      List.map
-        ( snd
-        >> replace
-          All
-          (regex <| (escape ".parametric.svg") ++ "$")
-          (always "")
-        )
+    toListOfGistData (id, filenames) =
+      List.map (toGistData id) filenames
 
-    rawFilenames =
-      "files" := keyValuePairs ("filename" := string)
+    toGistData id (_, filename) =
+      GistData id (extractBasename filename)
+
+    extractBasename =
+      replace All
+        (regex <| (escape ".parametric.svg") ++ "$")
+        (always "")
+
+    parseGistObject =
+      object2 (,)
+        ("id" := string)
+        ("files" := keyValuePairs ("filename" := string))
 
   in
-    list gistFiles
+    Decode.map List.concat (list gistObject)

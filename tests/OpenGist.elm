@@ -7,6 +7,7 @@ import Json.Decode exposing (decodeString)
 import Regex exposing (replace, regex, HowMany(All))
 import Set
 
+import Types exposing (GistData)
 import Components.OpenGist.Decoders exposing (userGists)
 
 
@@ -59,9 +60,12 @@ all =
           ]
           """
             |> decodeString userGists
-            |> Result.map (List.map Set.fromList)
             |> Expect.equal
-              (Ok [Set.fromList [basename1, basename2]])
+              ( Ok
+                [ GistData id basename2
+                , GistData id basename1
+                ]
+              )
 
       ]
     ]

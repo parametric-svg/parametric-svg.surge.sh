@@ -19,6 +19,7 @@
         "elm-lang/svg": "1.1.0 <= v < 2.0.0",
         "evancz/elm-http": "3.0.1 <= v < 4.0.0",
         "evancz/url-parser": "1.0.0 <= v < 2.0.0",
+        "krisajenkins/elm-exts": "25.13.0 <= v < 26.0.0",
         "rtfeldman/elm-css": "3.1.1 <= v < 4.0.0",
         "rtfeldman/elm-css-helpers": "2.0.0 <= v < 3.0.0"
     },

@@ -98,6 +98,27 @@ all =
               )
 
 
+      , fuzz threeJsonNeutralStrings
+        "doesn’t pick up irrelevant files"
+        <|
+        \(id, basename, otherFile) ->
+          """
+          [ { "id": \""""++ id ++"""\"
+            , "files":
+              { \""""++ basename ++""".parametric.svg":
+                { "filename": \""""++ basename ++""".parametric.svg"
+                }
+              , \""""++ otherFile ++"""\":
+                { "filename": \""""++ otherFile ++"""\"
+                }
+              }
+            }
+          ]
+          """
+            |> decodeString userGists
+            |> Expect.equal
+              ( Ok [GistData id basename]
+              )
       ]
     ]
 

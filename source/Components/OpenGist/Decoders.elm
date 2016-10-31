@@ -4,7 +4,8 @@ import Json.Decode as Decode exposing
   ( string, keyValuePairs, (:=), list, object2
   , Decoder
   )
-import Regex exposing (replace, escape, regex, HowMany(All))
+import Regex exposing (escape, regex, HowMany(All))
+import Exts.Maybe exposing (catMaybes)
 
 import Types exposing (GistData)
 
@@ -16,15 +17,20 @@ userGists =
       Decode.map toListOfGistData parseGistObject
 
     toListOfGistData (id, filenames) =
-      List.map (toGistData id) filenames
+      filenames
+        |> List.map (toGistData id)
+        |> catMaybes
 
     toGistData id (_, filename) =
-      GistData id (extractBasename filename)
+      if Regex.contains parametricSvgFilePattern filename
+        then Just <| GistData id (extractBasename filename)
+        else Nothing
 
     extractBasename =
-      replace All
-        (regex <| (escape ".parametric.svg") ++ "$")
-        (always "")
+      Regex.replace All parametricSvgFilePattern (always "")
+
+    parametricSvgFilePattern =
+      regex <| (escape ".parametric.svg") ++ "$"
 
     parseGistObject =
       object2 (,)

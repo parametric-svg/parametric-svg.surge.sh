@@ -2,7 +2,7 @@ module OpenGist exposing (all)
 
 import Expect
 import Fuzz exposing (tuple, tuple3, tuple5, string, map, Fuzzer)
-import Test exposing (describe, fuzz, Test)
+import Test exposing (describe, fuzz, test, Test)
 import Json.Decode exposing (decodeString)
 import Regex exposing (replace, regex, HowMany(All))
 
@@ -118,6 +118,33 @@ all =
             |> decodeString userGists
             |> Expect.equal
               ( Ok [GistData id basename]
+              )
+
+
+      , fuzz jsonNeutralString
+        "doesn’t break if there are no files"
+        <|
+        \id ->
+          """
+          [ { "id": \""""++ id ++"""\"
+            , "files": {}
+            }
+          ]
+          """
+            |> decodeString userGists
+            |> Expect.equal
+              ( Ok []
+              )
+
+
+      , test
+        "doesn’t break if there are no gists"
+        <|
+        \() ->
+          "[]"
+            |> decodeString userGists
+            |> Expect.equal
+              ( Ok []
               )
       ]
     ]

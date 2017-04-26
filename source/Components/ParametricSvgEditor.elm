@@ -5,8 +5,8 @@ module Components.ParametricSvgEditor exposing
   , markup
   )
 
-import Html exposing (node, div, text, textarea, span, Html)
-import Html.Attributes exposing (attribute, id, value)
+import Html exposing (node, div, text, textarea, span, a, Html)
+import Html.Attributes exposing (attribute, id, value, href)
 import Html.Events exposing (onInput, on)
 import Html.CssHelpers exposing (withNamespace)
 import Html.App as App
@@ -32,6 +32,8 @@ import Components.ParametricSvgEditor.Styles exposing
     , Editor
     , Toolbar
     , ToolbarButton
+    , HeaderLink
+    , Tagline
     )
   , componentNamespace
   )
@@ -576,7 +578,30 @@ view model =
       [ div
         [ Html.Attributes.class "title"
         ]
-        [ text "parametric-svg"
+        [ a
+          [ href "http://parametric-svg.graphics/"
+          , class [HeaderLink]
+          ]
+          [ text "parametric-svg.graphics"
+          ]
+        , span
+          [ class [Tagline]
+          ]
+          [ text " crafted with "
+          , a
+            [ href "https://github.com/projectshaped/parametric-svg"
+            , class [HeaderLink]
+            ]
+            [ text "❤"
+            ]
+          , text " by "
+          , a
+            [ href "http://shaped.cc/"
+            , class [HeaderLink]
+            ]
+            [ text "shaped"
+            ]
+          ]
         ]
       ]
 

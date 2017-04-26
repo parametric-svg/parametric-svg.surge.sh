@@ -6,9 +6,11 @@ import Css exposing
   , stylesheet, (.), selector, children
 
   , height, width, display, displayFlex, position, backgroundColor, flexGrow
-  , minHeight, maxHeight, paddingTop, top, property, marginLeft
+  , minHeight, maxHeight, paddingTop, top, property, marginLeft, fontSize
+  , fontWeight, color, textDecoration, opacity
 
-  , pct, block, hex, relative, px, int, absolute, zero
+  , pct, block, hex, relative, px, int, absolute, zero, em, bold, inherit, none
+  , float
   )
 
 
@@ -19,6 +21,8 @@ type Classes
   | Editor
   | Toolbar
   | ToolbarButton
+  | Tagline
+  | HeaderLink
 
 css : Stylesheet
 css = stylesheet <| namespace componentNamespace <|
@@ -82,6 +86,19 @@ css = stylesheet <| namespace componentNamespace <|
     , (.) Editor
       [ display block
       , flexGrow (int 1)
+      ]
+
+    , (.) HeaderLink
+      [ textDecoration none
+      , property "color" "inherit"
+      , fontWeight bold
+      , property "pointer-events" "initial"
+      ]
+
+    , (.) Tagline
+      [ fontSize (em 0.7)
+      , opacity (float 0.5)
+      , marginLeft (em 0.8)
       ]
     ]
 
